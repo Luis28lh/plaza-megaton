@@ -20,7 +20,7 @@ var FOLDER_NAME = 'PLAZA MEGATÓN';
 var DATABASE_NAME = 'PLAZA_MEGATON_DATABASE';
 var DATABASE_SPREADSHEET_ID = '1_pHnJkeyVTbVfXacVOFIsKDYb3vaP-EBepc3tm3CQKY';
 var ROOT_FOLDER_ID = '1CUUpP7K2roI8cemURppsB5QyPm6WAgpY';
-var DEFAULT_PORTAL_URL = 'https://luis28lh.github.io/wes-plataforma/plaza-megaton/index.html';
+var DEFAULT_PORTAL_URL = 'https://luis28lh.github.io/plaza-megaton/index.html';
 
 /**
  * Obtiene la referencia a la hoja de cálculo de Plaza Megatón
