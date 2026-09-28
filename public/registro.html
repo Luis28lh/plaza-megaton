@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Registro — Plaza Megatón</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Encabezado -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="index.html" class="brand-logo-wrap">
+        <img src="assets/logo-megaton.svg" alt="Plaza Megatón Logo" class="brand-logo-img">
+      </a>
+      <div id="user-header-pill" class="user-status-pill">
+        🔑 Acceder
+      </div>
+    </div>
+  </header>
+
+  <main class="main-wrapper">
+
+    <!-- Formulario de Registro -->
+    <div id="form-registro-box" class="card-box">
+      <div class="card-box-header">
+        <div style="font-size: 12px; font-weight: 800; color: var(--primary-red); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">
+          Formulario de Acceso Directo por QR
+        </div>
+        <h1 class="card-title">REGISTRO PLAZA MEGATÓN</h1>
+        <p class="card-subtitle">Registra o confirma tus datos de propietario, inquilino u ocupante de cubículos.</p>
+      </div>
+
+      <form id="form-registro">
+
+        <!-- Nombre Completo -->
+        <div class="form-group">
+          <label class="form-label" for="reg-nombre">Nombre completo <span class="req">*</span></label>
+          <input 
+            type="text" 
+            id="reg-nombre" 
+            class="form-input" 
+            placeholder="Ej: Juan Pérez" 
+            required 
+            autocomplete="name"
+          >
+        </div>
+
+        <!-- Correo Electrónico -->
+        <div class="form-group">
+          <label class="form-label" for="reg-email">Correo electrónico <span class="req">*</span></label>
+          <input 
+            type="email" 
+            id="reg-email" 
+            class="form-input" 
+            placeholder="Ej: juan.perez@correo.com" 
+            required 
+            inputmode="email"
+            autocomplete="email"
+          >
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+            Enviaremos tu confirmación y enlaces de acceso a esta cuenta.
+          </div>
+        </div>
+
+        <!-- Teléfono -->
+        <div class="form-group">
+          <label class="form-label" for="reg-telefono">Teléfono / WhatsApp <span class="opt">(Opcional)</span></label>
+          <input 
+            type="tel" 
+            id="reg-telefono" 
+            class="form-input" 
+            placeholder="Ej: 809-555-1234" 
+            inputmode="tel"
+            autocomplete="tel"
+          >
+        </div>
+
+        <!-- Cubículos o Locales Dinámicos (Uno debajo del otro) -->
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+            <label class="form-label" style="margin-bottom: 0;">
+              Cubículo(s) o Local(es) <span class="opt">(Opcional)</span>
+            </label>
+            <span style="font-size: 11px; color: var(--primary-red); font-weight: 700;">Manual o de la lista</span>
+          </div>
+          
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.45;">
+            Ingresa tu número de cubículo (ej: <strong>C1</strong>). Si tienes varios, agrégalos <strong>uno debajo del otro</strong>. Puedes incluir de forma opcional el <strong>nombre del local</strong> y su <strong>actividad comercial</strong> para referenciarlos con claridad.
+          </div>
+
+          <!-- Contenedor de Bloques Dinámicos de Cubículos -->
+          <div id="cubiculos-inputs-container" style="display: flex; flex-direction: column; gap: 14px;">
+            <!-- Renderizado dinámico desde registro.js -->
+          </div>
+
+          <!-- Botón para añadir más cubículos -->
+          <button type="button" id="btn-add-cubiculo" class="btn-secondary" style="margin-top: 12px; min-height: 46px; border: 1.5px dashed #CBD5E1; color: var(--text-main); font-weight: 700; width: 100%;">
+            ➕ Agregar otro cubículo (si tienes varios)
+          </button>
+
+          <!-- Datalists para sugerencias y autocompletado rápido -->
+          <datalist id="catalog-cubiculos-list"></datalist>
+          <datalist id="actividad-comercial-list">
+            <option value="Reparación de celulares y computadoras">
+            <option value="Venta de accesorios móviles y tecnología">
+            <option value="Venta de ropa y calzado">
+            <option value="Salón de belleza / Barbería / Uñas">
+            <option value="Cafetería / Comida rápida / Bebidas">
+            <option value="Oficina de servicios / Asesoría / Legal">
+            <option value="Electrónica y electrodomésticos">
+            <option value="Joyería y variedades">
+            <option value="Almacén / Depósito de mercancía">
+          </datalist>
+        </div>
+
+        <!-- Botón de Envío -->
+        <button type="submit" id="btn-submit-registro" class="btn-primary">
+          ✅ Confirmar mi Registro
+        </button>
+
+      </form>
+    </div>
+
+    <!-- Pantalla de Éxito / Confirmación -->
+    <div id="success-registro-box" class="card-box success-screen" style="display: none;">
+      <div class="success-icon-bubble">🎉</div>
+      <h2 style="font-size: 22px; font-weight: 900; color: var(--text-main); margin-bottom: 6px;">
+        ¡Felicitaciones! Ya eres Miembro Oficial
+      </h2>
+      <p style="font-size: 15px; color: var(--text-body); margin-bottom: 12px;">
+        Te confirmamos oficialmente como miembro activo de <strong>Plaza Megatón</strong>.
+      </p>
+
+      <div class="success-code-box">
+        <div style="font-size: 12px; color: var(--text-muted); text-transform: uppercase;">Cubículo(s) o Local(es) Vinculado(s)</div>
+        <div id="success-cubiculos" class="success-code-num" style="font-size: 18px; line-height: 1.4;">-</div>
+      </div>
+
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">
+        Hemos enviado un correo electrónico de felicitación y confirmación oficial con el enlace a la plataforma a:<br>
+        <strong id="success-email-dest" style="color: var(--text-main);">-</strong>
+      </p>
+
+      <div id="preview-mail-container"></div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 24px;">
+        <a href="solicitudes.html" class="btn-primary">
+          🛠️ Crear mi Primera Solicitud
+        </a>
+        <a href="pagos.html" class="btn-secondary">
+          💳 Reportar un Pago
+        </a>
+        <a href="index.html" class="btn-secondary">
+          🏠 Ir al Inicio
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Navegación móvil -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <span class="nav-item-icon">🏠</span>
+      <span>Inicio</span>
+    </a>
+    <a href="solicitudes.html" class="nav-item">
+      <span class="nav-item-icon">🛠️</span>
+      <span>Solicitudes</span>
+    </a>
+    <a href="pagos.html" class="nav-item">
+      <span class="nav-item-icon">💳</span>
+      <span>Pagos</span>
+    </a>
+    <a href="mis-solicitudes.html" class="nav-item">
+      <span class="nav-item-icon">📋</span>
+      <span>Mis Trámites</span>
+    </a>
+  </nav>
+
+  <script src="js/app.js"></script>
+  <script src="js/registro.js"></script>
+</body>
+</html>

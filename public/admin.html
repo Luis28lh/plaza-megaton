@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Administrativo — Plaza Megatón</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body style="padding-bottom: 20px;">
+
+  <!-- Acceso por PIN (Bloqueo de Seguridad) -->
+  <div id="admin-auth-gate" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:#0F172A; z-index:200; align-items:center; justify-content:center; padding:16px;">
+    <div style="background:#FFFFFF; border-radius:16px; max-width:380px; width:100%; padding:28px; box-shadow:var(--shadow-lg); text-align:center;">
+      <div style="font-size:36px; margin-bottom:8px;">🔐</div>
+      <h2 style="font-size:18px; font-weight:900; color:var(--text-main); margin-bottom:4px;">Administración Plaza Megatón</h2>
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:18px;">Ingresa el PIN de seguridad administrativa</p>
+      
+      <form id="admin-login-form">
+        <div class="form-group">
+          <input 
+            type="password" 
+            id="admin-pin-input" 
+            class="form-input" 
+            placeholder="PIN de acceso" 
+            required 
+            style="text-align:center; font-size:20px; letter-spacing:4px;"
+            autocomplete="current-password"
+          >
+        </div>
+        <button type="submit" class="btn-primary" style="min-height:46px;">
+          Ingresar al Panel
+        </button>
+      </form>
+      <div style="margin-top:14px;">
+        <a href="index.html" style="font-size:12px; color:var(--text-muted); text-decoration:none;">← Volver al portal público</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel Administrativo Principal -->
+  <div id="admin-main-panel" style="display:none;">
+
+    <!-- Encabezado del Administrador -->
+    <header class="admin-header">
+      <div class="admin-header-content">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <a href="index.html" style="text-decoration:none;">
+            <img src="assets/logo-megaton.svg" alt="Logo" style="height:36px; filter:brightness(0) invert(1);">
+          </a>
+          <span class="admin-badge">ADMIN</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <a href="index.html" class="btn-sm btn-sm-outline" style="background:#1E293B; border-color:#334155; color:#F8FAFC;">🌐 Ver Web</a>
+          <button onclick="adminLogout()" class="btn-sm btn-sm-danger">Salir</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Barra de Pestañas del Administrador -->
+    <nav class="admin-tabs-nav">
+      <div class="admin-tabs-container">
+        <button class="admin-tab-btn active" data-tab="kpis" onclick="switchAdminTab('kpis')">📊 Indicadores</button>
+        <button class="admin-tab-btn" data-tab="usuarios" onclick="switchAdminTab('usuarios')">👥 Usuarios</button>
+        <button class="admin-tab-btn" data-tab="reclamaciones" onclick="switchAdminTab('reclamaciones')">🛠️ Reclamaciones</button>
+        <button class="admin-tab-btn" data-tab="pagos" onclick="switchAdminTab('pagos')">💳 Pagos</button>
+        <button class="admin-tab-btn" data-tab="historial" onclick="switchAdminTab('historial')">📜 Historial</button>
+        <button class="admin-tab-btn" data-tab="qr" onclick="switchAdminTab('qr')">📱 Código QR</button>
+        <button class="admin-tab-btn" data-tab="config" onclick="switchAdminTab('config')">⚙️ Configuración</button>
+      </div>
+    </nav>
+
+    <!-- Contenido de las Secciones -->
+    <main class="admin-container">
+
+      <!-- 1. PESTAÑA: KPIS -->
+      <section id="tab-section-kpis">
+        <div class="kpis-grid">
+          <!-- Cubículos -->
+          <div class="kpi-card">
+            <div class="kpi-title">Cubículos Totales</div>
+            <div id="kpi-cub-total" class="kpi-value">30</div>
+            <div class="kpi-subtext">
+              <span id="kpi-cub-ocupados" style="color:#B71C1C; font-weight:700;">0</span> Ocupados · 
+              <span id="kpi-cub-disp" style="color:#15803D; font-weight:700;">30</span> Disponibles
+            </div>
+          </div>
+
+          <!-- Usuarios -->
+          <div class="kpi-card">
+            <div class="kpi-title">Usuarios Registrados</div>
+            <div id="kpi-users-total" class="kpi-value">0</div>
+            <div class="kpi-subtext">
+              <span id="kpi-users-activos" style="color:#15803D; font-weight:700;">0</span> Ocupantes activos
+            </div>
+          </div>
+
+          <!-- Reclamaciones -->
+          <div class="kpi-card">
+            <div class="kpi-title">Reclamaciones Abiertas</div>
+            <div id="kpi-rec-abiertas" class="kpi-value">0</div>
+            <div class="kpi-subtext">
+              <span id="kpi-rec-pend">0</span> pendientes · 
+              <span id="kpi-rec-resueltas" style="color:#15803D; font-weight:700;">0</span> resueltas
+            </div>
+          </div>
+
+          <!-- Pagos -->
+          <div class="kpi-card">
+            <div class="kpi-title">Pagos Reportados</div>
+            <div id="kpi-pag-reportados" class="kpi-value">0</div>
+            <div class="kpi-subtext">
+              <span id="kpi-pag-pend">0</span> por verificar · 
+              <span id="kpi-pag-confirmados" style="color:#15803D; font-weight:700;">0</span> confirmados
+            </div>
+          </div>
+        </div>
+
+        <!-- Acceso directo a acciones clave -->
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn-sm btn-sm-primary" onclick="switchAdminTab('reclamaciones')">Ir a Reclamaciones</button>
+          <button class="btn-sm btn-sm-primary" onclick="switchAdminTab('pagos')">Verificar Pagos</button>
+          <button class="btn-sm btn-sm-outline" onclick="switchAdminTab('qr')">Descargar Código QR</button>
+        </div>
+      </section>
+
+      <!-- 2. PESTAÑA: USUARIOS -->
+      <section id="tab-section-usuarios" style="display:none;">
+        <div class="table-filter-bar">
+          <div class="search-input-wrap">
+            <input type="text" id="search-usuarios-input" class="form-input" placeholder="🔍 Buscar por nombre, correo, cubículo o código..." oninput="filterUsuarios()">
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Contacto</th>
+                <th>Cubículos</th>
+                <th>Estado</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="table-usuarios-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 3. PESTAÑA: RECLAMACIONES -->
+      <section id="tab-section-reclamaciones" style="display:none;">
+        <div class="table-filter-bar">
+          <div class="search-input-wrap">
+            <input type="text" id="search-rec-input" class="form-input" placeholder="🔍 Buscar por código, usuario, asunto..." oninput="filterReclamaciones()">
+          </div>
+          <div style="min-width: 180px;">
+            <select id="filter-rec-estado" class="form-select" onchange="filterReclamaciones()">
+              <option value="Todos">Todos los estados</option>
+              <option value="Recibida">Recibida</option>
+              <option value="En revisión">En revisión</option>
+              <option value="Asignada">Asignada</option>
+              <option value="En proceso">En proceso</option>
+              <option value="Pendiente de información">Pendiente de info</option>
+              <option value="Resuelta">Resuelta</option>
+              <option value="Cerrada">Cerrada</option>
+              <option value="Cancelada">Cancelada</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Fecha</th>
+                <th>Usuario</th>
+                <th>Cubículo</th>
+                <th>Asunto</th>
+                <th>Estado</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="table-reclamaciones-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 4. PESTAÑA: PAGOS -->
+      <section id="tab-section-pagos" style="display:none;">
+        <div class="table-filter-bar">
+          <div class="search-input-wrap">
+            <input type="text" id="search-pago-input" class="form-input" placeholder="🔍 Buscar por código, inquilino, cubículo..." oninput="filterPagos()">
+          </div>
+          <div style="min-width: 180px;">
+            <select id="filter-pago-estado" class="form-select" onchange="filterPagos()">
+              <option value="Todos">Todos los estados</option>
+              <option value="Reportado">Reportado</option>
+              <option value="En revisión">En revisión</option>
+              <option value="Confirmado">Confirmado</option>
+              <option value="Rechazado">Rechazado</option>
+              <option value="Pendiente de información">Pendiente de info</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Fecha</th>
+                <th>Usuario</th>
+                <th>Cubículo</th>
+                <th>Monto / Período</th>
+                <th>Estado</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="table-pagos-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 5. PESTAÑA: HISTORIAL -->
+      <section id="tab-section-historial" style="display:none;">
+        <div style="margin-bottom:12px;">
+          <h2 style="font-size:16px; font-weight:800;">📜 Historial y Auditoría de Movimientos</h2>
+          <p style="font-size:13px; color:var(--text-muted);">Registro inmutable de todas las acciones del sistema</p>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Fecha / Hora</th>
+                <th>Tipo</th>
+                <th>Doc #</th>
+                <th>Usuario</th>
+                <th>Acción</th>
+                <th>Transición Estado</th>
+                <th>Observación</th>
+              </tr>
+            </thead>
+            <tbody id="table-historial-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 6. PESTAÑA: CÓDIGO QR -->
+      <section id="tab-section-qr" style="display:none;">
+        <div class="qr-display-card">
+          <div style="font-size:13px; font-weight:800; color:var(--primary-red); text-transform:uppercase; letter-spacing:1px;">
+            Acceso Rápido para Reuniones e Inquilinos
+          </div>
+          <h2 style="font-size:22px; font-weight:900; margin:6px 0 10px;">REGISTRO PLAZA MEGATÓN</h2>
+          <p style="font-size:13px; color:var(--text-muted);">
+            Escanea con cualquier celular (cámara de iPhone o Android) para completar tus datos y cubículos.
+          </p>
+
+          <div class="qr-box-img">
+            <img id="qr-code-img" alt="Código QR de Registro Plaza Megatón" src="">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" style="font-size:12px;">Enlace fijo directo:</label>
+            <input type="text" id="qr-target-url" class="form-input" readonly style="font-size:13px; text-align:center; background:#F8FAFC;">
+          </div>
+
+          <div style="display:flex; gap:10px; justify-content:center; margin-top:16px;">
+            <button class="btn-primary" onclick="downloadQR()" style="min-height:44px; width:auto; padding:0 20px;">
+              💾 Descargar Imagen QR
+            </button>
+            <button class="btn-secondary" onclick="printQRCard()" style="min-height:44px; width:auto; padding:0 20px;">
+              🖨️ Imprimir Cartel
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. PESTAÑA: CONFIGURACIÓN -->
+      <section id="tab-section-config" style="display:none;">
+        <div class="card-box">
+          <div class="card-box-header">
+            <h2 class="card-title">⚙️ Parámetros Generales de Plaza Megatón</h2>
+            <p class="card-subtitle">Configura los datos comerciales, correo oficial y correlativos.</p>
+          </div>
+          <div id="config-form-container"></div>
+        </div>
+
+        <!-- Tarjeta de Integración con Google Drive y Google Sheets -->
+        <div class="card-box" style="margin-top: 20px;">
+          <div class="card-box-header">
+            <h2 class="card-title">☁️ Base de Datos en Google Drive y Google Sheets</h2>
+            <p class="card-subtitle">Sincronización en tiempo real con la carpeta "PLAZA MEGATÓN" y la base de datos "PLAZA_MEGATON_DATABASE".</p>
+          </div>
+
+          <!-- GOOGLE DRIVE & SHEETS DATABASE -->
+          <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; padding: 18px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <span style="font-weight: 800; font-size: 14px; color: #0F172A;">📁 Carpeta en Google Drive:</span>
+                <span style="background: #FEE2E2; color: #991B1B; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 13px;">PLAZA MEGATÓN</span>
+              </div>
+              <div id="google-conn-status">
+                <span style="background: #DCFCE7; color: #166534; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 9999px;">🟢 Recursos Creados en Google Drive</span>
+              </div>
+            </div>
+
+            <!-- Accesos Rápidos a Recursos en Google Drive -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 16px;">
+              <a href="https://drive.google.com/drive/folders/1CUUpP7K2roI8cemURppsB5QyPm6WAgpY" target="_blank" style="text-decoration:none; display:flex; align-items:center; gap:8px; padding:10px 12px; background:#FFFFFF; border:1px solid #CBD5E1; border-radius:8px; font-size:12px; font-weight:700; color:#1E293B;">
+                <span style="font-size:16px;">📁</span>
+                <span>Carpeta <strong>PLAZA MEGATÓN</strong></span>
+              </a>
+              <a href="https://docs.google.com/spreadsheets/d/1_pHnJkeyVTbVfXacVOFIsKDYb3vaP-EBepc3tm3CQKY/edit" target="_blank" style="text-decoration:none; display:flex; align-items:center; gap:8px; padding:10px 12px; background:#FFFFFF; border:1px solid #CBD5E1; border-radius:8px; font-size:12px; font-weight:700; color:#1E293B;">
+                <span style="font-size:16px;">📊</span>
+                <span>Base de Datos <strong>Google Sheets</strong></span>
+              </a>
+              <a href="https://script.google.com/macros/d/1OtHXUEogeQaQIXUa9C8kQKm8EXqBo4Mlo7Zn3S7P6MyeWXg3fpRf6Z0B/edit" target="_blank" style="text-decoration:none; display:flex; align-items:center; gap:8px; padding:10px 12px; background:#FFFFFF; border:1px solid #CBD5E1; border-radius:8px; font-size:12px; font-weight:700; color:#1E293B;">
+                <span style="font-size:16px;">⚡</span>
+                <span>Editor <strong>Apps Script</strong></span>
+              </a>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label class="form-label" style="font-size: 12px;">URL de la Aplicación Web (Google Apps Script Webhook):</label>
+              <input type="url" id="input-google-script-url" class="form-input" value="https://script.google.com/macros/s/AKfycbzhIZ4dMGMyX4ZQgZrBnwegGHjPJC9U_9sw7jRcUVHVB2MGp9sLluZBi3wYN5bZICX0/exec" placeholder="https://script.google.com/macros/s/.../exec">
+            </div>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button type="button" class="btn-sm btn-sm-primary" onclick="testGoogleConnection()">
+                🧪 Probar Conexión con Google Drive
+              </button>
+              <button type="button" class="btn-sm btn-sm-outline" onclick="syncAllToGoogle()">
+                🔄 Sincronizar Todo a Google Sheets Ahora
+              </button>
+            </div>
+            
+            <div id="google-test-result" style="margin-top: 12px; font-size: 13px; display: none;"></div>
+          </div>
+
+          <!-- Estado y Confirmación del Proceso -->
+          <div style="font-size: 13px; color: #475569; line-height: 1.6; border-top: 1px dashed #CBD5E1; padding-top: 14px;">
+            <strong>Estado del proceso automático en Google Drive:</strong>
+            <ul style="margin: 8px 0 0; padding-left: 20px;">
+              <li>✅ Carpeta <strong>PLAZA MEGATÓN</strong> creada en tu cuenta de Google Drive.</li>
+              <li>✅ Subcarpetas <code>01 - RECLAMACIONES</code>, <code>02 - PAGOS</code> y <code>03 - COPIAS DE SEGURIDAD</code> generadas.</li>
+              <li>✅ Hoja <strong>PLAZA_MEGATON_DATABASE</strong> creada dentro de la carpeta.</li>
+              <li>✅ Proyecto y Web App de Apps Script publicado y vinculado a la plataforma.</li>
+              <li>👉 <em>Paso único de autorización de Google:</em> Abre el <a href="https://script.google.com/macros/d/1OtHXUEogeQaQIXUa9C8kQKm8EXqBo4Mlo7Zn3S7P6MyeWXg3fpRf6Z0B/edit" target="_blank" style="color:#D32F2F; font-weight:700;">Editor Apps Script</a>, presiona <strong>Ejecutar</strong> en la función <code>inicializarBaseDeDatos</code> y pulsa <strong>Revisar permisos &gt; Permitir</strong> para conceder acceso a tu cuenta.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- MODAL: GESTIONAR USUARIO -->
+  <div id="edit-user-modal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="font-size:16px; font-weight:800;">Gestionar Usuario y Cubículos</h3>
+        <button onclick="closeEditUserModal()" style="background:none; border:none; font-size:20px; cursor:pointer;">✕</button>
+      </div>
+      <div id="edit-user-body" class="modal-body"></div>
+      <div class="modal-footer">
+        <button onclick="closeEditUserModal()" class="btn-secondary" style="width:auto; min-height:40px; padding:0 16px;">Cancelar</button>
+        <button id="btn-save-user" class="btn-primary" style="width:auto; min-height:40px; padding:0 18px;">Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ATENDER RECLAMACIÓN -->
+  <div id="admin-reclamacion-modal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="font-size:16px; font-weight:800;">Atención de Solicitud / Reclamación</h3>
+        <button onclick="closeAdminReclamacionModal()" style="background:none; border:none; font-size:20px; cursor:pointer;">✕</button>
+      </div>
+      <div id="admin-reclamacion-body" class="modal-body"></div>
+      <div class="modal-footer">
+        <button onclick="closeAdminReclamacionModal()" class="btn-secondary" style="width:auto; min-height:40px; padding:0 16px;">Cerrar</button>
+        <button id="btn-save-reclamacion" class="btn-primary" style="width:auto; min-height:40px; padding:0 18px;">Actualizar y Notificar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: REVISAR PAGO -->
+  <div id="admin-pago-modal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="font-size:16px; font-weight:800;">Conciliación de Pago</h3>
+        <button onclick="closeAdminPagoModal()" style="background:none; border:none; font-size:20px; cursor:pointer;">✕</button>
+      </div>
+      <div id="admin-pago-body" class="modal-body"></div>
+      <div class="modal-footer">
+        <button id="btn-pago-pedir-info" class="btn-sm btn-sm-outline" style="padding:10px 14px;">Solicitar Info</button>
+        <button id="btn-pago-rechazar" class="btn-sm btn-sm-danger" style="padding:10px 14px;">Rechazar</button>
+        <button id="btn-pago-confirmar" class="btn-sm btn-sm-success" style="padding:10px 18px;">✓ Confirmar Pago</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

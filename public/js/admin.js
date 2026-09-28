@@ -1,0 +1,947 @@
+// Controlador Integral del Portal Administrativo - Plaza Megatón
+let currentTab = 'kpis';
+let adminData = {
+  kpis: null,
+  usuarios: [],
+  reclamaciones: [],
+  pagos: [],
+  historial: [],
+  config: []
+};
+
+// Autenticación por PIN
+function getAdminPin() {
+  return sessionStorage.getItem('megaton_admin_pin') || '';
+}
+
+function setAdminPin(pin) {
+  sessionStorage.setItem('megaton_admin_pin', pin);
+}
+
+async function checkAdminAuth() {
+  const pin = getAdminPin();
+  const authGate = document.getElementById('admin-auth-gate');
+  const panel = document.getElementById('admin-main-panel');
+
+  if (!pin) {
+    if (authGate) authGate.style.display = 'flex';
+    if (panel) panel.style.display = 'none';
+    return false;
+  }
+
+  // Verificar PIN contra la API
+  try {
+    const res = await fetch('/api/admin/dashboard', {
+      headers: { 'x-admin-pin': pin }
+    });
+
+    if (res.ok) {
+      if (authGate) authGate.style.display = 'none';
+      if (panel) panel.style.display = 'block';
+      loadAllAdminData();
+      return true;
+    } else {
+      sessionStorage.removeItem('megaton_admin_pin');
+      if (authGate) authGate.style.display = 'flex';
+      if (panel) panel.style.display = 'none';
+      return false;
+    }
+  } catch (err) {
+    console.error('Error autenticando admin:', err);
+    return false;
+  }
+}
+
+function handlePinSubmit(e) {
+  e.preventDefault();
+  const pinInput = document.getElementById('admin-pin-input');
+  const pin = pinInput.value.trim();
+  if (!pin) return;
+
+  setAdminPin(pin);
+  checkAdminAuth();
+}
+
+function adminLogout() {
+  sessionStorage.removeItem('megaton_admin_pin');
+  window.location.reload();
+}
+
+// ==========================================
+// CARGA Y PESTAÑAS
+// ==========================================
+function switchAdminTab(tabName) {
+  currentTab = tabName;
+  document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tabName);
+  });
+
+  const sections = ['kpis', 'usuarios', 'reclamaciones', 'pagos', 'historial', 'qr', 'config'];
+  sections.forEach(s => {
+    const el = document.getElementById(`tab-section-${s}`);
+    if (el) el.style.display = (s === tabName) ? 'block' : 'none';
+  });
+
+  if (tabName === 'kpis') loadKPIs();
+  if (tabName === 'usuarios') loadUsuarios();
+  if (tabName === 'reclamaciones') loadReclamaciones();
+  if (tabName === 'pagos') loadPagos();
+  if (tabName === 'historial') loadHistorial();
+  if (tabName === 'qr') loadQRInfo();
+  if (tabName === 'config') loadConfig();
+}
+
+async function loadAllAdminData() {
+  loadKPIs();
+  loadUsuarios();
+  loadReclamaciones();
+  loadPagos();
+  loadQRInfo();
+}
+
+// ==========================================
+// 1. KPIS / DASHBOARD
+// ==========================================
+async function loadKPIs() {
+  try {
+    const res = await fetch('/api/admin/dashboard', { headers: { 'x-admin-pin': getAdminPin() } });
+    const data = await res.json();
+    if (data.success && data.kpis) {
+      adminData.kpis = data.kpis;
+      const k = data.kpis;
+      
+      document.getElementById('kpi-cub-total').innerText = k.cubiculos.total;
+      document.getElementById('kpi-cub-ocupados').innerText = k.cubiculos.ocupados;
+      document.getElementById('kpi-cub-disp').innerText = k.cubiculos.disponibles;
+
+      document.getElementById('kpi-users-total').innerText = k.usuarios.total;
+      document.getElementById('kpi-users-activos').innerText = k.usuarios.activos;
+
+      document.getElementById('kpi-rec-abiertas').innerText = k.reclamaciones.abiertas;
+      document.getElementById('kpi-rec-pend').innerText = k.reclamaciones.pendientes;
+      document.getElementById('kpi-rec-resueltas').innerText = k.reclamaciones.resueltas;
+
+      document.getElementById('kpi-pag-reportados').innerText = k.pagos.reportados;
+      document.getElementById('kpi-pag-pend').innerText = k.pagos.pendientes;
+      document.getElementById('kpi-pag-confirmados').innerText = k.pagos.confirmados;
+    }
+  } catch (_) {}
+}
+
+// ==========================================
+// 2. USUARIOS
+// ==========================================
+async function loadUsuarios() {
+  const tbody = document.getElementById('table-usuarios-body');
+  if (!tbody) return;
+
+  try {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Cargando usuarios...</td></tr>';
+    const res = await fetch('/api/admin/usuarios', { headers: { 'x-admin-pin': getAdminPin() } });
+    const data = await res.json();
+
+    if (data.success && data.usuarios) {
+      adminData.usuarios = data.usuarios;
+      renderUsuariosTable(data.usuarios);
+    }
+  } catch (_) {}
+}
+
+function renderUsuariosTable(users) {
+  const tbody = document.getElementById('table-usuarios-body');
+  if (!tbody) return;
+
+  if (users.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:#64748B;">No hay usuarios registrados aún.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = '';
+  users.forEach(u => {
+    const tr = document.createElement('tr');
+    const cubsHtml = Array.isArray(u.cubiculos) && u.cubiculos.length > 0
+      ? u.cubiculos.map(c => {
+          if (typeof c === 'object' && c !== null) {
+            const extra = [c.nombre, c.actividad].filter(Boolean).join(' · ');
+            return `<div style="margin-bottom: 2px;"><strong>${c.codigo}</strong>${extra ? ' <span style="font-size:11px; color:#475569;">(' + extra + ')</span>' : ''}</div>`;
+          }
+          return `<div style="margin-bottom: 2px;"><strong>${c}</strong></div>`;
+        }).join('')
+      : '<span style="color:#94A3B8;">Ninguno</span>';
+
+    tr.innerHTML = `
+      <td><strong>${u.user_id}</strong></td>
+      <td><strong>${u.nombre}</strong></td>
+      <td>${u.email}<br><small style="color:#64748B;">${u.telefono || 'Sin tel.'}</small></td>
+      <td><span style="background:#FEE2E2; color:#B71C1C; padding:4px 8px; border-radius:6px; font-weight:600; font-size:12px; display:inline-block;">${cubsHtml}</span></td>
+      <td><span class="badge ${u.estado === 'Activo' ? 'badge-activo' : 'badge-rechazado'}">${u.estado}</span></td>
+      <td>
+        <button class="btn-sm btn-sm-outline" onclick="openEditUserModal('${u.user_id}')">⚙️ Gestionar</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function filterUsuarios() {
+  const q = document.getElementById('search-usuarios-input').value.toLowerCase();
+  const filtered = adminData.usuarios.filter(u => 
+    u.nombre.toLowerCase().includes(q) || 
+    u.email.toLowerCase().includes(q) || 
+    u.user_id.toLowerCase().includes(q) ||
+    (Array.isArray(u.cubiculos) && u.cubiculos.some(c => {
+      const txt = typeof c === 'object' ? `${c.codigo} ${c.nombre || ''} ${c.actividad || ''}` : String(c);
+      return txt.toLowerCase().includes(q);
+    }))
+  );
+  renderUsuariosTable(filtered);
+}
+
+function openEditUserModal(userId) {
+  const user = adminData.usuarios.find(u => u.user_id === userId);
+  if (!user) return;
+
+  const modal = document.getElementById('edit-user-modal');
+  const body = document.getElementById('edit-user-body');
+
+  const cubsFormatted = Array.isArray(user.cubiculos) && user.cubiculos.length > 0
+    ? user.cubiculos.map(c => {
+        if (typeof c === 'object' && c !== null) {
+          const extra = [c.nombre, c.actividad].filter(Boolean).join(' · ');
+          return `• <strong>${c.codigo}</strong>${extra ? ' — ' + extra : ''}`;
+        }
+        return `• <strong>${c}</strong>`;
+      }).join('<br>')
+    : 'Ninguno';
+
+  body.innerHTML = `
+    <div style="font-size:16px; font-weight:800; margin-bottom:12px;">Usuario: ${user.nombre} (${user.user_id})</div>
+    <div class="form-group">
+      <label class="form-label">Correo:</label>
+      <input type="text" class="form-input" value="${user.email}" readonly style="background:#F1F5F9;">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Teléfono:</label>
+      <input type="text" id="edit-user-tel" class="form-input" value="${user.telefono || ''}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Estado:</label>
+      <select id="edit-user-estado" class="form-select">
+        <option value="Activo" ${user.estado === 'Activo' ? 'selected' : ''}>Activo</option>
+        <option value="Inactivo" ${user.estado === 'Inactivo' ? 'selected' : ''}>Inactivo</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Cubículos actualmente asociados:</label>
+      <div style="font-size:13px; color:#B71C1C; margin-bottom:8px; line-height:1.5;">${cubsFormatted}</div>
+    </div>
+    <div style="border-top:1px solid #E2E8F0; padding-top:12px; margin-top:12px;">
+      <div class="form-group">
+        <label class="form-label">➕ Asignar nuevo cubículo (ej: C-015):</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="add-cubiculo-code" class="form-input" placeholder="Ej: C-008" style="text-transform:uppercase;">
+          <button type="button" class="btn-sm btn-sm-primary" onclick="submitAddCubiculo('${user.user_id}')">Asignar</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">➖ Quitar cubículo asociado:</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="remove-cubiculo-code" class="form-input" placeholder="Ej: C-001" style="text-transform:uppercase;">
+          <button type="button" class="btn-sm btn-sm-danger" onclick="submitRemoveCubiculo('${user.user_id}')">Quitar</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('btn-save-user').onclick = () => saveUserBasicInfo(user.user_id);
+  modal.classList.add('open');
+}
+
+async function saveUserBasicInfo(userId) {
+  const tel = document.getElementById('edit-user-tel').value;
+  const estado = document.getElementById('edit-user-estado').value;
+
+  try {
+    const res = await fetch(`/api/admin/usuarios/${userId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-pin': getAdminPin()
+      },
+      body: JSON.stringify({ telefono: tel, estado })
+    });
+
+    if (res.ok) {
+      App.showToast('Información de usuario actualizada', 'success');
+      closeEditUserModal();
+      loadUsuarios();
+    }
+  } catch (_) {}
+}
+
+async function submitAddCubiculo(userId) {
+  const code = document.getElementById('add-cubiculo-code').value.trim().toUpperCase();
+  if (!code) return;
+
+  const res = await fetch(`/api/admin/usuarios/${userId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'x-admin-pin': getAdminPin() },
+    body: JSON.stringify({ agregarCubiculo: code })
+  });
+  if (res.ok) {
+    App.showToast(`Cubículo ${code} asignado`, 'success');
+    closeEditUserModal();
+    loadUsuarios();
+  }
+}
+
+async function submitRemoveCubiculo(userId) {
+  const code = document.getElementById('remove-cubiculo-code').value.trim().toUpperCase();
+  if (!code) return;
+
+  const res = await fetch(`/api/admin/usuarios/${userId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'x-admin-pin': getAdminPin() },
+    body: JSON.stringify({ quitarCubiculo: code })
+  });
+  if (res.ok) {
+    App.showToast(`Cubículo ${code} desasociado`, 'success');
+    closeEditUserModal();
+    loadUsuarios();
+  }
+}
+
+function closeEditUserModal() {
+  document.getElementById('edit-user-modal').classList.remove('open');
+}
+
+// ==========================================
+// 3. RECLAMACIONES
+// ==========================================
+async function loadReclamaciones() {
+  const tbody = document.getElementById('table-reclamaciones-body');
+  if (!tbody) return;
+
+  try {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">Cargando reclamaciones...</td></tr>';
+    const res = await fetch('/api/reclamaciones', { headers: { 'x-admin-pin': getAdminPin() } });
+    const data = await res.json();
+
+    if (data.success && data.reclamaciones) {
+      adminData.reclamaciones = data.reclamaciones;
+      renderReclamacionesTable(data.reclamaciones);
+    }
+  } catch (_) {}
+}
+
+function renderReclamacionesTable(items) {
+  const tbody = document.getElementById('table-reclamaciones-body');
+  if (!tbody) return;
+
+  if (items.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:30px; color:#64748B;">No hay reclamaciones reportadas.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = '';
+  items.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong style="color:var(--primary-red);">${r.codigo}</strong></td>
+      <td>${r.fecha}</td>
+      <td><strong>${r.nombre}</strong><br><small style="color:#64748B;">${r.email}</small></td>
+      <td><span style="font-weight:700;">${r.cubiculo}</span></td>
+      <td>${r.asunto}</td>
+      <td><span class="badge ${getBadgeClass(r.estado)}">${r.estado}</span></td>
+      <td>
+        <button class="btn-sm btn-sm-primary" onclick="openAdminReclamacionModal('${r.codigo}')">Atender</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function filterReclamaciones() {
+  const estadoFilter = document.getElementById('filter-rec-estado').value;
+  const q = document.getElementById('search-rec-input').value.toLowerCase();
+
+  let filtered = adminData.reclamaciones;
+  if (estadoFilter !== 'Todos') {
+    filtered = filtered.filter(r => r.estado === estadoFilter);
+  }
+  if (q) {
+    filtered = filtered.filter(r => 
+      r.codigo.toLowerCase().includes(q) ||
+      r.nombre.toLowerCase().includes(q) ||
+      r.cubiculo.toLowerCase().includes(q) ||
+      r.asunto.toLowerCase().includes(q)
+    );
+  }
+  renderReclamacionesTable(filtered);
+}
+
+function openAdminReclamacionModal(codigo) {
+  const item = adminData.reclamaciones.find(r => r.codigo === codigo);
+  if (!item) return;
+
+  const modal = document.getElementById('admin-reclamacion-modal');
+  const body = document.getElementById('admin-reclamacion-body');
+
+  let photosHtml = '';
+  if (item.archivos && item.archivos.length > 0) {
+    photosHtml = `
+      <div style="margin-top:14px;">
+        <div style="font-size:13px; font-weight:700; margin-bottom:6px;">Fotografías de Evidencia (${item.archivos.length}):</div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          ${item.archivos.map(url => `
+            <a href="${url}" target="_blank">
+              <img src="${url}" style="width:100px; height:100px; object-fit:cover; border-radius:8px; border:1px solid #CBD5E1;">
+            </a>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  body.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <span class="success-code-num">${item.codigo}</span>
+      <span class="badge ${getBadgeClass(item.estado)}">${item.estado}</span>
+    </div>
+    <div style="font-size:14px; margin-bottom:4px;"><strong>Usuario:</strong> ${item.nombre} (${item.email})</div>
+    <div style="font-size:14px; margin-bottom:4px;"><strong>Cubículo:</strong> ${item.cubiculo}</div>
+    <div style="font-size:14px; margin-bottom:4px;"><strong>Asunto:</strong> ${item.asunto}</div>
+    <div style="font-size:14px; margin-bottom:10px;"><strong>Fecha de Registro:</strong> ${item.fecha} ${item.hora || ''}</div>
+
+    <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:12px; margin-bottom:14px;">
+      <div style="font-size:12px; font-weight:700; color:#64748B; margin-bottom:4px; text-transform:uppercase;">Detalle reportado:</div>
+      <div style="font-size:14px; color:#1E293B;">${item.detalle}</div>
+    </div>
+
+    ${photosHtml}
+
+    <div style="border-top:2px solid #F1F5F9; padding-top:14px; margin-top:16px;">
+      <div class="form-group">
+        <label class="form-label">Cambiar Estado:</label>
+        <select id="modal-rec-estado" class="form-select">
+          <option value="Recibida" ${item.estado === 'Recibida' ? 'selected' : ''}>Recibida</option>
+          <option value="En revisión" ${item.estado === 'En revisión' ? 'selected' : ''}>En revisión</option>
+          <option value="Asignada" ${item.estado === 'Asignada' ? 'selected' : ''}>Asignada</option>
+          <option value="En proceso" ${item.estado === 'En proceso' ? 'selected' : ''}>En proceso</option>
+          <option value="Pendiente de información" ${item.estado === 'Pendiente de información' ? 'selected' : ''}>Pendiente de información</option>
+          <option value="Resuelta" ${item.estado === 'Resuelta' ? 'selected' : ''}>Resuelta</option>
+          <option value="Cerrada" ${item.estado === 'Cerrada' ? 'selected' : ''}>Cerrada</option>
+          <option value="Cancelada" ${item.estado === 'Cancelada' ? 'selected' : ''}>Cancelada</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Responsable Asignado / Técnico:</label>
+        <input type="text" id="modal-rec-responsable" class="form-input" value="${item.responsable || 'Administración'}">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Observación o Solución (se notificará al usuario):</label>
+        <textarea id="modal-rec-observacion" class="form-textarea" placeholder="Describe los avances o la solución aplicada..."></textarea>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('btn-save-reclamacion').onclick = () => saveReclamacionAction(item.codigo);
+  modal.classList.add('open');
+}
+
+async function saveReclamacionAction(codigo) {
+  const estado = document.getElementById('modal-rec-estado').value;
+  const responsable = document.getElementById('modal-rec-responsable').value;
+  const observacion = document.getElementById('modal-rec-observacion').value;
+
+  try {
+    const res = await fetch(`/api/reclamaciones/${codigo}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-pin': getAdminPin()
+      },
+      body: JSON.stringify({ estado, responsable, observacion })
+    });
+
+    if (res.ok) {
+      App.showToast(`Solicitud ${codigo} actualizada`, 'success');
+      closeAdminReclamacionModal();
+      loadReclamaciones();
+      loadKPIs();
+    }
+  } catch (_) {}
+}
+
+function closeAdminReclamacionModal() {
+  document.getElementById('admin-reclamacion-modal').classList.remove('open');
+}
+
+// ==========================================
+// 4. PAGOS
+// ==========================================
+async function loadPagos() {
+  const tbody = document.getElementById('table-pagos-body');
+  if (!tbody) return;
+
+  try {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">Cargando pagos...</td></tr>';
+    const res = await fetch('/api/pagos', { headers: { 'x-admin-pin': getAdminPin() } });
+    const data = await res.json();
+
+    if (data.success && data.pagos) {
+      adminData.pagos = data.pagos;
+      renderPagosTable(data.pagos);
+    }
+  } catch (_) {}
+}
+
+function renderPagosTable(items) {
+  const tbody = document.getElementById('table-pagos-body');
+  if (!tbody) return;
+
+  if (items.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:30px; color:#64748B;">No hay reportes de pagos.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = '';
+  items.forEach(p => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong style="color:var(--primary-red);">${p.codigo}</strong></td>
+      <td>${p.fecha_pago || p.fecha_registro}</td>
+      <td><strong>${p.nombre}</strong><br><small style="color:#64748B;">${p.email}</small></td>
+      <td><span style="font-weight:700;">${p.cubiculo}</span></td>
+      <td><strong style="color:#15803D;">${p.monto}</strong><br><small>${p.periodo}</small></td>
+      <td><span class="badge ${getPagoBadgeClass(p.estado)}">${p.estado}</span></td>
+      <td>
+        <button class="btn-sm btn-sm-primary" onclick="openAdminPagoModal('${p.codigo}')">Revisar</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function filterPagos() {
+  const estadoFilter = document.getElementById('filter-pago-estado').value;
+  const q = document.getElementById('search-pago-input').value.toLowerCase();
+
+  let filtered = adminData.pagos;
+  if (estadoFilter !== 'Todos') {
+    filtered = filtered.filter(p => p.estado === estadoFilter);
+  }
+  if (q) {
+    filtered = filtered.filter(p => 
+      p.codigo.toLowerCase().includes(q) ||
+      p.nombre.toLowerCase().includes(q) ||
+      p.cubiculo.toLowerCase().includes(q) ||
+      p.periodo.toLowerCase().includes(q)
+    );
+  }
+  renderPagosTable(filtered);
+}
+
+function openAdminPagoModal(codigo) {
+  const item = adminData.pagos.find(p => p.codigo === codigo);
+  if (!item) return;
+
+  const modal = document.getElementById('admin-pago-modal');
+  const body = document.getElementById('admin-pago-body');
+
+  let voucherHtml = '<div style="color:#94A3B8; font-size:13px;">Sin comprobante adjunto.</div>';
+  if (item.voucher) {
+    if (item.voucher.toLowerCase().endsWith('.pdf')) {
+      voucherHtml = `
+        <div style="margin-top:10px;">
+          <a href="${item.voucher}" target="_blank" class="btn-secondary" style="display:inline-flex; width:auto; padding:10px 20px;">
+            📄 Abrir Voucher en PDF
+          </a>
+        </div>
+      `;
+    } else {
+      voucherHtml = `
+        <div style="margin-top:10px; text-align:center;">
+          <a href="${item.voucher}" target="_blank">
+            <img src="${item.voucher}" style="max-height:220px; max-width:100%; border-radius:8px; border:1px solid #CBD5E1; box-shadow:var(--shadow-sm);">
+          </a>
+          <div style="font-size:11px; color:#64748B; margin-top:4px;">Haz clic en la imagen para ver en alta resolución</div>
+        </div>
+      `;
+    }
+  }
+
+  body.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <span class="success-code-num">${item.codigo}</span>
+      <span class="badge ${getPagoBadgeClass(item.estado)}">${item.estado}</span>
+    </div>
+    <div style="font-size:14px; margin-bottom:4px;"><strong>Usuario:</strong> ${item.nombre} (${item.email})</div>
+    <div style="font-size:14px; margin-bottom:4px;"><strong>Cubículo:</strong> ${item.cubiculo}</div>
+    <div style="font-size:14px; margin-bottom:4px;"><strong>Concepto:</strong> ${item.concepto}</div>
+    <div style="font-size:14px; margin-bottom:4px;"><strong>Período:</strong> ${item.periodo}</div>
+    <div style="font-size:16px; margin-bottom:4px; font-weight:800; color:#15803D;">Monto: ${item.monto}</div>
+    <div style="font-size:14px; margin-bottom:4px;"><strong>Referencia bancaria:</strong> ${item.referencia || 'No indicada'}</div>
+    <div style="font-size:14px; margin-bottom:10px;"><strong>Fecha del pago:</strong> ${item.fecha_pago || item.fecha_registro}</div>
+
+    <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:12px; margin-top:10px;">
+      <div style="font-size:13px; font-weight:700; margin-bottom:6px;">Comprobante / Voucher:</div>
+      ${voucherHtml}
+    </div>
+
+    <div class="form-group" style="margin-top:16px;">
+      <label class="form-label">Observaciones administrativas:</label>
+      <input type="text" id="modal-pago-observaciones" class="form-input" placeholder="Ej: Verificado en Banco Popular" value="${item.observaciones || ''}">
+    </div>
+  `;
+
+  document.getElementById('btn-pago-confirmar').onclick = () => updatePagoStatus(item.codigo, 'Confirmado');
+  document.getElementById('btn-pago-rechazar').onclick = () => updatePagoStatus(item.codigo, 'Rechazado');
+  document.getElementById('btn-pago-pedir-info').onclick = () => updatePagoStatus(item.codigo, 'Pendiente de información');
+
+  modal.classList.add('open');
+}
+
+async function updatePagoStatus(codigo, nuevoEstado) {
+  const observaciones = document.getElementById('modal-pago-observaciones').value;
+
+  try {
+    const res = await fetch(`/api/pagos/${codigo}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-pin': getAdminPin()
+      },
+      body: JSON.stringify({ estado: nuevoEstado, observaciones })
+    });
+
+    if (res.ok) {
+      App.showToast(`Pago ${codigo} marcado como ${nuevoEstado}`, 'success');
+      closeAdminPagoModal();
+      loadPagos();
+      loadKPIs();
+    }
+  } catch (_) {}
+}
+
+function closeAdminPagoModal() {
+  document.getElementById('admin-pago-modal').classList.remove('open');
+}
+
+// ==========================================
+// 5. HISTORIAL Y AUDITORÍA
+// ==========================================
+async function loadHistorial() {
+  const tbody = document.getElementById('table-historial-body');
+  if (!tbody) return;
+
+  try {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">Cargando historial de movimientos...</td></tr>';
+    const res = await fetch('/api/admin/historial', { headers: { 'x-admin-pin': getAdminPin() } });
+    const data = await res.json();
+
+    if (data.success && data.historial) {
+      adminData.historial = data.historial;
+      renderHistorialTable(data.historial);
+    }
+  } catch (_) {}
+}
+
+function renderHistorialTable(items) {
+  const tbody = document.getElementById('table-historial-body');
+  if (!tbody) return;
+
+  if (items.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:30px; color:#64748B;">No hay registros en el historial.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = '';
+  items.forEach(h => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${h.fecha} <small>${h.hora || ''}</small></td>
+      <td><span style="font-weight:700; color:var(--primary-red);">${h.tipo_documento}</span></td>
+      <td><strong>${h.codigo_documento}</strong></td>
+      <td>${h.usuario}</td>
+      <td>${h.accion}</td>
+      <td><small>${h.estado_anterior ? `${h.estado_anterior} → ` : ''}<strong>${h.estado_nuevo}</strong></small></td>
+      <td><small>${h.observacion || ''}</small></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ==========================================
+// 6. CÓDIGO QR DE REGISTRO
+// ==========================================
+async function loadQRInfo() {
+  try {
+    let targetUrl = '';
+    if (App.isStaticHost()) {
+      // Si está en GitHub Pages u hosting estático
+      const base = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+      targetUrl = `${base}/registro.html`;
+    } else {
+      const res = await fetch('/api/qr/info');
+      const data = await res.json();
+      targetUrl = (data && data.targetUrl) ? data.targetUrl : `${window.location.origin}/registro.html`;
+    }
+
+    const qrTargetInput = document.getElementById('qr-target-url');
+    if (qrTargetInput) qrTargetInput.value = targetUrl;
+
+    const qrImg = document.getElementById('qr-code-img');
+    if (qrImg) {
+      const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=${encodeURIComponent(targetUrl)}&color=0f172a&bgcolor=ffffff&qzone=1`;
+      qrImg.src = qrApiUrl;
+    }
+  } catch (_) {}
+}
+
+function printQRCard() {
+  window.print();
+}
+
+function downloadQR() {
+  const qrImg = document.getElementById('qr-code-img');
+  if (!qrImg || !qrImg.src) return;
+
+  const a = document.createElement('a');
+  a.href = qrImg.src;
+  a.download = 'QR_REGISTRO_PLAZA_MEGATON.png';
+  a.target = '_blank';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+// ==========================================
+// 7. CONFIGURACIÓN
+// ==========================================
+async function loadConfig() {
+  const container = document.getElementById('config-form-container');
+  if (!container) return;
+
+  try {
+    const res = await fetch('/api/admin/config', { headers: { 'x-admin-pin': getAdminPin() } });
+    const data = await res.json();
+
+    if (data.success && data.config) {
+      adminData.config = data.config;
+      renderConfigFields(data.config);
+    }
+  } catch (_) {}
+}
+
+function renderConfigFields(configList) {
+  const container = document.getElementById('config-form-container');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  const inputGoogle = document.getElementById('input-google-script-url');
+  const gUrlItem = configList.find(c => c.parametro === 'google_apps_script_url');
+  const DEFAULT_DEPLOYED_URL = 'https://script.google.com/macros/s/AKfycbzhIZ4dMGMyX4ZQgZrBnwegGHjPJC9U_9sw7jRcUVHVB2MGp9sLluZBi3wYN5bZICX0/exec';
+  if (inputGoogle) {
+    if (gUrlItem && gUrlItem.valor) {
+      inputGoogle.value = gUrlItem.valor;
+    } else if (localStorage.getItem('pm_google_script_url')) {
+      inputGoogle.value = localStorage.getItem('pm_google_script_url');
+    } else {
+      inputGoogle.value = DEFAULT_DEPLOYED_URL;
+      localStorage.setItem('pm_google_script_url', DEFAULT_DEPLOYED_URL);
+    }
+  }
+
+  configList.forEach(item => {
+    const group = document.createElement('div');
+    group.className = 'form-group';
+    group.innerHTML = `
+      <label class="form-label">${item.parametro}:</label>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="cfg-${item.parametro}" class="form-input" value="${item.valor || ''}">
+        <button type="button" class="btn-sm btn-sm-primary" onclick="saveSingleConfig('${item.parametro}')">Guardar</button>
+      </div>
+    `;
+    container.appendChild(group);
+  });
+}
+
+async function saveSingleConfig(parametro) {
+  const input = document.getElementById(`cfg-${parametro}`);
+  if (!input) return;
+
+  const valor = input.value;
+  try {
+    const res = await fetch('/api/admin/config', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-pin': getAdminPin()
+      },
+      body: JSON.stringify({ parametro, valor })
+    });
+
+    if (res.ok) {
+      App.showToast(`Parámetro ${parametro} actualizado`, 'success');
+    }
+  } catch (_) {}
+}
+
+// ==========================================
+// 8. GOOGLE DRIVE Y GOOGLE SHEETS
+// ==========================================
+async function testGoogleConnection() {
+  const input = document.getElementById('input-google-script-url');
+  const resultDiv = document.getElementById('google-test-result');
+  const statusSpan = document.getElementById('google-conn-status');
+  const scriptUrl = input ? input.value.trim() : '';
+
+  if (!scriptUrl) {
+    App.showToast('Por favor introduce la URL de Google Apps Script.', 'error');
+    return;
+  }
+
+  resultDiv.style.display = 'block';
+  resultDiv.innerHTML = '<span style="color:#64748B;">⏳ Probando conexión con Google Drive y Google Sheets...</span>';
+
+  // Si corre en GitHub Pages directo
+  if (App.isStaticHost()) {
+    localStorage.setItem('pm_google_script_url', scriptUrl);
+    try {
+      const res = await fetch(scriptUrl, { method: 'GET' });
+      const data = await res.json();
+      if (data.status === 'ONLINE') {
+        statusSpan.innerHTML = '<span style="background:#DCFCE7; color:#166534; font-size:11px; font-weight:700; padding:3px 10px; border-radius:9999px;">🟢 Conectado a Google Drive</span>';
+        resultDiv.innerHTML = `
+          <div style="background:#F0FDF4; border:1px solid #BBF7D0; padding:10px; border-radius:8px; color:#166534;">
+            ✅ <strong>Conexión exitosa.</strong> Carpeta <strong>${data.folderDrive}</strong> activa.<br>
+            Base de datos: <a href="https://docs.google.com/spreadsheets/d/${data.spreadsheetId}" target="_blank" style="color:#D32F2F; font-weight:700;">${data.spreadsheetName}</a>
+          </div>
+        `;
+        App.showToast('¡Conectado exitosamente con Google Drive!', 'success');
+      } else {
+        throw new Error('Respuesta inesperada');
+      }
+    } catch (err) {
+      statusSpan.innerHTML = '<span style="background:#FEE2E2; color:#991B1B; font-size:11px; font-weight:700; padding:3px 10px; border-radius:9999px;">🔴 Error de conexión</span>';
+      resultDiv.innerHTML = `<span style="color:#DC2626;">Error al conectar: ${err.message}. Verifica los permisos de acceso "Cualquier persona" en Apps Script.</span>`;
+    }
+    return;
+  }
+
+  // Backend Node.js
+  try {
+    const res = await fetch('/api/admin/google/test', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-pin': getAdminPin()
+      },
+      body: JSON.stringify({ scriptUrl })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      statusSpan.innerHTML = '<span style="background:#DCFCE7; color:#166534; font-size:11px; font-weight:700; padding:3px 10px; border-radius:9999px;">🟢 Conectado a Google Drive</span>';
+      resultDiv.innerHTML = `
+        <div style="background:#F0FDF4; border:1px solid #BBF7D0; padding:10px; border-radius:8px; color:#166534;">
+          ✅ <strong>Conexión exitosa.</strong> Carpeta <strong>${data.folderName}</strong> activa.<br>
+          Base de datos: <a href="${data.spreadsheetUrl}" target="_blank" style="color:#D32F2F; font-weight:700;">Abrir PLAZA_MEGATON_DATABASE en Google Sheets</a>
+        </div>
+      `;
+      App.showToast('¡Conectado exitosamente con Google Drive!', 'success');
+    } else {
+      statusSpan.innerHTML = '<span style="background:#FEE2E2; color:#991B1B; font-size:11px; font-weight:700; padding:3px 10px; border-radius:9999px;">🔴 Error</span>';
+      resultDiv.innerHTML = `<span style="color:#DC2626;">${data.error || 'No se pudo conectar con Google Apps Script.'}</span>`;
+    }
+  } catch (err) {
+    statusSpan.innerHTML = '<span style="background:#FEE2E2; color:#991B1B; font-size:11px; font-weight:700; padding:3px 10px; border-radius:9999px;">🔴 Error de red</span>';
+    resultDiv.innerHTML = `<span style="color:#DC2626;">Error de red: ${err.message}</span>`;
+  }
+}
+
+async function syncAllToGoogle() {
+  const resultDiv = document.getElementById('google-test-result');
+  resultDiv.style.display = 'block';
+  resultDiv.innerHTML = '<span style="color:#64748B;">⏳ Sincronizando usuarios, cubículos, solicitudes y pagos a Google Sheets...</span>';
+
+  // Si corre en entorno estático
+  if (App.isStaticHost()) {
+    const scriptUrl = localStorage.getItem('pm_google_script_url');
+    if (!scriptUrl) {
+      App.showToast('Primero prueba y guarda la URL de Google Apps Script.', 'error');
+      return;
+    }
+    const users = JSON.parse(localStorage.getItem('pm_usuarios') || '[]');
+    let count = 0;
+    for (const u of users) {
+      try {
+        await fetch(scriptUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'SYNC_USUARIO', payload: u })
+        });
+        count++;
+      } catch (_) {}
+    }
+    resultDiv.innerHTML = `<span style="color:#166534;">✅ ${count} usuarios sincronizados directamente a tu Google Drive.</span>`;
+    App.showToast(`Sincronización enviada a Google Drive`, 'success');
+    return;
+  }
+
+  // Backend Node.js
+  try {
+    const res = await fetch('/api/admin/google/sync-all', {
+      method: 'POST',
+      headers: { 'x-admin-pin': getAdminPin() }
+    });
+    const data = await res.json();
+    if (data.success) {
+      resultDiv.innerHTML = `<span style="color:#166534;">✅ ${data.message}</span>`;
+      App.showToast(data.message, 'success');
+    } else {
+      resultDiv.innerHTML = `<span style="color:#DC2626;">${data.error}</span>`;
+      App.showToast(data.error, 'error');
+    }
+  } catch (err) {
+    resultDiv.innerHTML = `<span style="color:#DC2626;">Error: ${err.message}</span>`;
+  }
+}
+
+// Helpers de badges
+function getBadgeClass(estado) {
+  switch (estado) {
+    case 'Recibida': return 'badge-recibida';
+    case 'En revisión': return 'badge-revision';
+    case 'Asignada': return 'badge-asignada';
+    case 'En proceso': return 'badge-proceso';
+    case 'Pendiente de información': return 'badge-pendiente';
+    case 'Resuelta':
+    case 'Cerrada': return 'badge-resuelta';
+    case 'Cancelada': return 'badge-rechazado';
+    default: return 'badge-recibida';
+  }
+}
+
+function getPagoBadgeClass(estado) {
+  switch (estado) {
+    case 'Reportado': return 'badge-reportado';
+    case 'En revisión': return 'badge-revision';
+    case 'Confirmado': return 'badge-confirmado';
+    case 'Rechazado': return 'badge-rechazado';
+    case 'Pendiente de información': return 'badge-pendiente';
+    default: return 'badge-reportado';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  checkAdminAuth();
+
+  const authForm = document.getElementById('admin-login-form');
+  if (authForm) authForm.addEventListener('submit', handlePinSubmit);
+});

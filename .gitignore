@@ -1,0 +1,12 @@
+# Dependencias y paquetes
+node_modules/
+package-lock.json
+
+# Entorno y credenciales privadas
+.env
+*.log
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+desktop.ini

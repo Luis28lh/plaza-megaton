@@ -1,0 +1,853 @@
+{
+  "CUBICULOS": [
+    {
+      "cubiculo_id": "CUB-001",
+      "codigo": "C-001",
+      "estado": "Ocupado",
+      "nivel": "Nivel 1",
+      "observaciones": "Pasillo Principal A - Frente a entrada"
+    },
+    {
+      "cubiculo_id": "CUB-002",
+      "codigo": "C-002",
+      "estado": "Ocupado",
+      "nivel": "Nivel 1",
+      "observaciones": "Pasillo Principal A"
+    },
+    {
+      "cubiculo_id": "CUB-003",
+      "codigo": "C-003",
+      "estado": "Ocupado",
+      "nivel": "Nivel 1",
+      "observaciones": "Pasillo Principal A"
+    },
+    {
+      "cubiculo_id": "CUB-004",
+      "codigo": "C-004",
+      "estado": "Disponible",
+      "nivel": "Nivel 1",
+      "observaciones": "Pasillo Principal A"
+    },
+    {
+      "cubiculo_id": "CUB-005",
+      "codigo": "C-005",
+      "estado": "Disponible",
+      "nivel": "Nivel 1",
+      "observaciones": "Pasillo Principal A - Esquina"
+    },
+    {
+      "cubiculo_id": "CUB-006",
+      "codigo": "C-006",
+      "estado": "Disponible",
+      "nivel": "Nivel 1",
+      "observaciones": "Pasillo B - Zona Comercial"
+    },
+    {
+      "cubiculo_id": "CUB-007",
+      "codigo": "C-007",
+      "estado": "Disponible",
+      "nivel": "Nivel 1",
+      "observaciones": "Pasillo B - Zona Comercial"
+    },
+    {
+      "cubiculo_id": "CUB-008",
+      "codigo": "C-008",
+      "estado": "Disponible",
+      "nivel": "Nivel 1",
+      "observaciones": "Pasillo B - Zona Comercial"
+    },
+    {
+      "cubiculo_id": "CUB-009",
+      "codigo": "C-009",
+      "estado": "Disponible",
+      "nivel": "Nivel 1",
+      "observaciones": "Pasillo B - Zona Comercial"
+    },
+    {
+      "cubiculo_id": "CUB-010",
+      "codigo": "C-010",
+      "estado": "Disponible",
+      "nivel": "Nivel 1",
+      "observaciones": "Pasillo B - Esquina"
+    },
+    {
+      "cubiculo_id": "CUB-011",
+      "codigo": "C-011",
+      "estado": "Disponible",
+      "nivel": "Nivel 1",
+      "observaciones": "Pasillo Central C"
+    },
+    {
+      "cubiculo_id": "CUB-012",
+      "codigo": "C-012",
+      "estado": "Disponible",
+      "nivel": "Nivel 1",
+      "observaciones": "Pasillo Central C"
+    },
+    {
+      "cubiculo_id": "CUB-013",
+      "codigo": "C-013",
+      "estado": "Disponible",
+      "nivel": "Nivel 1",
+      "observaciones": "Pasillo Central C"
+    },
+    {
+      "cubiculo_id": "CUB-014",
+      "codigo": "C-014",
+      "estado": "Disponible",
+      "nivel": "Nivel 1",
+      "observaciones": "Pasillo Central C"
+    },
+    {
+      "cubiculo_id": "CUB-015",
+      "codigo": "C-015",
+      "estado": "Disponible",
+      "nivel": "Nivel 1",
+      "observaciones": "Pasillo Central C"
+    },
+    {
+      "cubiculo_id": "CUB-016",
+      "codigo": "C-016",
+      "estado": "Disponible",
+      "nivel": "Nivel 2",
+      "observaciones": "Nivel 2 - Pasillo D Servicios"
+    },
+    {
+      "cubiculo_id": "CUB-017",
+      "codigo": "C-017",
+      "estado": "Disponible",
+      "nivel": "Nivel 2",
+      "observaciones": "Nivel 2 - Pasillo D Servicios"
+    },
+    {
+      "cubiculo_id": "CUB-018",
+      "codigo": "C-018",
+      "estado": "Disponible",
+      "nivel": "Nivel 2",
+      "observaciones": "Nivel 2 - Pasillo D Servicios"
+    },
+    {
+      "cubiculo_id": "CUB-019",
+      "codigo": "C-019",
+      "estado": "Disponible",
+      "nivel": "Nivel 2",
+      "observaciones": "Nivel 2 - Pasillo D Servicios"
+    },
+    {
+      "cubiculo_id": "CUB-020",
+      "codigo": "C-020",
+      "estado": "Disponible",
+      "nivel": "Nivel 2",
+      "observaciones": "Nivel 2 - Pasillo D Servicios"
+    },
+    {
+      "cubiculo_id": "CUB-021",
+      "codigo": "C-021",
+      "estado": "Disponible",
+      "nivel": "Nivel 2",
+      "observaciones": "Nivel 2 - Pasillo E Tecnología"
+    },
+    {
+      "cubiculo_id": "CUB-022",
+      "codigo": "C-022",
+      "estado": "Disponible",
+      "nivel": "Nivel 2",
+      "observaciones": "Nivel 2 - Pasillo E Tecnología"
+    },
+    {
+      "cubiculo_id": "CUB-023",
+      "codigo": "C-023",
+      "estado": "Disponible",
+      "nivel": "Nivel 2",
+      "observaciones": "Nivel 2 - Pasillo E Tecnología"
+    },
+    {
+      "cubiculo_id": "CUB-024",
+      "codigo": "C-024",
+      "estado": "Disponible",
+      "nivel": "Nivel 2",
+      "observaciones": "Nivel 2 - Pasillo E Tecnología"
+    },
+    {
+      "cubiculo_id": "CUB-025",
+      "codigo": "C-025",
+      "estado": "Disponible",
+      "nivel": "Nivel 2",
+      "observaciones": "Nivel 2 - Pasillo E Tecnología"
+    },
+    {
+      "cubiculo_id": "CUB-026",
+      "codigo": "C-026",
+      "estado": "Disponible",
+      "nivel": "Nivel 2",
+      "observaciones": "Nivel 2 - Área Occidental"
+    },
+    {
+      "cubiculo_id": "CUB-027",
+      "codigo": "C-027",
+      "estado": "Disponible",
+      "nivel": "Nivel 2",
+      "observaciones": "Nivel 2 - Área Occidental"
+    },
+    {
+      "cubiculo_id": "CUB-028",
+      "codigo": "C-028",
+      "estado": "Disponible",
+      "nivel": "Nivel 2",
+      "observaciones": "Nivel 2 - Área Occidental"
+    },
+    {
+      "cubiculo_id": "CUB-029",
+      "codigo": "C-029",
+      "estado": "Disponible",
+      "nivel": "Nivel 2",
+      "observaciones": "Nivel 2 - Área Occidental"
+    },
+    {
+      "cubiculo_id": "CUB-030",
+      "codigo": "C-030",
+      "estado": "Disponible",
+      "nivel": "Nivel 2",
+      "observaciones": "Nivel 2 - Frente a escaleras"
+    },
+    {
+      "cubiculo_id": "CUB-C1",
+      "codigo": "C1",
+      "estado": "Ocupado",
+      "observaciones": "Registrado por usuario",
+      "nombre_local": "Zapatería Pedro",
+      "actividad_comercial": "Venta de calzado"
+    },
+    {
+      "cubiculo_id": "CUB-C2",
+      "codigo": "C2",
+      "estado": "Ocupado",
+      "observaciones": "Registrado por usuario",
+      "nombre_local": "Depósito Pedro",
+      "actividad_comercial": "Almacén de mercancía"
+    },
+    {
+      "cubiculo_id": "CUB-C10",
+      "codigo": "C10",
+      "nombre_local": "Taller Alfa",
+      "actividad_comercial": "Reparación de celulares",
+      "estado": "Ocupado",
+      "observaciones": "Registrado por usuario"
+    },
+    {
+      "cubiculo_id": "CUB-C11",
+      "codigo": "C11",
+      "nombre_local": "Boutique Alfa",
+      "actividad_comercial": "Venta de ropa",
+      "estado": "Ocupado",
+      "observaciones": "Registrado por usuario"
+    },
+    {
+      "cubiculo_id": "CUB-C20",
+      "codigo": "C20",
+      "nombre_local": "Electrónica Sánchez",
+      "actividad_comercial": "Reparación de celulares",
+      "estado": "Ocupado",
+      "observaciones": "Registrado por usuario"
+    }
+  ],
+  "USUARIOS": [
+    {
+      "user_id": "US-001",
+      "nombre": "Juan Pérez",
+      "email": "juan.perez@megatest.com",
+      "telefono": "809-555-1111",
+      "fecha_registro": "22/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "user_id": "US-002",
+      "nombre": "María Gómez",
+      "email": "maria.gomez@megatest.com",
+      "telefono": "809-555-2222",
+      "fecha_registro": "22/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "user_id": "US-003",
+      "nombre": "Carlos Mendoza",
+      "email": "carlos.mendoza@test.com",
+      "telefono": "8095554321",
+      "fecha_registro": "22/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "user_id": "US-004",
+      "nombre": "Lucia Ramos",
+      "email": "lucia.ramos@test.com",
+      "telefono": "8095559988",
+      "fecha_registro": "22/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "user_id": "US-005",
+      "nombre": "Pedro Almonte",
+      "email": "pedro.almonte@test.com",
+      "telefono": "8095557788",
+      "fecha_registro": "22/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "user_id": "US-006",
+      "nombre": "Don Fernando",
+      "email": "fernando@megatest.com",
+      "telefono": "809-555-8899",
+      "fecha_registro": "22/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "user_id": "US-007",
+      "nombre": "Roberto Sánchez",
+      "email": "roberto.sanchez@test.com",
+      "telefono": "8095551234",
+      "fecha_registro": "22/09/2026",
+      "estado": "Activo"
+    }
+  ],
+  "USUARIO_CUBICULO": [
+    {
+      "id": "UC-1790101382110-150",
+      "user_id": "US-001",
+      "cubiculo_id": "CUB-001",
+      "fecha_asignacion": "22/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-1790101388212-629",
+      "user_id": "US-002",
+      "cubiculo_id": "CUB-002",
+      "fecha_asignacion": "22/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-1790101388212-216",
+      "user_id": "US-002",
+      "cubiculo_id": "CUB-003",
+      "fecha_asignacion": "22/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-1790110680252-316",
+      "user_id": "US-003",
+      "cubiculo_id": "CUB-C1",
+      "fecha_asignacion": "22/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-1790110680252-615",
+      "user_id": "US-003",
+      "cubiculo_id": "CUB-C2",
+      "fecha_asignacion": "22/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-1790111516038-493",
+      "user_id": "US-005",
+      "cubiculo_id": "CUB-C1",
+      "nombre_local": "Zapatería Pedro",
+      "actividad_comercial": "Venta de calzado",
+      "fecha_asignacion": "22/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-1790111516038-857",
+      "user_id": "US-005",
+      "cubiculo_id": "CUB-C2",
+      "nombre_local": "Depósito Pedro",
+      "actividad_comercial": "Almacén de mercancía",
+      "fecha_asignacion": "22/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-1790111618803-773",
+      "user_id": "US-006",
+      "cubiculo_id": "CUB-C10",
+      "nombre_local": "Taller Alfa",
+      "actividad_comercial": "Reparación de celulares",
+      "fecha_asignacion": "22/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-1790111618803-644",
+      "user_id": "US-006",
+      "cubiculo_id": "CUB-C11",
+      "nombre_local": "Boutique Alfa",
+      "actividad_comercial": "Venta de ropa",
+      "fecha_asignacion": "22/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-1790112854806-681",
+      "user_id": "US-007",
+      "cubiculo_id": "CUB-C20",
+      "nombre_local": "Electrónica Sánchez",
+      "actividad_comercial": "Reparación de celulares",
+      "fecha_asignacion": "22/09/2026",
+      "estado": "Activo"
+    }
+  ],
+  "RECLAMACIONES": [
+    {
+      "codigo": "CL-001",
+      "fecha": "22/09/2026",
+      "hora": "02:23 p. m.",
+      "user_id": "US-001",
+      "nombre": "Juan Pérez",
+      "email": "juan.perez@megatest.com",
+      "cubiculo": "C-001",
+      "asunto": "Problema eléctrico",
+      "detalle": "No enciende la luminaria del pasillo frontal",
+      "archivos": [],
+      "estado": "En proceso",
+      "responsable": "Técnico Eléctrico Carlos",
+      "fecha_actualizacion": "22/09/2026 05:13 p. m.",
+      "observacion": "Repuesto en camino para reemplazo"
+    },
+    {
+      "codigo": "CL-002",
+      "fecha": "22/09/2026",
+      "hora": "02:23 p. m.",
+      "user_id": "US-002",
+      "nombre": "María Gómez",
+      "email": "maria.gomez@megatest.com",
+      "cubiculo": "C-002",
+      "asunto": "Filtración",
+      "detalle": "Goteo leve en esquina superior derecha",
+      "archivos": [],
+      "estado": "Recibida",
+      "responsable": "Administración",
+      "fecha_actualizacion": "22/09/2026 02:23 p. m."
+    },
+    {
+      "codigo": "CL-003",
+      "fecha": "22/09/2026",
+      "hora": "05:12 p. m.",
+      "user_id": "US-001",
+      "nombre": "Juan Pérez",
+      "email": "juan.perez@megatest.com",
+      "cubiculo": "C-001",
+      "asunto": "Problema eléctrico",
+      "detalle": "No enciende la luminaria del pasillo frontal",
+      "archivos": [],
+      "estado": "Recibida",
+      "responsable": "Administración",
+      "fecha_actualizacion": "22/09/2026 05:12 p. m."
+    },
+    {
+      "codigo": "CL-004",
+      "fecha": "22/09/2026",
+      "hora": "05:12 p. m.",
+      "user_id": "US-002",
+      "nombre": "María Gómez",
+      "email": "maria.gomez@megatest.com",
+      "cubiculo": "C-002",
+      "asunto": "Filtración",
+      "detalle": "Goteo leve en esquina superior derecha",
+      "archivos": [],
+      "estado": "Recibida",
+      "responsable": "Administración",
+      "fecha_actualizacion": "22/09/2026 05:12 p. m."
+    },
+    {
+      "codigo": "CL-005",
+      "fecha": "22/09/2026",
+      "hora": "05:13 p. m.",
+      "user_id": "US-001",
+      "nombre": "Juan Pérez",
+      "email": "juan.perez@megatest.com",
+      "cubiculo": "C-001",
+      "asunto": "Problema eléctrico",
+      "detalle": "No enciende la luminaria del pasillo frontal",
+      "archivos": [],
+      "estado": "Recibida",
+      "responsable": "Administración",
+      "fecha_actualizacion": "22/09/2026 05:13 p. m."
+    },
+    {
+      "codigo": "CL-006",
+      "fecha": "22/09/2026",
+      "hora": "05:13 p. m.",
+      "user_id": "US-002",
+      "nombre": "María Gómez",
+      "email": "maria.gomez@megatest.com",
+      "cubiculo": "C-002",
+      "asunto": "Filtración",
+      "detalle": "Goteo leve en esquina superior derecha",
+      "archivos": [],
+      "estado": "Recibida",
+      "responsable": "Administración",
+      "fecha_actualizacion": "22/09/2026 05:13 p. m."
+    }
+  ],
+  "PAGOS": [
+    {
+      "codigo": "PG-001",
+      "fecha_registro": "22/09/2026 02:23 p. m.",
+      "user_id": "US-001",
+      "nombre": "Juan Pérez",
+      "email": "juan.perez@megatest.com",
+      "cubiculo": "C-001",
+      "concepto": "Mantenimiento",
+      "periodo": "Septiembre 2026",
+      "monto": "RD$5,000.00",
+      "fecha_pago": "2026-09-22",
+      "referencia": "TR-88192",
+      "voucher": "",
+      "estado": "Confirmado",
+      "observaciones": "Verificado en estado de cuenta bancario"
+    },
+    {
+      "codigo": "PG-002",
+      "fecha_registro": "22/09/2026 02:23 p. m.",
+      "user_id": "US-002",
+      "nombre": "María Gómez",
+      "email": "maria.gomez@megatest.com",
+      "cubiculo": "C-002",
+      "concepto": "Alquiler",
+      "periodo": "Septiembre 2026",
+      "monto": "RD$12,000.00",
+      "fecha_pago": "2026-09-22",
+      "referencia": "DEP-4491",
+      "voucher": "",
+      "estado": "Reportado",
+      "observaciones": ""
+    },
+    {
+      "codigo": "PG-003",
+      "fecha_registro": "22/09/2026 05:12 p. m.",
+      "user_id": "US-001",
+      "nombre": "Juan Pérez",
+      "email": "juan.perez@megatest.com",
+      "cubiculo": "C-001",
+      "concepto": "Mantenimiento",
+      "periodo": "Septiembre 2026",
+      "monto": "RD$5,000.00",
+      "fecha_pago": "2026-09-22",
+      "referencia": "TR-88192",
+      "voucher": "",
+      "estado": "Reportado",
+      "observaciones": ""
+    },
+    {
+      "codigo": "PG-004",
+      "fecha_registro": "22/09/2026 05:12 p. m.",
+      "user_id": "US-002",
+      "nombre": "María Gómez",
+      "email": "maria.gomez@megatest.com",
+      "cubiculo": "C-002",
+      "concepto": "Alquiler",
+      "periodo": "Septiembre 2026",
+      "monto": "RD$12,000.00",
+      "fecha_pago": "2026-09-22",
+      "referencia": "DEP-4491",
+      "voucher": "",
+      "estado": "Reportado",
+      "observaciones": ""
+    },
+    {
+      "codigo": "PG-005",
+      "fecha_registro": "22/09/2026 05:13 p. m.",
+      "user_id": "US-001",
+      "nombre": "Juan Pérez",
+      "email": "juan.perez@megatest.com",
+      "cubiculo": "C-001",
+      "concepto": "Mantenimiento",
+      "periodo": "Septiembre 2026",
+      "monto": "RD$5,000.00",
+      "fecha_pago": "2026-09-22",
+      "referencia": "TR-88192",
+      "voucher": "",
+      "estado": "Reportado",
+      "observaciones": ""
+    },
+    {
+      "codigo": "PG-006",
+      "fecha_registro": "22/09/2026 05:13 p. m.",
+      "user_id": "US-002",
+      "nombre": "María Gómez",
+      "email": "maria.gomez@megatest.com",
+      "cubiculo": "C-002",
+      "concepto": "Alquiler",
+      "periodo": "Septiembre 2026",
+      "monto": "RD$12,000.00",
+      "fecha_pago": "2026-09-22",
+      "referencia": "TR-88193",
+      "voucher": "",
+      "estado": "Reportado",
+      "observaciones": ""
+    }
+  ],
+  "CONFIGURACION": [
+    {
+      "parametro": "nombre_plaza",
+      "valor": "PLAZA MEGATÓN"
+    },
+    {
+      "parametro": "titulo_visible",
+      "valor": "SISTEMA DE GESTIÓN – PLAZA MEGATÓN"
+    },
+    {
+      "parametro": "correo_administracion",
+      "valor": "administracion@plazamegaton.com"
+    },
+    {
+      "parametro": "telefono",
+      "valor": "809-555-0199"
+    },
+    {
+      "parametro": "direccion",
+      "valor": "Av. Principal esq. Central, Santo Domingo, Rep. Dominicana"
+    },
+    {
+      "parametro": "color_primario",
+      "valor": "#D32F2F"
+    },
+    {
+      "parametro": "logo",
+      "valor": "/assets/logo-megaton.svg"
+    },
+    {
+      "parametro": "url_publica",
+      "valor": "http://localhost:3007"
+    },
+    {
+      "parametro": "ultimo_codigo_usuario",
+      "valor": "US-007"
+    },
+    {
+      "parametro": "ultimo_codigo_reclamacion",
+      "valor": "CL-006"
+    },
+    {
+      "parametro": "ultimo_codigo_pago",
+      "valor": "PG-006"
+    },
+    {
+      "parametro": "ultimo_codigo_solicitud_admin",
+      "valor": "SL-000"
+    },
+    {
+      "parametro": "ultimo_codigo_comunicacion",
+      "valor": "CM-000"
+    },
+    {
+      "parametro": "firma_correo",
+      "valor": "Administración\nPlaza Megatón"
+    },
+    {
+      "parametro": "admin_pin",
+      "valor": "megaton2026"
+    }
+  ],
+  "HISTORIAL": [
+    {
+      "id": "HIST-001",
+      "tipo_documento": "SISTEMA",
+      "codigo_documento": "SYS-INIT",
+      "fecha": "22/09/2026",
+      "hora": "14:15",
+      "usuario": "Sistema",
+      "accion": "Inicialización de Catálogo Maestro",
+      "estado_anterior": "",
+      "estado_nuevo": "ACTIVO",
+      "observacion": "Sistema de Gestión Plaza Megatón inicializado con 30 cubículos disponibles."
+    },
+    {
+      "id": "H-1790101392419-63",
+      "tipo_documento": "RECLAMACION",
+      "codigo_documento": "CL-001",
+      "fecha": "22/09/2026",
+      "hora": "02:23 p. m.",
+      "usuario": "Juan Pérez",
+      "accion": "Creación de Reclamación",
+      "estado_anterior": "",
+      "estado_nuevo": "Recibida",
+      "observacion": "Asunto: Problema eléctrico | Cubículo: C-001"
+    },
+    {
+      "id": "H-1790101395591-183",
+      "tipo_documento": "RECLAMACION",
+      "codigo_documento": "CL-002",
+      "fecha": "22/09/2026",
+      "hora": "02:23 p. m.",
+      "usuario": "María Gómez",
+      "accion": "Creación de Reclamación",
+      "estado_anterior": "",
+      "estado_nuevo": "Recibida",
+      "observacion": "Asunto: Filtración | Cubículo: C-002"
+    },
+    {
+      "id": "H-1790101400054-587",
+      "tipo_documento": "PAGO",
+      "codigo_documento": "PG-001",
+      "fecha": "22/09/2026",
+      "hora": "02:23 p. m.",
+      "usuario": "Juan Pérez",
+      "accion": "Reporte de Pago",
+      "estado_anterior": "",
+      "estado_nuevo": "Reportado",
+      "observacion": "Monto: RD$5,000.00 | Período: Septiembre 2026 | Cubículo: C-001"
+    },
+    {
+      "id": "H-1790101403579-127",
+      "tipo_documento": "PAGO",
+      "codigo_documento": "PG-002",
+      "fecha": "22/09/2026",
+      "hora": "02:23 p. m.",
+      "usuario": "María Gómez",
+      "accion": "Reporte de Pago",
+      "estado_anterior": "",
+      "estado_nuevo": "Reportado",
+      "observacion": "Monto: RD$12,000.00 | Período: Septiembre 2026 | Cubículo: C-002"
+    },
+    {
+      "id": "H-1790101412079-636",
+      "tipo_documento": "RECLAMACION",
+      "codigo_documento": "CL-001",
+      "fecha": "22/09/2026",
+      "hora": "02:23 p. m.",
+      "usuario": "Administración",
+      "accion": "Cambio de Estado",
+      "estado_anterior": "Recibida",
+      "estado_nuevo": "En proceso",
+      "observacion": "Repuesto en camino para reemplazo"
+    },
+    {
+      "id": "H-1790101414740-356",
+      "tipo_documento": "PAGO",
+      "codigo_documento": "PG-001",
+      "fecha": "22/09/2026",
+      "hora": "02:23 p. m.",
+      "usuario": "Administración",
+      "accion": "Evaluación de Pago",
+      "estado_anterior": "Reportado",
+      "estado_nuevo": "Confirmado",
+      "observacion": "Verificado en estado de cuenta bancario"
+    },
+    {
+      "id": "H-1790111533404-284",
+      "tipo_documento": "RECLAMACION",
+      "codigo_documento": "CL-003",
+      "fecha": "22/09/2026",
+      "hora": "05:12 p. m.",
+      "usuario": "Juan Pérez",
+      "accion": "Creación de Reclamación",
+      "estado_anterior": "",
+      "estado_nuevo": "Recibida",
+      "observacion": "Asunto: Problema eléctrico | Cubículo: C-001"
+    },
+    {
+      "id": "H-1790111536596-329",
+      "tipo_documento": "RECLAMACION",
+      "codigo_documento": "CL-004",
+      "fecha": "22/09/2026",
+      "hora": "05:12 p. m.",
+      "usuario": "María Gómez",
+      "accion": "Creación de Reclamación",
+      "estado_anterior": "",
+      "estado_nuevo": "Recibida",
+      "observacion": "Asunto: Filtración | Cubículo: C-002"
+    },
+    {
+      "id": "H-1790111539271-492",
+      "tipo_documento": "PAGO",
+      "codigo_documento": "PG-003",
+      "fecha": "22/09/2026",
+      "hora": "05:12 p. m.",
+      "usuario": "Juan Pérez",
+      "accion": "Reporte de Pago",
+      "estado_anterior": "",
+      "estado_nuevo": "Reportado",
+      "observacion": "Monto: RD$5,000.00 | Período: Septiembre 2026 | Cubículo: C-001"
+    },
+    {
+      "id": "H-1790111541569-508",
+      "tipo_documento": "PAGO",
+      "codigo_documento": "PG-004",
+      "fecha": "22/09/2026",
+      "hora": "05:12 p. m.",
+      "usuario": "María Gómez",
+      "accion": "Reporte de Pago",
+      "estado_anterior": "",
+      "estado_nuevo": "Reportado",
+      "observacion": "Monto: RD$12,000.00 | Período: Septiembre 2026 | Cubículo: C-002"
+    },
+    {
+      "id": "H-1790111544484-224",
+      "tipo_documento": "RECLAMACION",
+      "codigo_documento": "CL-001",
+      "fecha": "22/09/2026",
+      "hora": "05:12 p. m.",
+      "usuario": "Administración",
+      "accion": "Nota Administrativa",
+      "estado_anterior": "En proceso",
+      "estado_nuevo": "En proceso",
+      "observacion": "Repuesto en camino para reemplazo"
+    },
+    {
+      "id": "H-1790111603432-704",
+      "tipo_documento": "RECLAMACION",
+      "codigo_documento": "CL-005",
+      "fecha": "22/09/2026",
+      "hora": "05:13 p. m.",
+      "usuario": "Juan Pérez",
+      "accion": "Creación de Reclamación",
+      "estado_anterior": "",
+      "estado_nuevo": "Recibida",
+      "observacion": "Asunto: Problema eléctrico | Cubículo: C-001"
+    },
+    {
+      "id": "H-1790111605695-157",
+      "tipo_documento": "RECLAMACION",
+      "codigo_documento": "CL-006",
+      "fecha": "22/09/2026",
+      "hora": "05:13 p. m.",
+      "usuario": "María Gómez",
+      "accion": "Creación de Reclamación",
+      "estado_anterior": "",
+      "estado_nuevo": "Recibida",
+      "observacion": "Asunto: Filtración | Cubículo: C-002"
+    },
+    {
+      "id": "H-1790111608809-281",
+      "tipo_documento": "PAGO",
+      "codigo_documento": "PG-005",
+      "fecha": "22/09/2026",
+      "hora": "05:13 p. m.",
+      "usuario": "Juan Pérez",
+      "accion": "Reporte de Pago",
+      "estado_anterior": "",
+      "estado_nuevo": "Reportado",
+      "observacion": "Monto: RD$5,000.00 | Período: Septiembre 2026 | Cubículo: C-001"
+    },
+    {
+      "id": "H-1790111611067-443",
+      "tipo_documento": "PAGO",
+      "codigo_documento": "PG-006",
+      "fecha": "22/09/2026",
+      "hora": "05:13 p. m.",
+      "usuario": "María Gómez",
+      "accion": "Reporte de Pago",
+      "estado_anterior": "",
+      "estado_nuevo": "Reportado",
+      "observacion": "Monto: RD$12,000.00 | Período: Septiembre 2026 | Cubículo: C-002"
+    },
+    {
+      "id": "H-1790111613869-363",
+      "tipo_documento": "RECLAMACION",
+      "codigo_documento": "CL-001",
+      "fecha": "22/09/2026",
+      "hora": "05:13 p. m.",
+      "usuario": "Administración",
+      "accion": "Nota Administrativa",
+      "estado_anterior": "En proceso",
+      "estado_nuevo": "En proceso",
+      "observacion": "Repuesto en camino para reemplazo"
+    }
+  ]
+}

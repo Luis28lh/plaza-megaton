@@ -1,0 +1,295 @@
+/* ==============================================================
+   PORTAL ADMINISTRATIVO – PLAZA MEGATÓN
+   Estilos específicos para el Dashboard Ejecutivo (/admin)
+   ============================================================== */
+
+.admin-header {
+  background-color: #0F172A;
+  color: #FFFFFF;
+  padding: 14px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 2px solid #D32F2F;
+}
+
+.admin-header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-badge {
+  background-color: #D32F2F;
+  color: #FFFFFF;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+/* Pestañas de Navegación del Admin */
+.admin-tabs-nav {
+  background-color: #FFFFFF;
+  border-bottom: 1px solid var(--border-light);
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-tabs-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  padding: 0 16px;
+}
+
+.admin-tab-btn {
+  padding: 14px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-muted);
+  border: none;
+  background: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.admin-tab-btn.active {
+  color: var(--primary-red);
+  border-bottom-color: var(--primary-red);
+}
+
+.admin-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 16px;
+}
+
+/* ==============================================================
+   KPIS GRID
+   ============================================================== */
+.kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.kpi-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background-color: var(--primary-red);
+}
+
+.kpi-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.kpi-value {
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--text-main);
+  margin: 6px 0 2px;
+}
+
+.kpi-subtext {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ==============================================================
+   TABLAS Y FILTROS
+   ============================================================== */
+.table-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.search-input-wrap {
+  flex: 1;
+  min-width: 240px;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background-color: #FFFFFF;
+  box-shadow: var(--shadow-sm);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+}
+
+.data-table th {
+  background-color: #F8FAFC;
+  padding: 12px 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  border-bottom: 1.5px solid var(--border-light);
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-body);
+  vertical-align: middle;
+}
+
+.data-table tr:hover {
+  background-color: #FFFBFB;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-sm-primary {
+  background-color: var(--primary-red);
+  color: #FFFFFF;
+}
+
+.btn-sm-outline {
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-light);
+  color: var(--text-body);
+}
+
+.btn-sm-success {
+  background-color: #16A34A;
+  color: #FFFFFF;
+}
+
+.btn-sm-danger {
+  background-color: #DC2626;
+  color: #FFFFFF;
+}
+
+/* ==============================================================
+   MODAL DE DETALLE Y GESTIÓN
+   ============================================================== */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(3px);
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal-backdrop.open {
+  display: flex;
+}
+
+.modal-box {
+  background-color: #FFFFFF;
+  border-radius: var(--radius-lg);
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.modal-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  background-color: #F8FAFC;
+}
+
+/* ==============================================================
+   ÁREA DE CÓDIGO QR
+   ============================================================== */
+.qr-display-card {
+  text-align: center;
+  max-width: 440px;
+  margin: 0 auto;
+  background-color: #FFFFFF;
+  padding: 30px 20px;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--border-light);
+  box-shadow: var(--shadow-md);
+}
+
+.qr-box-img {
+  width: 240px;
+  height: 240px;
+  margin: 20px auto;
+  padding: 12px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background-color: #FFFFFF;
+}
+
+.qr-box-img img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}

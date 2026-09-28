@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Solicitudes y Reclamaciones — Plaza Megatón</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Encabezado -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="index.html" class="brand-logo-wrap">
+        <img src="assets/logo-megaton.svg" alt="Plaza Megatón Logo" class="brand-logo-img">
+      </a>
+      <div id="user-header-pill" class="user-status-pill">
+        🔑 Acceder
+      </div>
+    </div>
+  </header>
+
+  <main class="main-wrapper">
+
+    <!-- Formulario de Solicitud -->
+    <div id="form-solicitud-box" class="card-box">
+      <div class="card-box-header">
+        <div style="font-size: 12px; font-weight: 800; color: var(--primary-red); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">
+          Módulo de Mantenimiento e Incidencias
+        </div>
+        <h1 class="card-title">🛠️ Nueva Solicitud o Reclamación</h1>
+        <p class="card-subtitle">Reporta situaciones en tu cubículo o áreas comunes para su pronta atención.</p>
+      </div>
+
+      <form id="form-solicitud">
+
+        <!-- Nombre Completo -->
+        <div class="form-group">
+          <label class="form-label" for="sol-nombre">Nombre <span class="req">*</span></label>
+          <input 
+            type="text" 
+            id="sol-nombre" 
+            class="form-input" 
+            placeholder="Tu nombre completo" 
+            required
+          >
+        </div>
+
+        <!-- Correo Electrónico -->
+        <div class="form-group">
+          <label class="form-label" for="sol-email">Correo electrónico <span class="req">*</span></label>
+          <input 
+            type="email" 
+            id="sol-email" 
+            class="form-input" 
+            placeholder="tu-correo@ejemplo.com" 
+            required 
+            inputmode="email"
+          >
+        </div>
+
+        <!-- Cubículo -->
+        <div class="form-group">
+          <label class="form-label" for="sol-cubiculo">Cubículo / Local <span class="req">*</span></label>
+          <select id="sol-cubiculo" class="form-select" required>
+            <option value="">-- Selecciona un cubículo --</option>
+          </select>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+            Solo se listan los cubículos vinculados a tu cuenta.
+          </div>
+        </div>
+
+        <!-- Asunto -->
+        <div class="form-group">
+          <label class="form-label" for="sol-asunto">Asunto <span class="req">*</span></label>
+          <select id="sol-asunto" class="form-select" required>
+            <option value="">-- Selecciona el tipo de situación --</option>
+            <option value="Problema eléctrico">⚡ Problema eléctrico</option>
+            <option value="Filtración">💧 Filtración de agua</option>
+            <option value="Limpieza">🧹 Limpieza y aseo</option>
+            <option value="Seguridad">🔒 Seguridad y cerraduras</option>
+            <option value="Área común">🏢 Área común / Pasillos</option>
+            <option value="Acceso">🚪 Acceso / Portones / Llaves</option>
+            <option value="Pago">💳 Aclaración de pagos</option>
+            <option value="Mantenimiento">🔧 Mantenimiento general</option>
+            <option value="Otro">📝 Otro requerimiento</option>
+          </select>
+        </div>
+
+        <!-- Detalle -->
+        <div class="form-group">
+          <label class="form-label" for="sol-detalle">Detalle de la situación <span class="req">*</span></label>
+          <textarea 
+            id="sol-detalle" 
+            class="form-textarea" 
+            placeholder="Describe lo ocurrido. Ej: En el pasillo frente al cubículo C-014 existe una luminaria que no está encendiendo." 
+            required
+          ></textarea>
+        </div>
+
+        <!-- Fotografías como evidencia -->
+        <div class="form-group">
+          <label class="form-label">
+            Fotografías de evidencia <span class="opt">(Recomendado, máx. 5 fotos)</span>
+          </label>
+          
+          <div class="media-upload-area">
+            <div style="font-size: 28px; margin-bottom: 4px;">📸</div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--text-main);">Adjuntar evidencias fotográficas</div>
+            <div style="font-size: 12px; color: var(--text-muted);">Toma una foto con tu celular o elige de tu galería</div>
+
+            <div class="upload-actions-btns">
+              <!-- Botón Cámara direct en móvil -->
+              <label class="upload-btn-chip">
+                <span>📷 Tomar foto</span>
+                <input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;">
+              </label>
+
+              <!-- Botón Galería / Archivos -->
+              <label class="upload-btn-chip">
+                <span>🖼️ Galería</span>
+                <input type="file" id="gallery-input" accept="image/*" multiple style="display: none;">
+              </label>
+            </div>
+          </div>
+
+          <!-- Galería de miniaturas previas -->
+          <div id="photos-preview-gallery" class="previews-gallery"></div>
+        </div>
+
+        <!-- Botón Enviar -->
+        <button type="submit" id="btn-submit-solicitud" class="btn-primary">
+          📤 Enviar Solicitud
+        </button>
+
+      </form>
+    </div>
+
+    <!-- Pantalla de Confirmación de Solicitud -->
+    <div id="success-solicitud-box" class="card-box success-screen" style="display: none;">
+      <div class="success-icon-bubble">✓</div>
+      
+      <h2 style="font-size: 20px; font-weight: 900; color: var(--text-main); margin-bottom: 6px;">
+        Solicitud registrada correctamente
+      </h2>
+      
+      <p style="font-size: 14px; color: var(--text-muted);">
+        Tu número de seguimiento es:
+      </p>
+
+      <div class="success-code-box">
+        <div id="sol-success-codigo" class="success-code-num">CL-001</div>
+        <div style="font-size: 12px; color: #991B1B; font-weight: 600;">Conserva este número para futuras consultas</div>
+      </div>
+
+      <div class="card-box" style="text-align: left; background: #F8FAFC; border: 1px solid var(--border-light); padding: 14px; margin: 16px 0;">
+        <div style="font-size: 13px; margin-bottom: 4px;"><strong>Cubículo:</strong> <span id="sol-success-cubiculo">-</span></div>
+        <div style="font-size: 13px; margin-bottom: 4px;"><strong>Asunto:</strong> <span id="sol-success-asunto">-</span></div>
+        <div style="font-size: 13px; margin-bottom: 4px;"><strong>Estado actual:</strong> <span class="badge badge-recibida">Recibida</span></div>
+        <div style="font-size: 13px;"><strong>Notificación enviada a:</strong> <span id="sol-success-email">-</span></div>
+      </div>
+
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+        Hemos enviado un correo automático con los detalles de tu solicitud. La administración estará dando seguimiento oportuno.
+      </p>
+
+      <div id="sol-preview-mail-container"></div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+        <a href="mis-solicitudes.html" class="btn-primary">
+          📋 Ver Mis Solicitudes
+        </a>
+        <a href="solicitudes.html" class="btn-secondary" onclick="location.reload()">
+          ➕ Crear otra Solicitud
+        </a>
+        <a href="index.html" class="btn-secondary">
+          🏠 Volver al Inicio
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Navegación móvil -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <span class="nav-item-icon">🏠</span>
+      <span>Inicio</span>
+    </a>
+    <a href="solicitudes.html" class="nav-item active">
+      <span class="nav-item-icon">🛠️</span>
+      <span>Solicitudes</span>
+    </a>
+    <a href="pagos.html" class="nav-item">
+      <span class="nav-item-icon">💳</span>
+      <span>Pagos</span>
+    </a>
+    <a href="mis-solicitudes.html" class="nav-item">
+      <span class="nav-item-icon">📋</span>
+      <span>Mis Trámites</span>
+    </a>
+  </nav>
+
+  <script src="js/app.js"></script>
+  <script src="js/solicitudes.js"></script>
+</body>
+</html>

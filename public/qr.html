@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Código QR de Registro — Plaza Megatón</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    @media print {
+      body {
+        background: #FFFFFF !important;
+        padding: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-card {
+        border: 2px solid #D32F2F !important;
+        box-shadow: none !important;
+        margin: 0 auto !important;
+        max-width: 100% !important;
+      }
+      .qr-frame img {
+        width: 380px !important;
+        height: 380px !important;
+      }
+    }
+
+    .qr-poster {
+      max-width: 580px;
+      margin: 20px auto;
+      background: #FFFFFF;
+      border-radius: 20px;
+      border: 2px solid #E2E8F0;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      padding: 36px 24px;
+      text-align: center;
+    }
+
+    .qr-frame {
+      width: 280px;
+      height: 280px;
+      margin: 20px auto;
+      padding: 14px;
+      background: #FFFFFF;
+      border: 3px solid #D32F2F;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(211, 47, 47, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qr-frame img {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+    }
+
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #D32F2F;
+      color: #FFFFFF;
+      font-weight: 800;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body style="background: #F1F5F9;">
+
+  <!-- Encabezado público -->
+  <header class="app-header no-print">
+    <div class="header-container">
+      <a href="index.html" class="brand-logo-wrap">
+        <img src="assets/logo-megaton.svg" alt="Plaza Megatón Logo" class="brand-logo-img">
+      </a>
+      <a href="registro.html" class="user-status-pill">
+        📝 Abrir Formulario
+      </a>
+    </div>
+  </header>
+
+  <main class="main-wrapper">
+
+    <!-- Botones de Acción Superior -->
+    <div class="no-print" style="display: flex; gap: 10px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap;">
+      <button onclick="window.print()" class="btn-primary" style="width: auto; min-height: 44px; padding: 0 20px;">
+        🖨️ Imprimir Cartel para la Reunión
+      </button>
+      <button onclick="downloadQRImage()" class="btn-secondary" style="width: auto; min-height: 44px; padding: 0 20px;">
+        💾 Descargar Imagen PNG
+      </button>
+      <button onclick="copyTargetLink()" class="btn-secondary" style="width: auto; min-height: 44px; padding: 0 20px;">
+        📋 Copiar Enlace
+      </button>
+      <a href="index.html" class="btn-secondary" style="width: auto; min-height: 44px; padding: 0 16px; text-decoration: none;">
+        ← Inicio
+      </a>
+    </div>
+
+    <!-- Cartel Imprimible de Presentación -->
+    <div class="qr-poster print-card">
+
+      <!-- Encabezado del Cartel -->
+      <div style="margin-bottom: 10px;">
+        <img src="assets/logo-megaton.svg" alt="Plaza Megatón" style="height: 52px; margin-bottom: 8px;">
+        <div style="display: inline-block; background: #FEE2E2; color: #991B1B; font-size: 12px; font-weight: 800; padding: 4px 14px; border-radius: 9999px; letter-spacing: 1px; text-transform: uppercase;">
+          Registro Oficial de Ocupantes
+        </div>
+        <h1 style="font-size: 26px; font-weight: 900; color: #0F172A; margin: 10px 0 4px;">
+          ESCANEA Y REGÍSTRATE
+        </h1>
+        <p style="font-size: 15px; color: #475569; max-width: 440px; margin: 0 auto;">
+          Apunta con la cámara de tu teléfono móvil para registrar tus datos y asociar tus cubículos.
+        </p>
+      </div>
+
+      <!-- Marco con el Código QR Oficial -->
+      <div class="qr-frame">
+        <img id="main-qr-image" alt="Código QR Plaza Megatón" src="">
+      </div>
+
+      <!-- Enlace directo visible -->
+      <div style="background: #F8FAFC; border: 1.5px dashed #CBD5E1; border-radius: 12px; padding: 12px; margin: 16px 0;">
+        <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 2px;">
+          Enlace directo en Internet:
+        </div>
+        <a id="qr-direct-link" href="#" target="_blank" style="font-size: 14px; font-weight: 800; color: #D32F2F; word-break: break-all; text-decoration: none;">
+          Cargando enlace...
+        </a>
+      </div>
+
+      <!-- Pasos sencillos para el usuario -->
+      <div style="margin-top: 18px; text-align: left;">
+        <div style="font-size: 13px; font-weight: 800; color: #0F172A; margin-bottom: 8px;">¿Cómo completar tu registro?</div>
+        
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div style="font-size: 13px; color: #334155;">
+            <strong>Abre la cámara de tu celular</strong> (iPhone o Android) y enfoca el código QR.
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div style="font-size: 13px; color: #334155;">
+            <strong>Toca la notificación</strong> para abrir el formulario web sin necesidad de instalar nada.
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div style="font-size: 13px; color: #334155;">
+            <strong>Escribe tus cubículos a mano</strong> (ej: C1, pulsa "+" para colocar varios uno debajo del otro) y agrega de forma opcional su nombre o actividad comercial.
+          </div>
+        </div>
+      </div>
+
+      <!-- Pie del Cartel -->
+      <div style="margin-top: 22px; padding-top: 14px; border-top: 1px solid #E2E8F0; font-size: 12px; color: #64748B;">
+        <strong>Administración Plaza Megatón</strong> · Av. Principal esq. Central, Santo Domingo, R.D.
+      </div>
+
+    </div>
+
+  </main>
+
+  <script src="js/app.js"></script>
+  <script>
+    const GITHUB_PAGES_REGISTRO = 'https://luis28lh.github.io/wes-plataforma/plaza-megaton/registro.html';
+
+    function getTargetRegistroUrl() {
+      // Si estamos corriendo en GitHub Pages o producción remota
+      if (window.location.hostname.includes('github.io')) {
+        const base = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+        return `${base}/registro.html`;
+      }
+      // Si estamos en un hosting con dominio propio o servidor local
+      if (window.location.protocol.startsWith('http')) {
+        const base = window.location.origin;
+        // Si la URL pública de GitHub Pages es preferida para el QR universal de reuniones:
+        return GITHUB_PAGES_REGISTRO;
+      }
+      return GITHUB_PAGES_REGISTRO;
+    }
+
+    function initQRPage() {
+      const targetUrl = getTargetRegistroUrl();
+      const qrImg = document.getElementById('main-qr-image');
+      const linkEl = document.getElementById('qr-direct-link');
+
+      // Generar imagen QR en alta resolución (500x500 para impresión nítida)
+      const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(targetUrl)}&color=0f172a&bgcolor=ffffff&qzone=1`;
+      qrImg.src = qrApiUrl;
+
+      linkEl.href = targetUrl;
+      linkEl.innerText = targetUrl;
+    }
+
+    function downloadQRImage() {
+      const qrImg = document.getElementById('main-qr-image');
+      if (!qrImg || !qrImg.src) return;
+
+      const a = document.createElement('a');
+      a.href = qrImg.src;
+      a.download = 'QR_REGISTRO_PLAZA_MEGATON.png';
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    function copyTargetLink() {
+      const targetUrl = getTargetRegistroUrl();
+      navigator.clipboard.writeText(targetUrl).then(() => {
+        App.showToast('Enlace copiado al portapapeles', 'success');
+      }).catch(() => {
+        prompt('Copia este enlace de registro:', targetUrl);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', initQRPage);
+  </script>
+</body>
+</html>

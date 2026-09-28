@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mis Pagos — Plaza Megatón</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+  <!-- Encabezado -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="index.html" class="brand-logo-wrap">
+        <img src="assets/logo-megaton.svg" alt="Plaza Megatón Logo" class="brand-logo-img">
+      </a>
+      <div id="user-header-pill" class="user-status-pill">
+        🔑 Acceder
+      </div>
+    </div>
+  </header>
+
+  <main class="main-wrapper">
+
+    <!-- Encabezado de la página -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <div>
+        <h1 style="font-size:20px; font-weight:800; color:var(--text-main);">💰 Mis Pagos</h1>
+        <p style="font-size:13px; color:var(--text-muted);">Historial de cuotas y comprobantes bancarios</p>
+      </div>
+      <a href="pagos.html" class="btn-primary" style="width:auto; min-height:40px; padding:0 14px; font-size:14px;">
+        + Reportar
+      </a>
+    </div>
+
+    <!-- Si no está autenticado -->
+    <div id="auth-prompt-box" class="card-box" style="display: none; text-align: center; padding: 32px 16px;">
+      <div style="font-size: 38px; margin-bottom: 8px;">🔐</div>
+      <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main); margin-bottom: 6px;">Identificación requerida</h3>
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">
+        Para consultar tus pagos y estados de cuenta debes ingresar con tu correo registrado.
+      </p>
+      <a href="login.html" class="btn-primary" style="display: inline-flex; width: auto; padding: 12px 28px;">
+        🔑 Acceder sin contraseña
+      </a>
+    </div>
+
+    <!-- Contenedor dinámico de pagos -->
+    <div id="pagos-list-container"></div>
+
+  </main>
+
+  <!-- Navegación móvil -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <span class="nav-item-icon">🏠</span>
+      <span>Inicio</span>
+    </a>
+    <a href="solicitudes.html" class="nav-item">
+      <span class="nav-item-icon">🛠️</span>
+      <span>Solicitudes</span>
+    </a>
+    <a href="pagos.html" class="nav-item">
+      <span class="nav-item-icon">💳</span>
+      <span>Pagos</span>
+    </a>
+    <a href="mis-pagos.html" class="nav-item active">
+      <span class="nav-item-icon">📋</span>
+      <span>Mis Trámites</span>
+    </a>
+  </nav>
+
+  <script src="js/app.js"></script>
+  <script src="js/mis-pagos.js"></script>
+</body>
+</html>

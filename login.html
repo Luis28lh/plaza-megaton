@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Acceso Seguro — Plaza Megatón</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Encabezado -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="index.html" class="brand-logo-wrap">
+        <img src="assets/logo-megaton.svg" alt="Plaza Megatón Logo" class="brand-logo-img">
+      </a>
+      <a href="registro.html" class="user-status-pill">
+        📝 Registrarme
+      </a>
+    </div>
+  </header>
+
+  <main class="main-wrapper">
+
+    <!-- Tarjeta de Acceso -->
+    <div class="card-box" style="max-width: 480px; margin: 30px auto;">
+      
+      <!-- Paso 1: Formulario de ingreso de correo -->
+      <div id="login-form-step">
+        <div class="card-box-header" style="text-align: center;">
+          <div style="font-size: 36px; margin-bottom: 8px;">🔑</div>
+          <h1 class="card-title" style="justify-content: center;">Acceso Seguro</h1>
+          <p class="card-subtitle">Ingresa sin necesidad de crear ni recordar una contraseña.</p>
+        </div>
+
+        <form id="login-form">
+          <div class="form-group">
+            <label class="form-label" for="login-email">Tu correo electrónico registrado <span class="req">*</span></label>
+            <input 
+              type="email" 
+              id="login-email" 
+              class="form-input" 
+              placeholder="ejemplo@correo.com" 
+              required
+              autocomplete="email"
+            >
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">
+              Te enviaremos un enlace de acceso temporal y seguro a tu bandeja.
+            </div>
+          </div>
+
+          <button type="submit" id="btn-submit-login" class="btn-primary">
+            📩 Enviar enlace de acceso
+          </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 20px; font-size: 13px; color: var(--text-muted);">
+          ¿Aún no has registrado tus cubículos?<br>
+          <a href="registro.html" style="color: var(--primary-red); font-weight: 700; text-decoration: none;">Completar Registro Inicial aquí</a>
+        </div>
+      </div>
+
+      <!-- Paso 2: Mensaje de Enlace Enviado -->
+      <div id="login-sent-step" style="display: none; text-align: center; padding: 20px 8px;">
+        <div class="success-icon-bubble">✉️</div>
+        <h2 style="font-size: 20px; font-weight: 900; color: var(--text-main); margin-bottom: 8px;">
+          ¡Enlace enviado!
+        </h2>
+        <p style="font-size: 14px; color: var(--text-body); margin-bottom: 12px;">
+          Hemos enviado un enlace seguro a:<br>
+          <strong id="sent-email-address" style="color: var(--primary-red);">-</strong>
+        </p>
+        <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">
+          Abre tu correo electrónico y toca el botón para acceder automáticamente a tu cuenta.
+        </p>
+
+        <div id="login-preview-container"></div>
+
+        <div style="margin-top: 24px;">
+          <a href="login.html" class="btn-secondary" onclick="location.reload()">
+            🔄 Probar con otro correo
+          </a>
+        </div>
+      </div>
+
+      <!-- Paso 3: Verificando token de la URL -->
+      <div id="token-verifying-box" style="display: none; text-align: center; padding: 30px 10px;">
+        <div style="font-size: 36px; margin-bottom: 10px; animation: spin 1s infinite linear;">🔄</div>
+        <h3 style="font-size: 17px; font-weight: 800; color: var(--text-main);">Validando enlace seguro...</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Ingresando a tu panel de Plaza Megatón...</p>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script src="js/app.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Registrar Pago — Plaza Megatón</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Encabezado -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="index.html" class="brand-logo-wrap">
+        <img src="assets/logo-megaton.svg" alt="Plaza Megatón Logo" class="brand-logo-img">
+      </a>
+      <div id="user-header-pill" class="user-status-pill">
+        🔑 Acceder
+      </div>
+    </div>
+  </header>
+
+  <main class="main-wrapper">
+
+    <!-- Formulario de Pago -->
+    <div id="form-pago-box" class="card-box">
+      <div class="card-box-header">
+        <div style="font-size: 12px; font-weight: 800; color: var(--primary-red); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">
+          Gestión Financiera de Cubículos
+        </div>
+        <h1 class="card-title">💳 Registrar Reporte de Pago</h1>
+        <p class="card-subtitle">Sube tu comprobante bancario para validación y conciliación administrativa.</p>
+      </div>
+
+      <form id="form-pago">
+
+        <!-- Nombre Completo -->
+        <div class="form-group">
+          <label class="form-label" for="pago-nombre">Nombre <span class="req">*</span></label>
+          <input 
+            type="text" 
+            id="pago-nombre" 
+            class="form-input" 
+            placeholder="Tu nombre completo" 
+            required
+          >
+        </div>
+
+        <!-- Correo Electrónico -->
+        <div class="form-group">
+          <label class="form-label" for="pago-email">Correo electrónico <span class="req">*</span></label>
+          <input 
+            type="email" 
+            id="pago-email" 
+            class="form-input" 
+            placeholder="tu-correo@ejemplo.com" 
+            required 
+            inputmode="email"
+          >
+        </div>
+
+        <!-- Cubículo -->
+        <div class="form-group">
+          <label class="form-label" for="pago-cubiculo">Cubículo / Local <span class="req">*</span></label>
+          <select id="pago-cubiculo" class="form-select" required>
+            <option value="">-- Selecciona el cubículo correspondiente --</option>
+          </select>
+        </div>
+
+        <!-- Concepto -->
+        <div class="form-group">
+          <label class="form-label" for="pago-concepto">Concepto del pago <span class="req">*</span></label>
+          <select id="pago-concepto" class="form-select" required>
+            <option value="">-- Selecciona concepto --</option>
+            <option value="Mantenimiento">🔧 Cuota de Mantenimiento</option>
+            <option value="Alquiler">🏢 Alquiler de Cubículo</option>
+            <option value="Cuota administrativa">📋 Cuota Administrativa</option>
+            <option value="Servicio">💡 Servicio de Electricidad / Común</option>
+            <option value="Otro">📝 Otro Concepto</option>
+          </select>
+        </div>
+
+        <!-- Período -->
+        <div class="form-group">
+          <label class="form-label" for="pago-periodo">Período correspondiente <span class="req">*</span></label>
+          <input 
+            type="text" 
+            id="pago-periodo" 
+            class="form-input" 
+            placeholder="Ej: Septiembre 2026" 
+            required
+          >
+        </div>
+
+        <!-- Monto -->
+        <div class="form-group">
+          <label class="form-label" for="pago-monto">Monto pagado <span class="req">*</span></label>
+          <input 
+            type="text" 
+            id="pago-monto" 
+            class="form-input" 
+            placeholder="Ej: RD$5,000.00" 
+            required
+          >
+        </div>
+
+        <!-- Fecha del Pago -->
+        <div class="form-group">
+          <label class="form-label" for="pago-fecha">Fecha en que realizaste el pago <span class="req">*</span></label>
+          <input 
+            type="date" 
+            id="pago-fecha" 
+            class="form-input" 
+            required
+          >
+        </div>
+
+        <!-- Número de Referencia Bancaria -->
+        <div class="form-group">
+          <label class="form-label" for="pago-referencia">Número de referencia bancaria <span class="opt">(Opcional)</span></label>
+          <input 
+            type="text" 
+            id="pago-referencia" 
+            class="form-input" 
+            placeholder="Ej: Depósito #489201 ó Transf. #9901"
+          >
+        </div>
+
+        <!-- Voucher / Comprobante -->
+        <div class="form-group">
+          <label class="form-label">
+            Voucher o Comprobante de Pago <span class="req">*</span>
+            <span class="opt">(Foto, JPG, PNG o PDF)</span>
+          </label>
+          
+          <div class="media-upload-area" onclick="document.getElementById('voucher-file-input').click()">
+            <div style="font-size: 32px; margin-bottom: 4px;">🧾</div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--text-main);">Toca para subir el comprobante</div>
+            <div style="font-size: 12px; color: var(--text-muted);">Puedes tomar una foto del voucher bancario o seleccionar el PDF</div>
+            <input type="file" id="voucher-file-input" accept="image/*,application/pdf" style="display: none;">
+          </div>
+
+          <div id="voucher-preview-container"></div>
+        </div>
+
+        <!-- Botón Enviar -->
+        <button type="submit" id="btn-submit-pago" class="btn-primary">
+          💳 Reportar Pago
+        </button>
+
+      </form>
+    </div>
+
+    <!-- Pantalla de Éxito de Pago -->
+    <div id="success-pago-box" class="card-box success-screen" style="display: none;">
+      <div class="success-icon-bubble">✓</div>
+      
+      <h2 style="font-size: 20px; font-weight: 900; color: var(--text-main); margin-bottom: 6px;">
+        Pago reportado correctamente
+      </h2>
+      
+      <p style="font-size: 14px; color: var(--text-muted);">
+        Tu código de pago es:
+      </p>
+
+      <div class="success-code-box">
+        <div id="pago-success-codigo" class="success-code-num">PG-001</div>
+        <div style="font-size: 12px; color: #15803D; font-weight: 600;">Estado: Reportado (En espera de verificación)</div>
+      </div>
+
+      <div class="card-box" style="text-align: left; background: #F8FAFC; border: 1px solid var(--border-light); padding: 14px; margin: 16px 0;">
+        <div style="font-size: 13px; margin-bottom: 4px;"><strong>Cubículo:</strong> <span id="pago-success-cubiculo">-</span></div>
+        <div style="font-size: 13px; margin-bottom: 4px;"><strong>Concepto:</strong> <span id="pago-success-concepto">-</span></div>
+        <div style="font-size: 13px; margin-bottom: 4px;"><strong>Monto:</strong> <span id="pago-success-monto" style="font-weight: 700; color: #15803D;">-</span></div>
+        <div style="font-size: 13px;"><strong>Notificación enviada a:</strong> <span id="pago-success-email">-</span></div>
+      </div>
+
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+        El comprobante será revisado y conciliado por la administración de Plaza Megatón.
+      </p>
+
+      <div id="pago-preview-mail-container"></div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+        <a href="mis-pagos.html" class="btn-primary">
+          💰 Ver Mis Pagos
+        </a>
+        <a href="pagos.html" class="btn-secondary" onclick="location.reload()">
+          ➕ Reportar otro Pago
+        </a>
+        <a href="index.html" class="btn-secondary">
+          🏠 Volver al Inicio
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Navegación móvil -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <span class="nav-item-icon">🏠</span>
+      <span>Inicio</span>
+    </a>
+    <a href="solicitudes.html" class="nav-item">
+      <span class="nav-item-icon">🛠️</span>
+      <span>Solicitudes</span>
+    </a>
+    <a href="pagos.html" class="nav-item active">
+      <span class="nav-item-icon">💳</span>
+      <span>Pagos</span>
+    </a>
+    <a href="mis-solicitudes.html" class="nav-item">
+      <span class="nav-item-icon">📋</span>
+      <span>Mis Trámites</span>
+    </a>
+  </nav>
+
+  <script src="js/app.js"></script>
+  <script src="js/pagos.js"></script>
+</body>
+</html>
