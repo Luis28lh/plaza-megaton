@@ -24,7 +24,7 @@ const driveService = new GoogleDriveService();
 const emailService = new EmailService(dataService);
 const authService = new AuthService(dataService, emailService);
 
-const DEFAULT_GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzhIZ4dMGMyX4ZQgZrBnwegGHjPJC9U_9sw7jRcUVHVB2MGp9sLluZBi3wYN5bZICX0/exec';
+const DEFAULT_GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3Ke4jrxn_cmQ8EC--_K-FbCfYIRdCAIVtplW6pKWclTukaG1tYLIWmdBgaBPf5tzSWA/exec';
 const activeGoogleUrl = process.env.GOOGLE_APPS_SCRIPT_URL || 
   dataService.db?.CONFIGURACION?.find(c => c.parametro === 'google_apps_script_url')?.valor || 
   DEFAULT_GOOGLE_SCRIPT_URL;
