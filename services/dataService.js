@@ -25,24 +25,25 @@ class DataService {
         const raw = fs.readFileSync(DB_PATH, 'utf8');
         this.db = JSON.parse(raw);
       } else {
-        // Inicializar desde catálogo inicial
-        const initial = fs.readFileSync(INITIAL_CATALOG_PATH, 'utf8');
-        this.db = JSON.parse(initial);
+        // Inicializar desde catálogo inicial usando require para empaquetado automático en Vercel
+        this.db = require('../database/initial_catalog.json');
         this.persist();
       }
     } catch (err) {
-      console.error('[DataService] Error cargando DB local, recargando inicial:', err);
-      const initial = fs.readFileSync(INITIAL_CATALOG_PATH, 'utf8');
-      this.db = JSON.parse(initial);
-      this.persist();
+      try {
+        this.db = require('../database/initial_catalog.json');
+      } catch (_) {
+        this.db = { CUBICULOS: [], USUARIOS: [], USUARIO_CUBICULO: [], PRESUPUESTO_2026: null, RECLAMACIONES: [], PAGOS: [], CONFIGURACION: [], HISTORIAL: [] };
+      }
     }
   }
 
   persist() {
+    if (process.env.VERCEL) return;
     try {
       fs.writeFileSync(DB_PATH, JSON.stringify(this.db, null, 2), 'utf8');
     } catch (err) {
-      console.error('[DataService] Error guardando DB local:', err);
+      console.warn('[DataService] Aviso guardando DB local:', err.message);
     }
   }
 
