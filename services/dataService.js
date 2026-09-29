@@ -95,6 +95,13 @@ class DataService {
   }
 
   // ==========================================
+  // PRESUPUESTO 2026
+  // ==========================================
+  async getPresupuesto() {
+    return this.db.PRESUPUESTO_2026 || null;
+  }
+
+  // ==========================================
   // USUARIOS
   // ==========================================
   async getUsuariosRaw() {

@@ -548,6 +548,18 @@ app.get('/api/qr/info', async (req, res) => {
   }
 });
 
+// 17b. Presupuesto Oficial Período 2026
+app.get('/api/admin/presupuesto', requireAdmin, async (req, res) => {
+  const data = await dataService.getPresupuesto();
+  res.json({ success: true, presupuesto: data });
+});
+
+// 17c. Catálogo Detallado de Cubículos / Locales
+app.get('/api/admin/cubiculos', requireAdmin, async (req, res) => {
+  const data = await dataService.getCubiculos();
+  res.json({ success: true, cubiculos: data });
+});
+
 // 18. Google Apps Script / Google Drive Test de Conexión
 app.post('/api/admin/google/test', async (req, res) => {
   const pin = req.headers['x-admin-pin'];

@@ -61,6 +61,8 @@
     <nav class="admin-tabs-nav">
       <div class="admin-tabs-container">
         <button class="admin-tab-btn active" data-tab="kpis" onclick="switchAdminTab('kpis')">📊 Indicadores</button>
+        <button class="admin-tab-btn" data-tab="locales" onclick="switchAdminTab('locales')">🏢 Locales & Mantenimiento (33)</button>
+        <button class="admin-tab-btn" data-tab="presupuesto" onclick="switchAdminTab('presupuesto')">📑 Presupuesto 2026</button>
         <button class="admin-tab-btn" data-tab="usuarios" onclick="switchAdminTab('usuarios')">👥 Usuarios</button>
         <button class="admin-tab-btn" data-tab="reclamaciones" onclick="switchAdminTab('reclamaciones')">🛠️ Reclamaciones</button>
         <button class="admin-tab-btn" data-tab="pagos" onclick="switchAdminTab('pagos')">💳 Pagos</button>
@@ -79,19 +81,19 @@
           <!-- Cubículos -->
           <div class="kpi-card">
             <div class="kpi-title">Cubículos Totales</div>
-            <div id="kpi-cub-total" class="kpi-value">30</div>
+            <div id="kpi-cub-total" class="kpi-value">33</div>
             <div class="kpi-subtext">
-              <span id="kpi-cub-ocupados" style="color:#B71C1C; font-weight:700;">0</span> Ocupados · 
-              <span id="kpi-cub-disp" style="color:#15803D; font-weight:700;">30</span> Disponibles
+              <span id="kpi-cub-ocupados" style="color:#B71C1C; font-weight:700;">33</span> Ocupados · 
+              <span id="kpi-cub-disp" style="color:#15803D; font-weight:700;">0</span> Disponibles
             </div>
           </div>
 
           <!-- Usuarios -->
           <div class="kpi-card">
             <div class="kpi-title">Usuarios Registrados</div>
-            <div id="kpi-users-total" class="kpi-value">0</div>
+            <div id="kpi-users-total" class="kpi-value">18</div>
             <div class="kpi-subtext">
-              <span id="kpi-users-activos" style="color:#15803D; font-weight:700;">0</span> Ocupantes activos
+              <span id="kpi-users-activos" style="color:#15803D; font-weight:700;">18</span> Ocupantes / Propietarios
             </div>
           </div>
 
@@ -118,9 +120,164 @@
 
         <!-- Acceso directo a acciones clave -->
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn-sm btn-sm-primary" onclick="switchAdminTab('locales')">🏢 Catálogo 33 Locales</button>
+          <button class="btn-sm btn-sm-primary" onclick="switchAdminTab('presupuesto')">📑 Presupuesto 2026</button>
           <button class="btn-sm btn-sm-primary" onclick="switchAdminTab('reclamaciones')">Ir a Reclamaciones</button>
           <button class="btn-sm btn-sm-primary" onclick="switchAdminTab('pagos')">Verificar Pagos</button>
           <button class="btn-sm btn-sm-outline" onclick="switchAdminTab('qr')">Descargar Código QR</button>
+        </div>
+      </section>
+
+      <!-- 1b. PESTAÑA: LOCALES & MANTENIMIENTO -->
+      <section id="tab-section-locales" style="display:none;">
+        <div class="kpis-grid" style="margin-bottom:16px;">
+          <div class="kpi-card">
+            <div class="kpi-title">Locales Registrados</div>
+            <div id="kpi-loc-total" class="kpi-value">33</div>
+            <div class="kpi-subtext">Distribuidos en 3 Niveles</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title">Área Total Edificio</div>
+            <div id="kpi-loc-area" class="kpi-value" style="font-size:26px;">3,745.54 m²</div>
+            <div class="kpi-subtext">Locales, almacenes y áreas comunes</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title">Carga Mensual Total</div>
+            <div id="kpi-loc-cuota" class="kpi-value" style="font-size:24px; color:#D32F2F;">RD$ 171,293.33</div>
+            <div class="kpi-subtext">Base fija + variaciones oficiales</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title">Facturación Anual Estimada</div>
+            <div id="kpi-loc-anual" class="kpi-value" style="font-size:24px; color:#15803D;">RD$ 2,055,519.96</div>
+            <div class="kpi-subtext">RD$ 1,653,765.56 base oficial</div>
+          </div>
+        </div>
+
+        <div class="table-filter-bar">
+          <div class="search-input-wrap">
+            <input type="text" id="search-locales-input" class="form-input" placeholder="🔍 Buscar por código (A-101, A-201, A-301...), propietario, RNC o actividad..." oninput="filterLocales()">
+          </div>
+          <div style="min-width: 200px;">
+            <select id="filter-locales-nivel" class="form-select" onchange="filterLocales()">
+              <option value="Todos">Todos los niveles (33)</option>
+              <option value="Primer Nivel">Primer Nivel (6)</option>
+              <option value="Segundo Nivel">Segundo Nivel (11)</option>
+              <option value="Tercer Nivel">Tercer Nivel (16)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Nivel</th>
+                <th>Nombre / Ocupante</th>
+                <th>RNC / Cédula</th>
+                <th>Área m²</th>
+                <th>Tarifa/m²</th>
+                <th>Cuota Mensual</th>
+                <th>Actividad Comercial</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="table-locales-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 1c. PESTAÑA: PRESUPUESTO 2026 -->
+      <section id="tab-section-presupuesto" style="display:none;">
+        <div style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-lg); padding:24px; margin-bottom:24px; box-shadow:var(--shadow-sm);">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px; border-bottom:1px solid var(--border-light); padding-bottom:16px;">
+            <div>
+              <span style="background:#FEE2E2; color:#B71C1C; font-weight:800; font-size:11px; padding:3px 10px; border-radius:999px; text-transform:uppercase;">Documento Oficial Condominal</span>
+              <h2 style="font-size:22px; font-weight:900; margin:6px 0 2px; color:#0F172A;">Presupuesto de Mantenimiento — Período 2026</h2>
+              <p style="font-size:13px; color:#64748B; margin:0;">Plaza Megatone · Principio de Control y Administración Planificada</p>
+            </div>
+            <div style="text-align:right;">
+              <span class="badge badge-activo" style="font-size:13px; padding:6px 14px; background:#DCFCE7; color:#15803D;">✓ Presupuesto Operativo Balanceado</span>
+            </div>
+          </div>
+
+          <!-- Cuadros Resumen Financiero -->
+          <div class="kpis-grid" style="margin-bottom:0;">
+            <div class="kpi-card" style="border-left:4px solid #16A34A;">
+              <div class="kpi-title">Ingresos Base Mensual</div>
+              <div class="kpi-value" style="font-size:22px; color:#16A34A;">RD$ 137,813.80</div>
+              <div class="kpi-subtext">RD$ 1,653,765.56 anual</div>
+            </div>
+            <div class="kpi-card" style="border-left:4px solid #D32F2F;">
+              <div class="kpi-title">Egresos Operativos Mensual</div>
+              <div class="kpi-value" style="font-size:22px; color:#D32F2F;">RD$ 137,813.80</div>
+              <div class="kpi-subtext">5 partidas operativas fijadas</div>
+            </div>
+            <div class="kpi-card" style="border-left:4px solid #2563EB;">
+              <div class="kpi-title">Carga Fija Total</div>
+              <div class="kpi-value" style="font-size:22px; color:#2563EB;">RD$ 171,293.33</div>
+              <div class="kpi-subtext">Con variaciones 3er nivel</div>
+            </div>
+            <div class="kpi-card" style="border-left:4px solid #0F172A;">
+              <div class="kpi-title">Balance Operativo Neto</div>
+              <div class="kpi-value" style="font-size:22px; color:#0F172A;">RD$ 0.00</div>
+              <div class="kpi-subtext">100% equilibrio presupuestario</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detalle Comparativo: Ingresos vs Egresos -->
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap:20px; margin-bottom:20px;">
+          <!-- Columna Ingresos -->
+          <div style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-lg); padding:20px; box-shadow:var(--shadow-sm);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:1.5px solid #F1F5F9; padding-bottom:10px;">
+              <h3 style="font-size:16px; font-weight:800; color:#0F172A; margin:0; display:flex; align-items:center; gap:8px;">
+                <span>📈</span> Ingresos por Nivel
+              </h3>
+              <span style="font-size:12px; font-weight:700; color:#16A34A; background:#DCFCE7; padding:3px 8px; border-radius:6px;">RD$ 137,813.80 / mes</span>
+            </div>
+            <div id="presupuesto-ingresos-list">
+              <!-- Renderizado dinámico -->
+            </div>
+          </div>
+
+          <!-- Columna Egresos -->
+          <div style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-lg); padding:20px; box-shadow:var(--shadow-sm);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:1.5px solid #F1F5F9; padding-bottom:10px;">
+              <h3 style="font-size:16px; font-weight:800; color:#0F172A; margin:0; display:flex; align-items:center; gap:8px;">
+                <span>📉</span> Egresos Operativos (5 Partidas)
+              </h3>
+              <span style="font-size:12px; font-weight:700; color:#D32F2F; background:#FEE2E2; padding:3px 8px; border-radius:6px;">RD$ 137,813.80 / mes</span>
+            </div>
+            <div id="presupuesto-egresos-list">
+              <!-- Renderizado dinámico -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Principio de Administración y Especificaciones Oficiales -->
+        <div style="background:#F8FAFC; border:1px solid var(--border-light); border-radius:var(--radius-md); padding:18px;">
+          <h4 style="font-size:13px; font-weight:800; color:#334155; margin:0 0 6px;">📌 Principio de Control y Administración Condominal</h4>
+          <p style="font-size:12px; color:#64748B; margin:0 0 12px; line-height:1.5;">
+            <em>"El principio de administración controlar en un condominio implica que la administración debe ser planificada y controlada para asegurar que se cumplan los objetivos del condominio."</em>
+          </p>
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px; font-size:12px; color:#475569;">
+            <div style="background:#FFFFFF; padding:10px 12px; border-radius:6px; border:1px solid #E2E8F0;">
+              🧹 <strong>Conserjería:</strong><br>2 conserjes de 1/2 tiempo igualado (RD$ 42,000/mes).
+            </div>
+            <div style="background:#FFFFFF; padding:10px 12px; border-radius:6px; border:1px solid #E2E8F0;">
+              🧼 <strong>Insumos de Baños:</strong><br>Papel, jabón, desinfectante, fundas (RD$ 18,000/mes).
+            </div>
+            <div style="background:#FFFFFF; padding:10px 12px; border-radius:6px; border:1px solid #E2E8F0;">
+              💧 <strong>Suministro de Agua:</strong><br>2 baños públicos, 15-20 m³/mes (RD$ 7,000/mes).
+            </div>
+            <div style="background:#FFFFFF; padding:10px 12px; border-radius:6px; border:1px solid #E2E8F0;">
+              💡 <strong>Luz de Área Común:</strong><br>Iluminación LED + extractores 12h/día (RD$ 12,000/mes).
+            </div>
+            <div style="background:#FFFFFF; padding:10px 12px; border-radius:6px; border:1px solid #E2E8F0;">
+              🛡️ <strong>Imprevistos / Adm.:</strong><br>23% de margen sobre base (RD$ 58,813.80/mes).
+            </div>
+          </div>
         </div>
       </section>
 

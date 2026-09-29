@@ -161,18 +161,44 @@ const App = {
 
   // Almacenamiento local persistente para funcionamiento en GitHub Pages (offline/remoto)
   initLocalStore() {
-    if (!localStorage.getItem('pm_cubiculos')) {
-      const cubs = [];
-      for (let i = 1; i <= 30; i++) {
-        const cod = 'C-' + (i < 10 ? '00' + i : (i < 100 ? '0' + i : i));
-        cubs.push({
-          cubiculo_id: 'CUB-' + (i < 10 ? '00' + i : i),
-          codigo: cod,
-          estado: 'Disponible',
-          observaciones: 'Pasillo Principal'
-        });
-      }
-      localStorage.setItem('pm_cubiculos', JSON.stringify(cubs));
+    const OFFICIAL_CUBS = [
+      { codigo: "A-101", nivel: "Primer Nivel", area_m2: 64.75, precio_m2: 100.00, cuota: 6475.00, nombre: "Yesenia Grullón", propietario: "YESENIA GRULLON", estado: "Ocupado" },
+      { codigo: "A-102", nivel: "Primer Nivel", area_m2: 54.95, precio_m2: 100.00, cuota: 5495.00, nombre: "Alba María García Rodríguez", propietario: "ALBA MARIA GARCIA RODRIGUEZ", rnc: "131516238", estado: "Ocupado" },
+      { codigo: "A-103", nivel: "Primer Nivel", area_m2: 170.24, precio_m2: 60.00, cuota: 10214.40, nombre: "Consultorio Dra. Melissa", propietario: "DR. MELISSA", estado: "Ocupado" },
+      { codigo: "A-104", nivel: "Primer Nivel", area_m2: 78.26, precio_m2: 100.00, cuota: 7826.00, nombre: "Warn Electrical Services SRL", propietario: "WARN ELECTRICAL SERVICES SRL", rnc: "130161267", estado: "Ocupado" },
+      { codigo: "A-105", nivel: "Primer Nivel", area_m2: 223.45, precio_m2: 35.00, cuota: 7820.75, nombre: "Armería La Mocana SRL - Pablo Abreu", propietario: "ARMERIA LA MOCANA SRL - PABLO ABREU", rnc: "130060398", estado: "Ocupado" },
+      { codigo: "A-105-A", nivel: "Primer Nivel", area_m2: 293.55, precio_m2: 35.00, cuota: 10274.25, nombre: "Bingo", propietario: "EDWAR GRULLON", rnc: "130161267", estado: "Ocupado" },
+      { codigo: "A-201", nivel: "Segundo Nivel", area_m2: 115.20, precio_m2: 60.00, cuota: 6912.00, nombre: "INABIE", propietario: "INABIE", rnc: "130161267", estado: "Ocupado" },
+      { codigo: "A-202", nivel: "Segundo Nivel", area_m2: 32.88, precio_m2: 100.00, cuota: 3288.00, nombre: "Luis María García", propietario: "LUIS MARIA GARCIA", estado: "Ocupado" },
+      { codigo: "A-203", nivel: "Segundo Nivel", area_m2: 34.18, precio_m2: 100.00, cuota: 3418.00, nombre: "Jet Pack", propietario: "MANUEL SANTOS", estado: "Ocupado" },
+      { codigo: "A-204", nivel: "Segundo Nivel", area_m2: 30.83, precio_m2: 100.00, cuota: 3083.00, nombre: "Manuel Santos", propietario: "MANUEL SANTOS", estado: "Ocupado" },
+      { codigo: "A-205", nivel: "Segundo Nivel", area_m2: 13.55, precio_m2: 100.00, cuota: 1355.00, nombre: "Centro de Uña", propietario: "ELDA BENCOSME", estado: "Ocupado" },
+      { codigo: "A-206", nivel: "Segundo Nivel", area_m2: 66.69, precio_m2: 31.00, cuota: 2067.39, nombre: "Alba Rodríguez & Asociados, SRL", propietario: "ALBA RODRIGUEZ & ASOCIADOS, SRL", rnc: "131262589", estado: "Ocupado" },
+      { codigo: "A-207", nivel: "Segundo Nivel", area_m2: 65.14, precio_m2: 31.00, cuota: 2019.34, nombre: "Alba Rodríguez & Asociados, SRL", propietario: "ALBA RODRIGUEZ & ASOCIADOS, SRL", rnc: "131262589", estado: "Ocupado" },
+      { codigo: "A-208", nivel: "Segundo Nivel", area_m2: 80.05, precio_m2: 100.00, cuota: 8005.00, nombre: "Nicolás Grullón", propietario: "NICOLAS GRULLON", estado: "Ocupado" },
+      { codigo: "A-209", nivel: "Segundo Nivel", area_m2: 79.99, precio_m2: 60.00, cuota: 4799.40, nombre: "Ahsdiel Music Bar SRL", propietario: "AHSDIEL MUSIC BAR SRL", rnc: "132080211", estado: "Ocupado" },
+      { codigo: "A-210", nivel: "Segundo Nivel", area_m2: 84.42, precio_m2: 60.00, cuota: 5065.20, nombre: "Ahsdiel Music Bar SRL", propietario: "AHSDIEL MUSIC BAR SRL", rnc: "130161267", estado: "Ocupado" },
+      { codigo: "A-301-A", nivel: "Tercer Nivel", area_m2: 34.37, precio_m2: 100.00, cuota: 3437.00, nombre: "Vipsania Grullón", propietario: "VIPSANIA GRULLON", rnc: "130161267", estado: "Ocupado" },
+      { codigo: "A-301-B", nivel: "Tercer Nivel", area_m2: 15.32, precio_m2: 100.00, cuota: 1532.00, nombre: "Vipsania Grullón", propietario: "VIPSANIA GRULLON", rnc: "130161267", estado: "Ocupado" },
+      { codigo: "A-301-C", nivel: "Tercer Nivel", area_m2: 11.05, precio_m2: 100.00, cuota: 1105.00, nombre: "Vipsania Grullón", propietario: "VIPSANIA GRULLON", rnc: "130161267", estado: "Ocupado" },
+      { codigo: "A-301-D", nivel: "Tercer Nivel", area_m2: 9.69, precio_m2: 100.00, cuota: 969.00, nombre: "Vipsania Grullón", propietario: "VIPSANIA GRULLON", rnc: "130161267", estado: "Ocupado" },
+      { codigo: "A-302", nivel: "Tercer Nivel", area_m2: 43.53, precio_m2: 31.00, cuota: 1349.43, nombre: "Grupo de Desarrollo Internacional", propietario: "GRUPO DE DESARROLLO INTERNACIONAL", rnc: "106014788", estado: "Ocupado" },
+      { codigo: "A-303", nivel: "Tercer Nivel", area_m2: 43.92, precio_m2: 31.00, cuota: 1361.52, nombre: "Grupo de Desarrollo Internacional", propietario: "GRUPO DE DESARROLLO INTERNACIONAL", rnc: "106014788", estado: "Ocupado" },
+      { codigo: "A-304", nivel: "Tercer Nivel", area_m2: 34.90, precio_m2: 31.00, cuota: 1081.90, nombre: "Grupo de Desarrollo Internacional", propietario: "GRUPO DE DESARROLLO INTERNACIONAL", rnc: "106014788", estado: "Ocupado" },
+      { codigo: "A-305", nivel: "Tercer Nivel", area_m2: 39.26, precio_m2: 31.00, cuota: 1217.06, nombre: "Grupo de Desarrollo Internacional", propietario: "GRUPO DE DESARROLLO INTERNACIONAL", rnc: "106014788", estado: "Ocupado" },
+      { codigo: "A-306", nivel: "Tercer Nivel", area_m2: 33.93, precio_m2: 31.00, cuota: 1051.83, nombre: "Grupo de Desarrollo Internacional", propietario: "GRUPO DE DESARROLLO INTERNACIONAL", rnc: "106014788", estado: "Ocupado" },
+      { codigo: "A-307", nivel: "Tercer Nivel", area_m2: 202.43, precio_m2: 31.00, cuota: 6275.33, nombre: "Grupo de Desarrollo Internacional", propietario: "GRUPO DE DESARROLLO INTERNACIONAL", rnc: "106014788", estado: "Ocupado" },
+      { codigo: "A-307-ANT", nivel: "Tercer Nivel", area_m2: 335.77, precio_m2: 31.00, cuota: 10408.87, nombre: "Esward-Sotea, Antena", propietario: "EDWARD GRULLON", rnc: "131712541", estado: "Ocupado" },
+      { codigo: "A-307-COF", nivel: "Tercer Nivel", area_m2: 22.62, precio_m2: 180.00, cuota: 4071.60, nombre: "Mega Coffy", propietario: "NICOLAS GRULLON", rnc: "132080211", estado: "Ocupado" },
+      { codigo: "A-308", nivel: "Tercer Nivel", area_m2: 62.23, precio_m2: 60.00, cuota: 3733.80, nombre: "Bertha Soury", propietario: "BERTHA SOURY", estado: "Ocupado" },
+      { codigo: "A-309", nivel: "Tercer Nivel", area_m2: 79.34, precio_m2: 60.00, cuota: 4760.40, nombre: "Bertha Soury", propietario: "BERTHA SOURY", estado: "Ocupado" },
+      { codigo: "A-310", nivel: "Tercer Nivel", area_m2: 1002.06, precio_m2: 31.00, cuota: 31063.86, nombre: "B&B Operadora de Filmes & Gym SRL", propietario: "B&B OPERADORA DE FILMES & GYM SRL", rnc: "131528759", estado: "Ocupado" },
+      { codigo: "A-311", nivel: "Tercer Nivel", area_m2: 47.57, precio_m2: 100.00, cuota: 4757.00, nombre: "Elda Bencosme", propietario: "ELDA BENCOSME", estado: "Ocupado" },
+      { codigo: "A-312", nivel: "Tercer Nivel", area_m2: 423.35, precio_m2: 31.00, cuota: 5000.00, nombre: "Grupo de Desarrollo Internacional", propietario: "GRUPO DE DESARROLLO INTERNACIONAL", rnc: "106014788", estado: "Ocupado" }
+    ];
+
+    if (!localStorage.getItem('pm_cubiculos') || JSON.parse(localStorage.getItem('pm_cubiculos') || '[]')[0]?.codigo?.startsWith('C-')) {
+      localStorage.setItem('pm_cubiculos', JSON.stringify(OFFICIAL_CUBS));
     }
     if (!localStorage.getItem('pm_usuarios')) localStorage.setItem('pm_usuarios', '[]');
     if (!localStorage.getItem('pm_reclamaciones')) localStorage.setItem('pm_reclamaciones', '[]');

@@ -2,12 +2,27 @@
 let currentTab = 'kpis';
 let adminData = {
   kpis: null,
+  locales: [],
+  presupuesto: null,
   usuarios: [],
   reclamaciones: [],
   pagos: [],
   historial: [],
   config: []
 };
+
+// Helper para cargar catálogo en entornos estáticos (GitHub Pages / demo)
+async function fetchCatalogFallback() {
+  if (window._catalogLoaded) return window._catalogLoaded;
+  try {
+    const res = await fetch('database/initial_catalog.json');
+    if (res.ok) {
+      window._catalogLoaded = await res.json();
+      return window._catalogLoaded;
+    }
+  } catch (_) {}
+  return null;
+}
 
 // Autenticación por PIN
 function getAdminPin() {
@@ -29,7 +44,7 @@ async function checkAdminAuth() {
     return false;
   }
 
-  // Verificar PIN contra la API
+  // Verificar PIN contra la API local
   try {
     const res = await fetch('/api/admin/dashboard', {
       headers: { 'x-admin-pin': pin }
@@ -40,14 +55,22 @@ async function checkAdminAuth() {
       if (panel) panel.style.display = 'block';
       loadAllAdminData();
       return true;
-    } else {
-      sessionStorage.removeItem('megaton_admin_pin');
-      if (authGate) authGate.style.display = 'flex';
-      if (panel) panel.style.display = 'none';
-      return false;
     }
   } catch (err) {
-    console.error('Error autenticando admin:', err);
+    console.warn('Backend local no disponible o entorno estático (GitHub Pages), validando PIN maestro...');
+  }
+
+  // Validación de PIN maestro para GitHub Pages y modo público
+  if (pin === 'megaton2026') {
+    if (authGate) authGate.style.display = 'none';
+    if (panel) panel.style.display = 'block';
+    loadAllAdminData();
+    return true;
+  } else {
+    sessionStorage.removeItem('megaton_admin_pin');
+    if (authGate) authGate.style.display = 'flex';
+    if (panel) panel.style.display = 'none';
+    alert('PIN incorrecto. Ingrese el PIN administrativo asignado (ej. megaton2026).');
     return false;
   }
 }
@@ -76,13 +99,15 @@ function switchAdminTab(tabName) {
     btn.classList.toggle('active', btn.dataset.tab === tabName);
   });
 
-  const sections = ['kpis', 'usuarios', 'reclamaciones', 'pagos', 'historial', 'qr', 'config'];
+  const sections = ['kpis', 'locales', 'presupuesto', 'usuarios', 'reclamaciones', 'pagos', 'historial', 'qr', 'config'];
   sections.forEach(s => {
     const el = document.getElementById(`tab-section-${s}`);
     if (el) el.style.display = (s === tabName) ? 'block' : 'none';
   });
 
   if (tabName === 'kpis') loadKPIs();
+  if (tabName === 'locales') loadLocales();
+  if (tabName === 'presupuesto') loadPresupuesto();
   if (tabName === 'usuarios') loadUsuarios();
   if (tabName === 'reclamaciones') loadReclamaciones();
   if (tabName === 'pagos') loadPagos();
@@ -93,6 +118,8 @@ function switchAdminTab(tabName) {
 
 async function loadAllAdminData() {
   loadKPIs();
+  loadLocales();
+  loadPresupuesto();
   loadUsuarios();
   loadReclamaciones();
   loadPagos();
@@ -124,8 +151,228 @@ async function loadKPIs() {
       document.getElementById('kpi-pag-reportados').innerText = k.pagos.reportados;
       document.getElementById('kpi-pag-pend').innerText = k.pagos.pendientes;
       document.getElementById('kpi-pag-confirmados').innerText = k.pagos.confirmados;
+      return;
     }
   } catch (_) {}
+
+  // Fallback desde catálogo
+  const cat = await fetchCatalogFallback();
+  if (cat) {
+    const cubs = cat.CUBICULOS || [];
+    const users = cat.USUARIOS || [];
+    const recs = cat.RECLAMACIONES || JSON.parse(localStorage.getItem('pm_reclamaciones') || '[]');
+    const pags = cat.PAGOS || JSON.parse(localStorage.getItem('pm_pagos') || '[]');
+
+    const elCubTot = document.getElementById('kpi-cub-total');
+    const elCubOcup = document.getElementById('kpi-cub-ocupados');
+    const elCubDisp = document.getElementById('kpi-cub-disp');
+    const elUsTot = document.getElementById('kpi-users-total');
+    const elUsAct = document.getElementById('kpi-users-activos');
+
+    if (elCubTot) elCubTot.innerText = cubs.length || 33;
+    if (elCubOcup) elCubOcup.innerText = cubs.filter(c => c.estado === 'Ocupado').length || 33;
+    if (elCubDisp) elCubDisp.innerText = cubs.filter(c => c.estado !== 'Ocupado').length || 0;
+
+    if (elUsTot) elUsTot.innerText = users.length || 18;
+    if (elUsAct) elUsAct.innerText = users.length || 18;
+
+    const elRecAb = document.getElementById('kpi-rec-abiertas');
+    const elRecPe = document.getElementById('kpi-rec-pend');
+    const elRecRe = document.getElementById('kpi-rec-resueltas');
+    if (elRecAb) elRecAb.innerText = recs.filter(r => r.estado !== 'Resuelta').length;
+    if (elRecPe) elRecPe.innerText = recs.filter(r => r.estado === 'Pendiente').length;
+    if (elRecRe) elRecRe.innerText = recs.filter(r => r.estado === 'Resuelta').length;
+
+    const elPagRep = document.getElementById('kpi-pag-reportados');
+    const elPagPe = document.getElementById('kpi-pag-pend');
+    const elPagCo = document.getElementById('kpi-pag-confirmados');
+    if (elPagRep) elPagRep.innerText = pags.length;
+    if (elPagPe) elPagPe.innerText = pags.filter(p => p.estado === 'Pendiente').length;
+    if (elPagCo) elPagCo.innerText = pags.filter(p => p.estado === 'Confirmado').length;
+  }
+}
+
+// ==========================================
+// 1b. LOCALES & MANTENIMIENTO
+// ==========================================
+async function loadLocales() {
+  const tbody = document.getElementById('table-locales-body');
+  if (!tbody) return;
+
+  try {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:20px;">Cargando locales y cuotas de mantenimiento...</td></tr>';
+    const res = await fetch('/api/admin/cubiculos', { headers: { 'x-admin-pin': getAdminPin() } });
+    const data = await res.json();
+    if (data.success && data.cubiculos) {
+      adminData.locales = data.cubiculos;
+      renderLocalesTable(adminData.locales);
+      return;
+    }
+  } catch (_) {}
+
+  // Fallback a catálogo oficial
+  const cat = await fetchCatalogFallback();
+  if (cat && cat.CUBICULOS) {
+    adminData.locales = cat.CUBICULOS;
+  } else {
+    adminData.locales = JSON.parse(localStorage.getItem('pm_cubiculos') || '[]');
+  }
+  renderLocalesTable(adminData.locales);
+}
+
+function renderLocalesTable(list) {
+  const tbody = document.getElementById('table-locales-body');
+  if (!tbody) return;
+
+  if (!list || list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:30px; color:#64748B;">No se encontraron locales.</td></tr>';
+    return;
+  }
+
+  // Actualizar KPIs de locales
+  const totalM2 = list.reduce((acc, c) => acc + (parseFloat(c.area_m2) || 0), 0);
+  const totalCuota = list.reduce((acc, c) => acc + (parseFloat(c.mantenimiento_mensual || c.cuota) || 0), 0);
+  
+  const elArea = document.getElementById('kpi-loc-area');
+  const elCuota = document.getElementById('kpi-loc-cuota');
+  const elAnual = document.getElementById('kpi-loc-anual');
+  const elTotal = document.getElementById('kpi-loc-total');
+
+  if (elArea) elArea.innerText = totalM2.toFixed(2) + ' m²';
+  if (elCuota) elCuota.innerText = App.formatCurrency(totalCuota);
+  if (elAnual) elAnual.innerText = App.formatCurrency(totalCuota * 12);
+  if (elTotal) elTotal.innerText = list.length;
+
+  tbody.innerHTML = '';
+  list.forEach(c => {
+    const tr = document.createElement('tr');
+    const cuota = parseFloat(c.mantenimiento_mensual || c.cuota) || 0;
+    const precio = parseFloat(c.precio_m2) || 0;
+    const rncTxt = c.rnc ? `<span style="font-size:11px; background:#F1F5F9; color:#334155; padding:2px 6px; border-radius:4px; font-weight:700;">${c.rnc}</span>` : '<span style="color:#94A3B8; font-size:11px;">N/A</span>';
+    
+    tr.innerHTML = `
+      <td><span style="background:#FEE2E2; color:#B71C1C; padding:4px 8px; border-radius:6px; font-weight:800; font-size:13px;">${c.codigo}</span></td>
+      <td><strong style="color:#475569; font-size:12px;">${c.nivel || 'Nivel General'}</strong></td>
+      <td>
+        <strong style="color:#0F172A;">${c.nombre_local || c.nombre || c.propietario}</strong>
+        ${c.propietario && c.propietario !== (c.nombre_local || c.nombre) ? `<div style="font-size:11px; color:#64748B;">Prop: ${c.propietario}</div>` : ''}
+      </td>
+      <td>${rncTxt}</td>
+      <td style="text-align:right; font-weight:700;">${(c.area_m2 || 0).toFixed(2)} m²</td>
+      <td style="text-align:right; color:#475569;">RD$ ${precio.toFixed(2)}</td>
+      <td style="text-align:right;"><strong style="color:#D32F2F;">${App.formatCurrency(cuota)}</strong></td>
+      <td style="font-size:12px; color:#475569;">${c.actividad_comercial || 'Comercial'}</td>
+      <td><span class="badge ${c.estado === 'Ocupado' ? 'badge-activo' : 'badge-pendiente'}">${c.estado || 'Ocupado'}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function filterLocales() {
+  const q = (document.getElementById('search-locales-input')?.value || '').toLowerCase();
+  const nivel = document.getElementById('filter-locales-nivel')?.value || 'Todos';
+
+  const filtered = (adminData.locales || []).filter(c => {
+    const matchesNivel = (nivel === 'Todos' || c.nivel === nivel);
+    const matchesText = !q || 
+      (c.codigo && c.codigo.toLowerCase().includes(q)) ||
+      (c.nombre_local && c.nombre_local.toLowerCase().includes(q)) ||
+      (c.propietario && c.propietario.toLowerCase().includes(q)) ||
+      (c.rnc && c.rnc.toLowerCase().includes(q)) ||
+      (c.actividad_comercial && c.actividad_comercial.toLowerCase().includes(q));
+    return matchesNivel && matchesText;
+  });
+
+  renderLocalesTable(filtered);
+}
+
+// ==========================================
+// 1c. PRESUPUESTO OFICIAL 2026
+// ==========================================
+async function loadPresupuesto() {
+  const containerIng = document.getElementById('presupuesto-ingresos-list');
+  const containerEg = document.getElementById('presupuesto-egresos-list');
+  if (!containerIng || !containerEg) return;
+
+  try {
+    const res = await fetch('/api/admin/presupuesto', { headers: { 'x-admin-pin': getAdminPin() } });
+    const data = await res.json();
+    if (data.success && data.presupuesto) {
+      adminData.presupuesto = data.presupuesto;
+      renderPresupuesto(adminData.presupuesto);
+      return;
+    }
+  } catch (_) {}
+
+  // Fallback desde catálogo
+  const cat = await fetchCatalogFallback();
+  if (cat && cat.PRESUPUESTO_2026) {
+    adminData.presupuesto = cat.PRESUPUESTO_2026;
+  }
+  if (adminData.presupuesto) {
+    renderPresupuesto(adminData.presupuesto);
+  }
+}
+
+function renderPresupuesto(p) {
+  const cIng = document.getElementById('presupuesto-ingresos-list');
+  const cEg = document.getElementById('presupuesto-egresos-list');
+  if (!cIng || !cEg || !p) return;
+
+  const totalBase = p.ingresos?.total_ingresos_base_mensual || 137813.80;
+
+  // Renderizar Ingresos
+  const ingData = [
+    { nivel: "Primer Nivel", detalle: "Locales A-101 a A-105-A (WES, Bingo, Armería...)", mensual: p.ingresos?.primer_nivel?.mensual || 48105.40, anual: p.ingresos?.primer_nivel?.anual || 577264.80, color: "#D32F2F" },
+    { nivel: "Segundo Nivel", detalle: "Locales A-201 a A-210 (INABIE, Jet Pack, Alba Rdz...)", mensual: p.ingresos?.segundo_nivel?.mensual || 45208.40, anual: p.ingresos?.segundo_nivel?.anual || 542500.80, color: "#2563EB" },
+    { nivel: "Tercer Nivel (Base)", detalle: "Locales A-301 a A-312 (B&B Gym, Vipsania, Grupo Inter...)", mensual: p.ingresos?.tercer_nivel_base?.mensual || 44500.00, anual: p.ingresos?.tercer_nivel_base?.anual || 533999.96, color: "#7C3AED" },
+    { nivel: "Tercer Nivel (Con Variaciones)", detalle: "Incluye Mega Coffy, Antena/Sotea y cuotas extendidas", mensual: p.ingresos?.tercer_nivel_presupuesto?.mensual || 77635.00, variacion: p.ingresos?.tercer_nivel_presupuesto?.variacion || 33135.00, color: "#0D9488", esVariacion: true }
+  ];
+
+  cIng.innerHTML = ingData.map(item => {
+    const pct = ((item.mensual / totalBase) * 100).toFixed(1);
+    return `
+      <div style="margin-bottom:14px; padding-bottom:12px; border-bottom:1px solid #F1F5F9;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px;">
+          <div>
+            <strong style="color:#0F172A; font-size:14px;">${item.nivel}</strong>
+            <div style="font-size:11px; color:#64748B;">${item.detalle}</div>
+          </div>
+          <div style="text-align:right;">
+            <strong style="color:${item.color}; font-size:14px;">${App.formatCurrency(item.mensual)}</strong>
+            <div style="font-size:11px; color:#64748B;">${item.anual ? App.formatCurrency(item.anual) + '/año' : `+${App.formatCurrency(item.variacion)} var.`}</div>
+          </div>
+        </div>
+        <div style="background:#F1F5F9; border-radius:999px; height:7px; overflow:hidden;">
+          <div style="background:${item.color}; width:${Math.min(pct, 100)}%; height:100%; border-radius:999px;"></div>
+        </div>
+        <div style="font-size:10px; color:#94A3B8; text-align:right; margin-top:2px;">${pct}% del ingreso base mensual</div>
+      </div>
+    `;
+  }).join('');
+
+  // Renderizar Egresos
+  const egresosList = Array.isArray(p.egresos) ? p.egresos : [];
+  cEg.innerHTML = egresosList.map(eg => {
+    const pct = ((eg.mensual / totalBase) * 100).toFixed(1);
+    return `
+      <div style="margin-bottom:14px; padding-bottom:12px; border-bottom:1px solid #F1F5F9;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px;">
+          <div>
+            <strong style="color:#0F172A; font-size:13px;">${eg.concepto}</strong>
+          </div>
+          <div style="text-align:right;">
+            <strong style="color:#D32F2F; font-size:14px;">${App.formatCurrency(eg.mensual)}</strong>
+            <div style="font-size:11px; color:#64748B;">${App.formatCurrency(eg.anual)}/año</div>
+          </div>
+        </div>
+        <div style="background:#F1F5F9; border-radius:999px; height:7px; overflow:hidden;">
+          <div style="background:#D32F2F; width:${pct}%; height:100%; border-radius:999px;"></div>
+        </div>
+        <div style="font-size:10px; color:#94A3B8; text-align:right; margin-top:2px;">${pct}% del presupuesto operativo mensual</div>
+      </div>
+    `;
+  }).join('');
 }
 
 // ==========================================
@@ -143,8 +390,16 @@ async function loadUsuarios() {
     if (data.success && data.usuarios) {
       adminData.usuarios = data.usuarios;
       renderUsuariosTable(data.usuarios);
+      return;
     }
   } catch (_) {}
+
+  // Fallback desde catálogo
+  const cat = await fetchCatalogFallback();
+  if (cat && cat.USUARIOS) {
+    adminData.usuarios = cat.USUARIOS;
+    renderUsuariosTable(adminData.usuarios);
+  }
 }
 
 function renderUsuariosTable(users) {

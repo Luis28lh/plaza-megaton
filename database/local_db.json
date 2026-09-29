@@ -1,396 +1,1206 @@
 {
   "CUBICULOS": [
     {
-      "cubiculo_id": "CUB-001",
-      "codigo": "C-001",
+      "cubiculo_id": "CUB-A101",
+      "codigo": "A-101",
+      "nivel": "Primer Nivel",
+      "area_m2": 64.75,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 6475,
+      "nombre_local": "Yesenia Grullón",
+      "actividad_comercial": "Comercial / Administrativo",
       "estado": "Ocupado",
-      "nivel": "Nivel 1",
-      "observaciones": "Pasillo Principal A - Frente a entrada"
+      "propietario": "YESENIA GRULLON",
+      "rnc": "",
+      "observaciones": "Primer Nivel - Local Principal"
     },
     {
-      "cubiculo_id": "CUB-002",
-      "codigo": "C-002",
+      "cubiculo_id": "CUB-A102",
+      "codigo": "A-102",
+      "nivel": "Primer Nivel",
+      "area_m2": 54.95,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 5495,
+      "nombre_local": "Alba María García Rodríguez",
+      "actividad_comercial": "Servicios Profesionales",
       "estado": "Ocupado",
-      "nivel": "Nivel 1",
-      "observaciones": "Pasillo Principal A"
+      "propietario": "ALBA MARIA GARCIA RODRIGUEZ",
+      "rnc": "131516238",
+      "observaciones": "Primer Nivel - RNC 131516238"
     },
     {
-      "cubiculo_id": "CUB-003",
-      "codigo": "C-003",
+      "cubiculo_id": "CUB-A103",
+      "codigo": "A-103",
+      "nivel": "Primer Nivel",
+      "area_m2": 170.24,
+      "precio_m2": 60,
+      "mantenimiento_mensual": 10214.4,
+      "nombre_local": "Consultorio Dra. Melissa",
+      "actividad_comercial": "Servicios Médicos / Salud",
       "estado": "Ocupado",
-      "nivel": "Nivel 1",
-      "observaciones": "Pasillo Principal A"
+      "propietario": "DR. MELISSA",
+      "rnc": "",
+      "observaciones": "Primer Nivel - Área Médica"
     },
     {
-      "cubiculo_id": "CUB-004",
-      "codigo": "C-004",
-      "estado": "Disponible",
-      "nivel": "Nivel 1",
-      "observaciones": "Pasillo Principal A"
-    },
-    {
-      "cubiculo_id": "CUB-005",
-      "codigo": "C-005",
-      "estado": "Disponible",
-      "nivel": "Nivel 1",
-      "observaciones": "Pasillo Principal A - Esquina"
-    },
-    {
-      "cubiculo_id": "CUB-006",
-      "codigo": "C-006",
-      "estado": "Disponible",
-      "nivel": "Nivel 1",
-      "observaciones": "Pasillo B - Zona Comercial"
-    },
-    {
-      "cubiculo_id": "CUB-007",
-      "codigo": "C-007",
-      "estado": "Disponible",
-      "nivel": "Nivel 1",
-      "observaciones": "Pasillo B - Zona Comercial"
-    },
-    {
-      "cubiculo_id": "CUB-008",
-      "codigo": "C-008",
-      "estado": "Disponible",
-      "nivel": "Nivel 1",
-      "observaciones": "Pasillo B - Zona Comercial"
-    },
-    {
-      "cubiculo_id": "CUB-009",
-      "codigo": "C-009",
-      "estado": "Disponible",
-      "nivel": "Nivel 1",
-      "observaciones": "Pasillo B - Zona Comercial"
-    },
-    {
-      "cubiculo_id": "CUB-010",
-      "codigo": "C-010",
-      "estado": "Disponible",
-      "nivel": "Nivel 1",
-      "observaciones": "Pasillo B - Esquina"
-    },
-    {
-      "cubiculo_id": "CUB-011",
-      "codigo": "C-011",
-      "estado": "Disponible",
-      "nivel": "Nivel 1",
-      "observaciones": "Pasillo Central C"
-    },
-    {
-      "cubiculo_id": "CUB-012",
-      "codigo": "C-012",
-      "estado": "Disponible",
-      "nivel": "Nivel 1",
-      "observaciones": "Pasillo Central C"
-    },
-    {
-      "cubiculo_id": "CUB-013",
-      "codigo": "C-013",
-      "estado": "Disponible",
-      "nivel": "Nivel 1",
-      "observaciones": "Pasillo Central C"
-    },
-    {
-      "cubiculo_id": "CUB-014",
-      "codigo": "C-014",
-      "estado": "Disponible",
-      "nivel": "Nivel 1",
-      "observaciones": "Pasillo Central C"
-    },
-    {
-      "cubiculo_id": "CUB-015",
-      "codigo": "C-015",
-      "estado": "Disponible",
-      "nivel": "Nivel 1",
-      "observaciones": "Pasillo Central C"
-    },
-    {
-      "cubiculo_id": "CUB-016",
-      "codigo": "C-016",
-      "estado": "Disponible",
-      "nivel": "Nivel 2",
-      "observaciones": "Nivel 2 - Pasillo D Servicios"
-    },
-    {
-      "cubiculo_id": "CUB-017",
-      "codigo": "C-017",
-      "estado": "Disponible",
-      "nivel": "Nivel 2",
-      "observaciones": "Nivel 2 - Pasillo D Servicios"
-    },
-    {
-      "cubiculo_id": "CUB-018",
-      "codigo": "C-018",
-      "estado": "Disponible",
-      "nivel": "Nivel 2",
-      "observaciones": "Nivel 2 - Pasillo D Servicios"
-    },
-    {
-      "cubiculo_id": "CUB-019",
-      "codigo": "C-019",
-      "estado": "Disponible",
-      "nivel": "Nivel 2",
-      "observaciones": "Nivel 2 - Pasillo D Servicios"
-    },
-    {
-      "cubiculo_id": "CUB-020",
-      "codigo": "C-020",
-      "estado": "Disponible",
-      "nivel": "Nivel 2",
-      "observaciones": "Nivel 2 - Pasillo D Servicios"
-    },
-    {
-      "cubiculo_id": "CUB-021",
-      "codigo": "C-021",
-      "estado": "Disponible",
-      "nivel": "Nivel 2",
-      "observaciones": "Nivel 2 - Pasillo E Tecnología"
-    },
-    {
-      "cubiculo_id": "CUB-022",
-      "codigo": "C-022",
-      "estado": "Disponible",
-      "nivel": "Nivel 2",
-      "observaciones": "Nivel 2 - Pasillo E Tecnología"
-    },
-    {
-      "cubiculo_id": "CUB-023",
-      "codigo": "C-023",
-      "estado": "Disponible",
-      "nivel": "Nivel 2",
-      "observaciones": "Nivel 2 - Pasillo E Tecnología"
-    },
-    {
-      "cubiculo_id": "CUB-024",
-      "codigo": "C-024",
-      "estado": "Disponible",
-      "nivel": "Nivel 2",
-      "observaciones": "Nivel 2 - Pasillo E Tecnología"
-    },
-    {
-      "cubiculo_id": "CUB-025",
-      "codigo": "C-025",
-      "estado": "Disponible",
-      "nivel": "Nivel 2",
-      "observaciones": "Nivel 2 - Pasillo E Tecnología"
-    },
-    {
-      "cubiculo_id": "CUB-026",
-      "codigo": "C-026",
-      "estado": "Disponible",
-      "nivel": "Nivel 2",
-      "observaciones": "Nivel 2 - Área Occidental"
-    },
-    {
-      "cubiculo_id": "CUB-027",
-      "codigo": "C-027",
-      "estado": "Disponible",
-      "nivel": "Nivel 2",
-      "observaciones": "Nivel 2 - Área Occidental"
-    },
-    {
-      "cubiculo_id": "CUB-028",
-      "codigo": "C-028",
-      "estado": "Disponible",
-      "nivel": "Nivel 2",
-      "observaciones": "Nivel 2 - Área Occidental"
-    },
-    {
-      "cubiculo_id": "CUB-029",
-      "codigo": "C-029",
-      "estado": "Disponible",
-      "nivel": "Nivel 2",
-      "observaciones": "Nivel 2 - Área Occidental"
-    },
-    {
-      "cubiculo_id": "CUB-030",
-      "codigo": "C-030",
-      "estado": "Disponible",
-      "nivel": "Nivel 2",
-      "observaciones": "Nivel 2 - Frente a escaleras"
-    },
-    {
-      "cubiculo_id": "CUB-C1",
-      "codigo": "C1",
+      "cubiculo_id": "CUB-A104",
+      "codigo": "A-104",
+      "nivel": "Primer Nivel",
+      "area_m2": 78.26,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 7826,
+      "nombre_local": "Warn Electrical Services SRL",
+      "actividad_comercial": "Seguridad Electrónica, Automatización e Instalaciones",
       "estado": "Ocupado",
-      "observaciones": "Registrado por usuario",
-      "nombre_local": "Zapatería Pedro",
-      "actividad_comercial": "Venta de calzado"
+      "propietario": "WARN ELECTRICAL SERVICES SRL",
+      "rnc": "130161267",
+      "observaciones": "Primer Nivel - Sede WES"
     },
     {
-      "cubiculo_id": "CUB-C2",
-      "codigo": "C2",
+      "cubiculo_id": "CUB-A105",
+      "codigo": "A-105",
+      "nivel": "Primer Nivel",
+      "area_m2": 223.45,
+      "precio_m2": 35,
+      "mantenimiento_mensual": 7820.75,
+      "nombre_local": "Armería La Mocana SRL - Pablo Abreu",
+      "actividad_comercial": "Comercio Especializado / Armería",
       "estado": "Ocupado",
-      "observaciones": "Registrado por usuario",
-      "nombre_local": "Depósito Pedro",
-      "actividad_comercial": "Almacén de mercancía"
+      "propietario": "ARMERIA LA MOCANA SRL - PABLO ABREU",
+      "rnc": "130060398",
+      "observaciones": "Primer Nivel - RNC 130060398"
     },
     {
-      "cubiculo_id": "CUB-C10",
-      "codigo": "C10",
-      "nombre_local": "Taller Alfa",
-      "actividad_comercial": "Reparación de celulares",
+      "cubiculo_id": "CUB-A105A",
+      "codigo": "A-105-A",
+      "nivel": "Primer Nivel",
+      "area_m2": 293.55,
+      "precio_m2": 35,
+      "mantenimiento_mensual": 10274.25,
+      "nombre_local": "Bingo",
+      "actividad_comercial": "Entretenimiento / Juegos",
       "estado": "Ocupado",
-      "observaciones": "Registrado por usuario"
+      "propietario": "EDWAR GRULLON",
+      "rnc": "130161267",
+      "observaciones": "Primer Nivel - Sala de Bingo"
     },
     {
-      "cubiculo_id": "CUB-C11",
-      "codigo": "C11",
-      "nombre_local": "Boutique Alfa",
-      "actividad_comercial": "Venta de ropa",
+      "cubiculo_id": "CUB-A201",
+      "codigo": "A-201",
+      "nivel": "Segundo Nivel",
+      "area_m2": 115.2,
+      "precio_m2": 60,
+      "mantenimiento_mensual": 6912,
+      "nombre_local": "INABIE",
+      "actividad_comercial": "Institucional / Gubernamental",
       "estado": "Ocupado",
-      "observaciones": "Registrado por usuario"
+      "propietario": "INABIE",
+      "rnc": "130161267",
+      "observaciones": "Segundo Nivel - Oficinas INABIE"
     },
     {
-      "cubiculo_id": "CUB-C20",
-      "codigo": "C20",
-      "nombre_local": "Electrónica Sánchez",
-      "actividad_comercial": "Reparación de celulares",
+      "cubiculo_id": "CUB-A202",
+      "codigo": "A-202",
+      "nivel": "Segundo Nivel",
+      "area_m2": 32.88,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 3288,
+      "nombre_local": "Luis María García",
+      "actividad_comercial": "Comercial",
       "estado": "Ocupado",
-      "observaciones": "Registrado por usuario"
+      "propietario": "LUIS MARIA GARCIA",
+      "rnc": "",
+      "observaciones": "Segundo Nivel"
+    },
+    {
+      "cubiculo_id": "CUB-A203",
+      "codigo": "A-203",
+      "nivel": "Segundo Nivel",
+      "area_m2": 34.18,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 3418,
+      "nombre_local": "Jet Pack",
+      "actividad_comercial": "Envíos / Paquetería / Courier",
+      "estado": "Ocupado",
+      "propietario": "MANUEL SANTOS",
+      "rnc": "",
+      "observaciones": "Segundo Nivel - Jet Pack"
+    },
+    {
+      "cubiculo_id": "CUB-A204",
+      "codigo": "A-204",
+      "nivel": "Segundo Nivel",
+      "area_m2": 30.83,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 3083,
+      "nombre_local": "Manuel Santos",
+      "actividad_comercial": "Comercial / Oficina",
+      "estado": "Ocupado",
+      "propietario": "MANUEL SANTOS",
+      "rnc": "",
+      "observaciones": "Segundo Nivel"
+    },
+    {
+      "cubiculo_id": "CUB-A205",
+      "codigo": "A-205",
+      "nivel": "Segundo Nivel",
+      "area_m2": 13.55,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 1355,
+      "nombre_local": "Centro de Uña",
+      "actividad_comercial": "Estética y Belleza / Salón de Uñas",
+      "estado": "Ocupado",
+      "propietario": "ELDA BENCOSME",
+      "rnc": "",
+      "observaciones": "Segundo Nivel - Salón"
+    },
+    {
+      "cubiculo_id": "CUB-A206",
+      "codigo": "A-206",
+      "nivel": "Segundo Nivel",
+      "area_m2": 66.69,
+      "precio_m2": 31,
+      "mantenimiento_mensual": 2067.39,
+      "nombre_local": "Alba Rodríguez & Asociados, SRL",
+      "actividad_comercial": "Consultoría / Servicios Legales y Financieros",
+      "estado": "Ocupado",
+      "propietario": "ALBA RODRIGUEZ & ASOCIADOS, SRL",
+      "rnc": "131262589",
+      "observaciones": "Segundo Nivel - RNC 131262589"
+    },
+    {
+      "cubiculo_id": "CUB-A207",
+      "codigo": "A-207",
+      "nivel": "Segundo Nivel",
+      "area_m2": 65.14,
+      "precio_m2": 31,
+      "mantenimiento_mensual": 2019.34,
+      "nombre_local": "Alba Rodríguez & Asociados, SRL",
+      "actividad_comercial": "Consultoría / Servicios Legales y Financieros",
+      "estado": "Ocupado",
+      "propietario": "ALBA RODRIGUEZ & ASOCIADOS, SRL",
+      "rnc": "131262589",
+      "observaciones": "Segundo Nivel - RNC 131262589"
+    },
+    {
+      "cubiculo_id": "CUB-A208",
+      "codigo": "A-208",
+      "nivel": "Segundo Nivel",
+      "area_m2": 80.05,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 8005,
+      "nombre_local": "Nicolás Grullón",
+      "actividad_comercial": "Comercial",
+      "estado": "Ocupado",
+      "propietario": "NICOLAS GRULLON",
+      "rnc": "",
+      "observaciones": "Segundo Nivel"
+    },
+    {
+      "cubiculo_id": "CUB-A209",
+      "codigo": "A-209",
+      "nivel": "Segundo Nivel",
+      "area_m2": 79.99,
+      "precio_m2": 60,
+      "mantenimiento_mensual": 4799.4,
+      "nombre_local": "Ahsdiel Music Bar SRL",
+      "actividad_comercial": "Bar / Lounge / Entretenimiento",
+      "estado": "Ocupado",
+      "propietario": "AHSDIEL MUSIC BAR SRL",
+      "rnc": "132080211",
+      "observaciones": "Segundo Nivel - RNC 132080211"
+    },
+    {
+      "cubiculo_id": "CUB-A210",
+      "codigo": "A-210",
+      "nivel": "Segundo Nivel",
+      "area_m2": 84.42,
+      "precio_m2": 60,
+      "mantenimiento_mensual": 5065.2,
+      "nombre_local": "Ahsdiel Music Bar SRL",
+      "actividad_comercial": "Bar / Lounge / Entretenimiento",
+      "estado": "Ocupado",
+      "propietario": "AHSDIEL MUSIC BAR SRL",
+      "rnc": "130161267",
+      "observaciones": "Segundo Nivel - RNC 130161267"
+    },
+    {
+      "cubiculo_id": "CUB-A301A",
+      "codigo": "A-301-A",
+      "nivel": "Tercer Nivel",
+      "area_m2": 34.37,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 3437,
+      "nombre_local": "Vipsania Grullón",
+      "actividad_comercial": "Comercial / Administrativo",
+      "estado": "Ocupado",
+      "propietario": "VIPSANIA GRULLON",
+      "rnc": "130161267",
+      "observaciones": "Tercer Nivel - Módulo A"
+    },
+    {
+      "cubiculo_id": "CUB-A301B",
+      "codigo": "A-301-B",
+      "nivel": "Tercer Nivel",
+      "area_m2": 15.32,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 1532,
+      "nombre_local": "Vipsania Grullón",
+      "actividad_comercial": "Comercial / Administrativo",
+      "estado": "Ocupado",
+      "propietario": "VIPSANIA GRULLON",
+      "rnc": "130161267",
+      "observaciones": "Tercer Nivel - Módulo B"
+    },
+    {
+      "cubiculo_id": "CUB-A301C",
+      "codigo": "A-301-C",
+      "nivel": "Tercer Nivel",
+      "area_m2": 11.05,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 1105,
+      "nombre_local": "Vipsania Grullón",
+      "actividad_comercial": "Comercial / Administrativo",
+      "estado": "Ocupado",
+      "propietario": "VIPSANIA GRULLON",
+      "rnc": "130161267",
+      "observaciones": "Tercer Nivel - Módulo C"
+    },
+    {
+      "cubiculo_id": "CUB-A301D",
+      "codigo": "A-301-D",
+      "nivel": "Tercer Nivel",
+      "area_m2": 9.69,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 969,
+      "nombre_local": "Vipsania Grullón",
+      "actividad_comercial": "Comercial / Administrativo",
+      "estado": "Ocupado",
+      "propietario": "VIPSANIA GRULLON",
+      "rnc": "130161267",
+      "observaciones": "Tercer Nivel - Módulo D"
+    },
+    {
+      "cubiculo_id": "CUB-A302",
+      "codigo": "A-302",
+      "nivel": "Tercer Nivel",
+      "area_m2": 43.53,
+      "precio_m2": 31,
+      "mantenimiento_mensual": 1349.43,
+      "nombre_local": "Grupo de Desarrollo Internacional",
+      "actividad_comercial": "Desarrollo Inmobiliario / Proyectos",
+      "estado": "Ocupado",
+      "propietario": "GRUPO DE DESARROLLO INTERNACIONAL",
+      "rnc": "106014788",
+      "observaciones": "Tercer Nivel - Local 302"
+    },
+    {
+      "cubiculo_id": "CUB-A303",
+      "codigo": "A-303",
+      "nivel": "Tercer Nivel",
+      "area_m2": 43.92,
+      "precio_m2": 31,
+      "mantenimiento_mensual": 1361.52,
+      "nombre_local": "Grupo de Desarrollo Internacional",
+      "actividad_comercial": "Desarrollo Inmobiliario / Proyectos",
+      "estado": "Ocupado",
+      "propietario": "GRUPO DE DESARROLLO INTERNACIONAL",
+      "rnc": "106014788",
+      "observaciones": "Tercer Nivel - Local 303"
+    },
+    {
+      "cubiculo_id": "CUB-A304",
+      "codigo": "A-304",
+      "nivel": "Tercer Nivel",
+      "area_m2": 34.9,
+      "precio_m2": 31,
+      "mantenimiento_mensual": 1081.9,
+      "nombre_local": "Grupo de Desarrollo Internacional",
+      "actividad_comercial": "Desarrollo Inmobiliario / Proyectos",
+      "estado": "Ocupado",
+      "propietario": "GRUPO DE DESARROLLO INTERNACIONAL",
+      "rnc": "106014788",
+      "observaciones": "Tercer Nivel - Local 304"
+    },
+    {
+      "cubiculo_id": "CUB-A305",
+      "codigo": "A-305",
+      "nivel": "Tercer Nivel",
+      "area_m2": 39.26,
+      "precio_m2": 31,
+      "mantenimiento_mensual": 1217.06,
+      "nombre_local": "Grupo de Desarrollo Internacional",
+      "actividad_comercial": "Desarrollo Inmobiliario / Proyectos",
+      "estado": "Ocupado",
+      "propietario": "GRUPO DE DESARROLLO INTERNACIONAL",
+      "rnc": "106014788",
+      "observaciones": "Tercer Nivel - Local 305"
+    },
+    {
+      "cubiculo_id": "CUB-A306",
+      "codigo": "A-306",
+      "nivel": "Tercer Nivel",
+      "area_m2": 33.93,
+      "precio_m2": 31,
+      "mantenimiento_mensual": 1051.83,
+      "nombre_local": "Grupo de Desarrollo Internacional",
+      "actividad_comercial": "Desarrollo Inmobiliario / Proyectos",
+      "estado": "Ocupado",
+      "propietario": "GRUPO DE DESARROLLO INTERNACIONAL",
+      "rnc": "106014788",
+      "observaciones": "Tercer Nivel - Local 306"
+    },
+    {
+      "cubiculo_id": "CUB-A307",
+      "codigo": "A-307",
+      "nivel": "Tercer Nivel",
+      "area_m2": 202.43,
+      "precio_m2": 31,
+      "mantenimiento_mensual": 6275.33,
+      "nombre_local": "Grupo de Desarrollo Internacional",
+      "actividad_comercial": "Desarrollo Inmobiliario / Proyectos",
+      "estado": "Ocupado",
+      "propietario": "GRUPO DE DESARROLLO INTERNACIONAL",
+      "rnc": "106014788",
+      "observaciones": "Tercer Nivel - Local 307"
+    },
+    {
+      "cubiculo_id": "CUB-A307ANT",
+      "codigo": "A-307-ANT",
+      "nivel": "Tercer Nivel",
+      "area_m2": 335.77,
+      "precio_m2": 31,
+      "mantenimiento_mensual": 10408.87,
+      "nombre_local": "Esward-Sotea, Antena",
+      "actividad_comercial": "Telecomunicaciones / Azotea",
+      "estado": "Ocupado",
+      "propietario": "EDWARD GRULLON",
+      "rnc": "131712541",
+      "observaciones": "Tercer Nivel / Azotea - Antena"
+    },
+    {
+      "cubiculo_id": "CUB-A307COF",
+      "codigo": "A-307-COF",
+      "nivel": "Tercer Nivel",
+      "area_m2": 22.62,
+      "precio_m2": 180,
+      "mantenimiento_mensual": 4071.6,
+      "nombre_local": "Mega Coffy",
+      "actividad_comercial": "Cafetería / Bebidas y Snacks",
+      "estado": "Ocupado",
+      "propietario": "NICOLAS GRULLON",
+      "rnc": "132080211",
+      "observaciones": "Tercer Nivel - Mega Coffy"
+    },
+    {
+      "cubiculo_id": "CUB-A308",
+      "codigo": "A-308",
+      "nivel": "Tercer Nivel",
+      "area_m2": 62.23,
+      "precio_m2": 60,
+      "mantenimiento_mensual": 3733.8,
+      "nombre_local": "Bertha Soury",
+      "actividad_comercial": "Comercial / Oficina",
+      "estado": "Ocupado",
+      "propietario": "BERTHA SOURY",
+      "rnc": "",
+      "observaciones": "Tercer Nivel"
+    },
+    {
+      "cubiculo_id": "CUB-A309",
+      "codigo": "A-309",
+      "nivel": "Tercer Nivel",
+      "area_m2": 79.34,
+      "precio_m2": 60,
+      "mantenimiento_mensual": 4760.4,
+      "nombre_local": "Bertha Soury",
+      "actividad_comercial": "Comercial / Oficina",
+      "estado": "Ocupado",
+      "propietario": "BERTHA SOURY",
+      "rnc": "",
+      "observaciones": "Tercer Nivel"
+    },
+    {
+      "cubiculo_id": "CUB-A310",
+      "codigo": "A-310",
+      "nivel": "Tercer Nivel",
+      "area_m2": 1002.06,
+      "precio_m2": 31,
+      "mantenimiento_mensual": 31063.86,
+      "nombre_local": "B&B Operadora de Filmes & Gym SRL",
+      "actividad_comercial": "Gimnasio / Fitness / Producción",
+      "estado": "Ocupado",
+      "propietario": "B&B OPERADORA DE FILMES & GYM SRL",
+      "rnc": "131528759",
+      "observaciones": "Tercer Nivel - 4 secciones (268.89 + 453.02 + 270.48 + 9.67 m2)"
+    },
+    {
+      "cubiculo_id": "CUB-A311",
+      "codigo": "A-311",
+      "nivel": "Tercer Nivel",
+      "area_m2": 47.57,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 4757,
+      "nombre_local": "Elda Bencosme",
+      "actividad_comercial": "Comercial / Estética",
+      "estado": "Ocupado",
+      "propietario": "ELDA BENCOSME",
+      "rnc": "",
+      "observaciones": "Tercer Nivel"
+    },
+    {
+      "cubiculo_id": "CUB-A312",
+      "codigo": "A-312",
+      "nivel": "Tercer Nivel",
+      "area_m2": 423.35,
+      "precio_m2": 31,
+      "mantenimiento_mensual": 5000,
+      "nombre_local": "Grupo de Desarrollo Internacional",
+      "actividad_comercial": "Desarrollo Inmobiliario / Proyectos",
+      "estado": "Ocupado",
+      "propietario": "GRUPO DE DESARROLLO INTERNACIONAL",
+      "rnc": "106014788",
+      "observaciones": "Tercer Nivel - Local 312"
     }
   ],
   "USUARIOS": [
     {
       "user_id": "US-001",
-      "nombre": "Juan Pérez",
-      "email": "juan.perez@megatest.com",
-      "telefono": "809-555-1111",
-      "fecha_registro": "22/09/2026",
+      "nombre": "YESENIA GRULLON",
+      "rnc": "",
+      "email": "yesenia.grullon@plazamegaton.com",
+      "telefono": "809-555-1000",
+      "tipo": "Propietario / Inquilino",
+      "cubiculos": [
+        "A-101"
+      ],
+      "fecha_registro": "28/09/2026",
       "estado": "Activo"
     },
     {
       "user_id": "US-002",
-      "nombre": "María Gómez",
-      "email": "maria.gomez@megatest.com",
-      "telefono": "809-555-2222",
-      "fecha_registro": "22/09/2026",
+      "nombre": "ALBA MARIA GARCIA RODRIGUEZ",
+      "rnc": "131516238",
+      "email": "alba.maria.garcia.rodriguez@plazamegaton.com",
+      "telefono": "809-555-1001",
+      "tipo": "Propietario / Inquilino",
+      "cubiculos": [
+        "A-102"
+      ],
+      "fecha_registro": "28/09/2026",
       "estado": "Activo"
     },
     {
       "user_id": "US-003",
-      "nombre": "Carlos Mendoza",
-      "email": "carlos.mendoza@test.com",
-      "telefono": "8095554321",
-      "fecha_registro": "22/09/2026",
+      "nombre": "DR. MELISSA",
+      "rnc": "",
+      "email": "dr.melissa@plazamegaton.com",
+      "telefono": "809-555-1002",
+      "tipo": "Propietario / Inquilino",
+      "cubiculos": [
+        "A-103"
+      ],
+      "fecha_registro": "28/09/2026",
       "estado": "Activo"
     },
     {
       "user_id": "US-004",
-      "nombre": "Lucia Ramos",
-      "email": "lucia.ramos@test.com",
-      "telefono": "8095559988",
-      "fecha_registro": "22/09/2026",
+      "nombre": "WARN ELECTRICAL SERVICES SRL",
+      "rnc": "130161267",
+      "email": "warn.electrical.services.srl@plazamegaton.com",
+      "telefono": "809-555-1003",
+      "tipo": "Propietario / Inquilino",
+      "cubiculos": [
+        "A-104"
+      ],
+      "fecha_registro": "28/09/2026",
       "estado": "Activo"
     },
     {
       "user_id": "US-005",
-      "nombre": "Pedro Almonte",
-      "email": "pedro.almonte@test.com",
-      "telefono": "8095557788",
-      "fecha_registro": "22/09/2026",
+      "nombre": "ARMERIA LA MOCANA SRL - PABLO ABREU",
+      "rnc": "130060398",
+      "email": "armeria.la.mocana.srl.pablo.abreu@plazamegaton.com",
+      "telefono": "809-555-1004",
+      "tipo": "Propietario / Inquilino",
+      "cubiculos": [
+        "A-105"
+      ],
+      "fecha_registro": "28/09/2026",
       "estado": "Activo"
     },
     {
       "user_id": "US-006",
-      "nombre": "Don Fernando",
-      "email": "fernando@megatest.com",
-      "telefono": "809-555-8899",
-      "fecha_registro": "22/09/2026",
+      "nombre": "EDWAR GRULLON",
+      "rnc": "130161267",
+      "email": "edwar.grullon@plazamegaton.com",
+      "telefono": "809-555-1005",
+      "tipo": "Propietario / Inquilino",
+      "cubiculos": [
+        "A-105-A"
+      ],
+      "fecha_registro": "28/09/2026",
       "estado": "Activo"
     },
     {
       "user_id": "US-007",
-      "nombre": "Roberto Sánchez",
-      "email": "roberto.sanchez@test.com",
-      "telefono": "8095551234",
-      "fecha_registro": "22/09/2026",
+      "nombre": "INABIE",
+      "rnc": "130161267",
+      "email": "inabie@plazamegaton.com",
+      "telefono": "809-555-1006",
+      "tipo": "Propietario / Inquilino",
+      "cubiculos": [
+        "A-201"
+      ],
+      "fecha_registro": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "user_id": "US-008",
+      "nombre": "LUIS MARIA GARCIA",
+      "rnc": "",
+      "email": "luis.maria.garcia@plazamegaton.com",
+      "telefono": "809-555-1007",
+      "tipo": "Propietario / Inquilino",
+      "cubiculos": [
+        "A-202"
+      ],
+      "fecha_registro": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "user_id": "US-009",
+      "nombre": "MANUEL SANTOS",
+      "rnc": "",
+      "email": "manuel.santos@plazamegaton.com",
+      "telefono": "809-555-1008",
+      "tipo": "Propietario / Inquilino",
+      "cubiculos": [
+        "A-203",
+        "A-204"
+      ],
+      "fecha_registro": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "user_id": "US-010",
+      "nombre": "ELDA BENCOSME",
+      "rnc": "",
+      "email": "elda.bencosme@plazamegaton.com",
+      "telefono": "809-555-1009",
+      "tipo": "Propietario / Inquilino",
+      "cubiculos": [
+        "A-205",
+        "A-311"
+      ],
+      "fecha_registro": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "user_id": "US-011",
+      "nombre": "ALBA RODRIGUEZ & ASOCIADOS, SRL",
+      "rnc": "131262589",
+      "email": "alba.rodriguez.asociados.srl@plazamegaton.com",
+      "telefono": "809-555-1010",
+      "tipo": "Propietario / Inquilino",
+      "cubiculos": [
+        "A-206",
+        "A-207"
+      ],
+      "fecha_registro": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "user_id": "US-012",
+      "nombre": "NICOLAS GRULLON",
+      "rnc": "132080211",
+      "email": "nicolas.grullon@plazamegaton.com",
+      "telefono": "809-555-1011",
+      "tipo": "Propietario / Inquilino",
+      "cubiculos": [
+        "A-208",
+        "A-307-COF"
+      ],
+      "fecha_registro": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "user_id": "US-013",
+      "nombre": "AHSDIEL MUSIC BAR SRL",
+      "rnc": "132080211",
+      "email": "ahsdiel.music.bar.srl@plazamegaton.com",
+      "telefono": "809-555-1012",
+      "tipo": "Propietario / Inquilino",
+      "cubiculos": [
+        "A-209",
+        "A-210"
+      ],
+      "fecha_registro": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "user_id": "US-014",
+      "nombre": "VIPSANIA GRULLON",
+      "rnc": "130161267",
+      "email": "vipsania.grullon@plazamegaton.com",
+      "telefono": "809-555-1013",
+      "tipo": "Propietario / Inquilino",
+      "cubiculos": [
+        "A-301-A",
+        "A-301-B",
+        "A-301-C",
+        "A-301-D"
+      ],
+      "fecha_registro": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "user_id": "US-015",
+      "nombre": "GRUPO DE DESARROLLO INTERNACIONAL",
+      "rnc": "106014788",
+      "email": "grupo.de.desarrollo.internacional@plazamegaton.com",
+      "telefono": "809-555-1014",
+      "tipo": "Propietario / Inquilino",
+      "cubiculos": [
+        "A-302",
+        "A-303",
+        "A-304",
+        "A-305",
+        "A-306",
+        "A-307",
+        "A-312"
+      ],
+      "fecha_registro": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "user_id": "US-016",
+      "nombre": "EDWARD GRULLON",
+      "rnc": "131712541",
+      "email": "edward.grullon@plazamegaton.com",
+      "telefono": "809-555-1015",
+      "tipo": "Propietario / Inquilino",
+      "cubiculos": [
+        "A-307-ANT"
+      ],
+      "fecha_registro": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "user_id": "US-017",
+      "nombre": "BERTHA SOURY",
+      "rnc": "",
+      "email": "bertha.soury@plazamegaton.com",
+      "telefono": "809-555-1016",
+      "tipo": "Propietario / Inquilino",
+      "cubiculos": [
+        "A-308",
+        "A-309"
+      ],
+      "fecha_registro": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "user_id": "US-018",
+      "nombre": "B&B OPERADORA DE FILMES & GYM SRL",
+      "rnc": "131528759",
+      "email": "b.b.operadora.de.filmes.gym.srl@plazamegaton.com",
+      "telefono": "809-555-1017",
+      "tipo": "Propietario / Inquilino",
+      "cubiculos": [
+        "A-310"
+      ],
+      "fecha_registro": "28/09/2026",
       "estado": "Activo"
     }
   ],
   "USUARIO_CUBICULO": [
     {
-      "id": "UC-1790101382110-150",
+      "id": "UC-001",
       "user_id": "US-001",
-      "cubiculo_id": "CUB-001",
-      "fecha_asignacion": "22/09/2026",
+      "cubiculo_id": "CUB-A101",
+      "codigo_local": "A-101",
+      "nombre_local": "Yesenia Grullón",
+      "actividad_comercial": "Comercial / Administrativo",
+      "area_m2": 64.75,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 6475,
+      "fecha_asignacion": "28/09/2026",
       "estado": "Activo"
     },
     {
-      "id": "UC-1790101388212-629",
+      "id": "UC-002",
       "user_id": "US-002",
-      "cubiculo_id": "CUB-002",
-      "fecha_asignacion": "22/09/2026",
+      "cubiculo_id": "CUB-A102",
+      "codigo_local": "A-102",
+      "nombre_local": "Alba María García Rodríguez",
+      "actividad_comercial": "Servicios Profesionales",
+      "area_m2": 54.95,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 5495,
+      "fecha_asignacion": "28/09/2026",
       "estado": "Activo"
     },
     {
-      "id": "UC-1790101388212-216",
-      "user_id": "US-002",
-      "cubiculo_id": "CUB-003",
-      "fecha_asignacion": "22/09/2026",
-      "estado": "Activo"
-    },
-    {
-      "id": "UC-1790110680252-316",
+      "id": "UC-003",
       "user_id": "US-003",
-      "cubiculo_id": "CUB-C1",
-      "fecha_asignacion": "22/09/2026",
+      "cubiculo_id": "CUB-A103",
+      "codigo_local": "A-103",
+      "nombre_local": "Consultorio Dra. Melissa",
+      "actividad_comercial": "Servicios Médicos / Salud",
+      "area_m2": 170.24,
+      "precio_m2": 60,
+      "mantenimiento_mensual": 10214.4,
+      "fecha_asignacion": "28/09/2026",
       "estado": "Activo"
     },
     {
-      "id": "UC-1790110680252-615",
-      "user_id": "US-003",
-      "cubiculo_id": "CUB-C2",
-      "fecha_asignacion": "22/09/2026",
+      "id": "UC-004",
+      "user_id": "US-004",
+      "cubiculo_id": "CUB-A104",
+      "codigo_local": "A-104",
+      "nombre_local": "Warn Electrical Services SRL",
+      "actividad_comercial": "Seguridad Electrónica, Automatización e Instalaciones",
+      "area_m2": 78.26,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 7826,
+      "fecha_asignacion": "28/09/2026",
       "estado": "Activo"
     },
     {
-      "id": "UC-1790111516038-493",
+      "id": "UC-005",
       "user_id": "US-005",
-      "cubiculo_id": "CUB-C1",
-      "nombre_local": "Zapatería Pedro",
-      "actividad_comercial": "Venta de calzado",
-      "fecha_asignacion": "22/09/2026",
+      "cubiculo_id": "CUB-A105",
+      "codigo_local": "A-105",
+      "nombre_local": "Armería La Mocana SRL - Pablo Abreu",
+      "actividad_comercial": "Comercio Especializado / Armería",
+      "area_m2": 223.45,
+      "precio_m2": 35,
+      "mantenimiento_mensual": 7820.75,
+      "fecha_asignacion": "28/09/2026",
       "estado": "Activo"
     },
     {
-      "id": "UC-1790111516038-857",
-      "user_id": "US-005",
-      "cubiculo_id": "CUB-C2",
-      "nombre_local": "Depósito Pedro",
-      "actividad_comercial": "Almacén de mercancía",
-      "fecha_asignacion": "22/09/2026",
-      "estado": "Activo"
-    },
-    {
-      "id": "UC-1790111618803-773",
+      "id": "UC-006",
       "user_id": "US-006",
-      "cubiculo_id": "CUB-C10",
-      "nombre_local": "Taller Alfa",
-      "actividad_comercial": "Reparación de celulares",
-      "fecha_asignacion": "22/09/2026",
+      "cubiculo_id": "CUB-A105A",
+      "codigo_local": "A-105-A",
+      "nombre_local": "Bingo",
+      "actividad_comercial": "Entretenimiento / Juegos",
+      "area_m2": 293.55,
+      "precio_m2": 35,
+      "mantenimiento_mensual": 10274.25,
+      "fecha_asignacion": "28/09/2026",
       "estado": "Activo"
     },
     {
-      "id": "UC-1790111618803-644",
-      "user_id": "US-006",
-      "cubiculo_id": "CUB-C11",
-      "nombre_local": "Boutique Alfa",
-      "actividad_comercial": "Venta de ropa",
-      "fecha_asignacion": "22/09/2026",
-      "estado": "Activo"
-    },
-    {
-      "id": "UC-1790112854806-681",
+      "id": "UC-007",
       "user_id": "US-007",
-      "cubiculo_id": "CUB-C20",
-      "nombre_local": "Electrónica Sánchez",
-      "actividad_comercial": "Reparación de celulares",
-      "fecha_asignacion": "22/09/2026",
+      "cubiculo_id": "CUB-A201",
+      "codigo_local": "A-201",
+      "nombre_local": "INABIE",
+      "actividad_comercial": "Institucional / Gubernamental",
+      "area_m2": 115.2,
+      "precio_m2": 60,
+      "mantenimiento_mensual": 6912,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-008",
+      "user_id": "US-008",
+      "cubiculo_id": "CUB-A202",
+      "codigo_local": "A-202",
+      "nombre_local": "Luis María García",
+      "actividad_comercial": "Comercial",
+      "area_m2": 32.88,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 3288,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-009",
+      "user_id": "US-009",
+      "cubiculo_id": "CUB-A203",
+      "codigo_local": "A-203",
+      "nombre_local": "Jet Pack",
+      "actividad_comercial": "Envíos / Paquetería / Courier",
+      "area_m2": 34.18,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 3418,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-010",
+      "user_id": "US-009",
+      "cubiculo_id": "CUB-A204",
+      "codigo_local": "A-204",
+      "nombre_local": "Manuel Santos",
+      "actividad_comercial": "Comercial / Oficina",
+      "area_m2": 30.83,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 3083,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-011",
+      "user_id": "US-010",
+      "cubiculo_id": "CUB-A205",
+      "codigo_local": "A-205",
+      "nombre_local": "Centro de Uña",
+      "actividad_comercial": "Estética y Belleza / Salón de Uñas",
+      "area_m2": 13.55,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 1355,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-012",
+      "user_id": "US-011",
+      "cubiculo_id": "CUB-A206",
+      "codigo_local": "A-206",
+      "nombre_local": "Alba Rodríguez & Asociados, SRL",
+      "actividad_comercial": "Consultoría / Servicios Legales y Financieros",
+      "area_m2": 66.69,
+      "precio_m2": 31,
+      "mantenimiento_mensual": 2067.39,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-013",
+      "user_id": "US-011",
+      "cubiculo_id": "CUB-A207",
+      "codigo_local": "A-207",
+      "nombre_local": "Alba Rodríguez & Asociados, SRL",
+      "actividad_comercial": "Consultoría / Servicios Legales y Financieros",
+      "area_m2": 65.14,
+      "precio_m2": 31,
+      "mantenimiento_mensual": 2019.34,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-014",
+      "user_id": "US-012",
+      "cubiculo_id": "CUB-A208",
+      "codigo_local": "A-208",
+      "nombre_local": "Nicolás Grullón",
+      "actividad_comercial": "Comercial",
+      "area_m2": 80.05,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 8005,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-015",
+      "user_id": "US-013",
+      "cubiculo_id": "CUB-A209",
+      "codigo_local": "A-209",
+      "nombre_local": "Ahsdiel Music Bar SRL",
+      "actividad_comercial": "Bar / Lounge / Entretenimiento",
+      "area_m2": 79.99,
+      "precio_m2": 60,
+      "mantenimiento_mensual": 4799.4,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-016",
+      "user_id": "US-013",
+      "cubiculo_id": "CUB-A210",
+      "codigo_local": "A-210",
+      "nombre_local": "Ahsdiel Music Bar SRL",
+      "actividad_comercial": "Bar / Lounge / Entretenimiento",
+      "area_m2": 84.42,
+      "precio_m2": 60,
+      "mantenimiento_mensual": 5065.2,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-017",
+      "user_id": "US-014",
+      "cubiculo_id": "CUB-A301A",
+      "codigo_local": "A-301-A",
+      "nombre_local": "Vipsania Grullón",
+      "actividad_comercial": "Comercial / Administrativo",
+      "area_m2": 34.37,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 3437,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-018",
+      "user_id": "US-014",
+      "cubiculo_id": "CUB-A301B",
+      "codigo_local": "A-301-B",
+      "nombre_local": "Vipsania Grullón",
+      "actividad_comercial": "Comercial / Administrativo",
+      "area_m2": 15.32,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 1532,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-019",
+      "user_id": "US-014",
+      "cubiculo_id": "CUB-A301C",
+      "codigo_local": "A-301-C",
+      "nombre_local": "Vipsania Grullón",
+      "actividad_comercial": "Comercial / Administrativo",
+      "area_m2": 11.05,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 1105,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-020",
+      "user_id": "US-014",
+      "cubiculo_id": "CUB-A301D",
+      "codigo_local": "A-301-D",
+      "nombre_local": "Vipsania Grullón",
+      "actividad_comercial": "Comercial / Administrativo",
+      "area_m2": 9.69,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 969,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-021",
+      "user_id": "US-015",
+      "cubiculo_id": "CUB-A302",
+      "codigo_local": "A-302",
+      "nombre_local": "Grupo de Desarrollo Internacional",
+      "actividad_comercial": "Desarrollo Inmobiliario / Proyectos",
+      "area_m2": 43.53,
+      "precio_m2": 31,
+      "mantenimiento_mensual": 1349.43,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-022",
+      "user_id": "US-015",
+      "cubiculo_id": "CUB-A303",
+      "codigo_local": "A-303",
+      "nombre_local": "Grupo de Desarrollo Internacional",
+      "actividad_comercial": "Desarrollo Inmobiliario / Proyectos",
+      "area_m2": 43.92,
+      "precio_m2": 31,
+      "mantenimiento_mensual": 1361.52,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-023",
+      "user_id": "US-015",
+      "cubiculo_id": "CUB-A304",
+      "codigo_local": "A-304",
+      "nombre_local": "Grupo de Desarrollo Internacional",
+      "actividad_comercial": "Desarrollo Inmobiliario / Proyectos",
+      "area_m2": 34.9,
+      "precio_m2": 31,
+      "mantenimiento_mensual": 1081.9,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-024",
+      "user_id": "US-015",
+      "cubiculo_id": "CUB-A305",
+      "codigo_local": "A-305",
+      "nombre_local": "Grupo de Desarrollo Internacional",
+      "actividad_comercial": "Desarrollo Inmobiliario / Proyectos",
+      "area_m2": 39.26,
+      "precio_m2": 31,
+      "mantenimiento_mensual": 1217.06,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-025",
+      "user_id": "US-015",
+      "cubiculo_id": "CUB-A306",
+      "codigo_local": "A-306",
+      "nombre_local": "Grupo de Desarrollo Internacional",
+      "actividad_comercial": "Desarrollo Inmobiliario / Proyectos",
+      "area_m2": 33.93,
+      "precio_m2": 31,
+      "mantenimiento_mensual": 1051.83,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-026",
+      "user_id": "US-015",
+      "cubiculo_id": "CUB-A307",
+      "codigo_local": "A-307",
+      "nombre_local": "Grupo de Desarrollo Internacional",
+      "actividad_comercial": "Desarrollo Inmobiliario / Proyectos",
+      "area_m2": 202.43,
+      "precio_m2": 31,
+      "mantenimiento_mensual": 6275.33,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-027",
+      "user_id": "US-016",
+      "cubiculo_id": "CUB-A307ANT",
+      "codigo_local": "A-307-ANT",
+      "nombre_local": "Esward-Sotea, Antena",
+      "actividad_comercial": "Telecomunicaciones / Azotea",
+      "area_m2": 335.77,
+      "precio_m2": 31,
+      "mantenimiento_mensual": 10408.87,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-028",
+      "user_id": "US-012",
+      "cubiculo_id": "CUB-A307COF",
+      "codigo_local": "A-307-COF",
+      "nombre_local": "Mega Coffy",
+      "actividad_comercial": "Cafetería / Bebidas y Snacks",
+      "area_m2": 22.62,
+      "precio_m2": 180,
+      "mantenimiento_mensual": 4071.6,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-029",
+      "user_id": "US-017",
+      "cubiculo_id": "CUB-A308",
+      "codigo_local": "A-308",
+      "nombre_local": "Bertha Soury",
+      "actividad_comercial": "Comercial / Oficina",
+      "area_m2": 62.23,
+      "precio_m2": 60,
+      "mantenimiento_mensual": 3733.8,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-030",
+      "user_id": "US-017",
+      "cubiculo_id": "CUB-A309",
+      "codigo_local": "A-309",
+      "nombre_local": "Bertha Soury",
+      "actividad_comercial": "Comercial / Oficina",
+      "area_m2": 79.34,
+      "precio_m2": 60,
+      "mantenimiento_mensual": 4760.4,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-031",
+      "user_id": "US-018",
+      "cubiculo_id": "CUB-A310",
+      "codigo_local": "A-310",
+      "nombre_local": "B&B Operadora de Filmes & Gym SRL",
+      "actividad_comercial": "Gimnasio / Fitness / Producción",
+      "area_m2": 1002.06,
+      "precio_m2": 31,
+      "mantenimiento_mensual": 31063.86,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-032",
+      "user_id": "US-010",
+      "cubiculo_id": "CUB-A311",
+      "codigo_local": "A-311",
+      "nombre_local": "Elda Bencosme",
+      "actividad_comercial": "Comercial / Estética",
+      "area_m2": 47.57,
+      "precio_m2": 100,
+      "mantenimiento_mensual": 4757,
+      "fecha_asignacion": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
+      "id": "UC-033",
+      "user_id": "US-015",
+      "cubiculo_id": "CUB-A312",
+      "codigo_local": "A-312",
+      "nombre_local": "Grupo de Desarrollo Internacional",
+      "actividad_comercial": "Desarrollo Inmobiliario / Proyectos",
+      "area_m2": 423.35,
+      "precio_m2": 31,
+      "mantenimiento_mensual": 5000,
+      "fecha_asignacion": "28/09/2026",
       "estado": "Activo"
     }
   ],
+  "PRESUPUESTO_2026": {
+    "periodo": "2026",
+    "moneda": "RD$",
+    "principio_administracion": "El principio de administración controlar en un condominio implica que la administración debe ser planificada y controlada para asegurar que se cumplan los objetivos del condominio.",
+    "ingresos": {
+      "primer_nivel": {
+        "mensual": 48105.4,
+        "anual": 577264.8
+      },
+      "segundo_nivel": {
+        "mensual": 45208.4,
+        "anual": 542500.8
+      },
+      "tercer_nivel_base": {
+        "mensual": 44500,
+        "anual": 533999.96
+      },
+      "tercer_nivel_presupuesto": {
+        "mensual": 77635,
+        "variacion": 33135
+      },
+      "total_ingresos_base_mensual": 137813.8,
+      "total_ingresos_base_anual": 1653765.56,
+      "total_carga_fija_mantenimiento": 171293.33
+    },
+    "egresos": [
+      {
+        "concepto": "LIMPIEZA (CONSERJE 2 DE 1/2 TIEMPO IGUALADO)",
+        "mensual": 42000,
+        "anual": 504000
+      },
+      {
+        "concepto": "Insumos baños (Papel, jabón, desinfectante, fundas)",
+        "mensual": 18000,
+        "anual": 216000
+      },
+      {
+        "concepto": "Agua (2 baños públicos, 15-20 m3/mes)",
+        "mensual": 7000,
+        "anual": 84000
+      },
+      {
+        "concepto": "Luz área común (iluminación LED + extractores 12h/día)",
+        "mensual": 12000,
+        "anual": 144000
+      },
+      {
+        "concepto": "Imprevisto / administración 23% Sup.",
+        "mensual": 58813.8,
+        "anual": 705765.6
+      }
+    ],
+    "totales_egresos_mensual": 137813.8,
+    "totales_egresos_anual": 1653765.6,
+    "resultado_neto": 0
+  },
   "RECLAMACIONES": [
     {
       "codigo": "CL-001",
@@ -585,7 +1395,7 @@
   "CONFIGURACION": [
     {
       "parametro": "nombre_plaza",
-      "valor": "PLAZA MEGATÓN"
+      "valor": "PLAZA MEGATON"
     },
     {
       "parametro": "titulo_visible",
@@ -613,19 +1423,31 @@
     },
     {
       "parametro": "url_publica",
-      "valor": "http://localhost:3007"
+      "valor": "https://luis28lh.github.io/plaza-megaton/"
+    },
+    {
+      "parametro": "google_apps_script_url",
+      "valor": "https://script.google.com/macros/s/AKfycbxBnqJdUmj9sZkRupF1Obu-EqF4SPIBmferL7RMLdU3gwiCJJx8pOo6-92ba9g6DN7ImA/exec"
+    },
+    {
+      "parametro": "google_drive_folder_id",
+      "valor": "1CUUpP7K2roI8cemURppsB5QyPm6WAgpY"
+    },
+    {
+      "parametro": "google_spreadsheet_id",
+      "valor": "1_pHnJkeyVTbVfXacVOFIsKDYb3vaP-EBepc3tm3CQKY"
     },
     {
       "parametro": "ultimo_codigo_usuario",
-      "valor": "US-007"
+      "valor": "US-018"
     },
     {
       "parametro": "ultimo_codigo_reclamacion",
-      "valor": "CL-006"
+      "valor": "CL-000"
     },
     {
       "parametro": "ultimo_codigo_pago",
-      "valor": "PG-006"
+      "valor": "PG-000"
     },
     {
       "parametro": "ultimo_codigo_solicitud_admin",
@@ -649,205 +1471,13 @@
       "id": "HIST-001",
       "tipo_documento": "SISTEMA",
       "codigo_documento": "SYS-INIT",
-      "fecha": "22/09/2026",
-      "hora": "14:15",
+      "fecha": "28/09/2026",
+      "hora": "11:10 p. m.",
       "usuario": "Sistema",
-      "accion": "Inicialización de Catálogo Maestro",
+      "accion": "Carga de Catálogo Oficial de Plaza Megatone",
       "estado_anterior": "",
       "estado_nuevo": "ACTIVO",
-      "observacion": "Sistema de Gestión Plaza Megatón inicializado con 30 cubículos disponibles."
-    },
-    {
-      "id": "H-1790101392419-63",
-      "tipo_documento": "RECLAMACION",
-      "codigo_documento": "CL-001",
-      "fecha": "22/09/2026",
-      "hora": "02:23 p. m.",
-      "usuario": "Juan Pérez",
-      "accion": "Creación de Reclamación",
-      "estado_anterior": "",
-      "estado_nuevo": "Recibida",
-      "observacion": "Asunto: Problema eléctrico | Cubículo: C-001"
-    },
-    {
-      "id": "H-1790101395591-183",
-      "tipo_documento": "RECLAMACION",
-      "codigo_documento": "CL-002",
-      "fecha": "22/09/2026",
-      "hora": "02:23 p. m.",
-      "usuario": "María Gómez",
-      "accion": "Creación de Reclamación",
-      "estado_anterior": "",
-      "estado_nuevo": "Recibida",
-      "observacion": "Asunto: Filtración | Cubículo: C-002"
-    },
-    {
-      "id": "H-1790101400054-587",
-      "tipo_documento": "PAGO",
-      "codigo_documento": "PG-001",
-      "fecha": "22/09/2026",
-      "hora": "02:23 p. m.",
-      "usuario": "Juan Pérez",
-      "accion": "Reporte de Pago",
-      "estado_anterior": "",
-      "estado_nuevo": "Reportado",
-      "observacion": "Monto: RD$5,000.00 | Período: Septiembre 2026 | Cubículo: C-001"
-    },
-    {
-      "id": "H-1790101403579-127",
-      "tipo_documento": "PAGO",
-      "codigo_documento": "PG-002",
-      "fecha": "22/09/2026",
-      "hora": "02:23 p. m.",
-      "usuario": "María Gómez",
-      "accion": "Reporte de Pago",
-      "estado_anterior": "",
-      "estado_nuevo": "Reportado",
-      "observacion": "Monto: RD$12,000.00 | Período: Septiembre 2026 | Cubículo: C-002"
-    },
-    {
-      "id": "H-1790101412079-636",
-      "tipo_documento": "RECLAMACION",
-      "codigo_documento": "CL-001",
-      "fecha": "22/09/2026",
-      "hora": "02:23 p. m.",
-      "usuario": "Administración",
-      "accion": "Cambio de Estado",
-      "estado_anterior": "Recibida",
-      "estado_nuevo": "En proceso",
-      "observacion": "Repuesto en camino para reemplazo"
-    },
-    {
-      "id": "H-1790101414740-356",
-      "tipo_documento": "PAGO",
-      "codigo_documento": "PG-001",
-      "fecha": "22/09/2026",
-      "hora": "02:23 p. m.",
-      "usuario": "Administración",
-      "accion": "Evaluación de Pago",
-      "estado_anterior": "Reportado",
-      "estado_nuevo": "Confirmado",
-      "observacion": "Verificado en estado de cuenta bancario"
-    },
-    {
-      "id": "H-1790111533404-284",
-      "tipo_documento": "RECLAMACION",
-      "codigo_documento": "CL-003",
-      "fecha": "22/09/2026",
-      "hora": "05:12 p. m.",
-      "usuario": "Juan Pérez",
-      "accion": "Creación de Reclamación",
-      "estado_anterior": "",
-      "estado_nuevo": "Recibida",
-      "observacion": "Asunto: Problema eléctrico | Cubículo: C-001"
-    },
-    {
-      "id": "H-1790111536596-329",
-      "tipo_documento": "RECLAMACION",
-      "codigo_documento": "CL-004",
-      "fecha": "22/09/2026",
-      "hora": "05:12 p. m.",
-      "usuario": "María Gómez",
-      "accion": "Creación de Reclamación",
-      "estado_anterior": "",
-      "estado_nuevo": "Recibida",
-      "observacion": "Asunto: Filtración | Cubículo: C-002"
-    },
-    {
-      "id": "H-1790111539271-492",
-      "tipo_documento": "PAGO",
-      "codigo_documento": "PG-003",
-      "fecha": "22/09/2026",
-      "hora": "05:12 p. m.",
-      "usuario": "Juan Pérez",
-      "accion": "Reporte de Pago",
-      "estado_anterior": "",
-      "estado_nuevo": "Reportado",
-      "observacion": "Monto: RD$5,000.00 | Período: Septiembre 2026 | Cubículo: C-001"
-    },
-    {
-      "id": "H-1790111541569-508",
-      "tipo_documento": "PAGO",
-      "codigo_documento": "PG-004",
-      "fecha": "22/09/2026",
-      "hora": "05:12 p. m.",
-      "usuario": "María Gómez",
-      "accion": "Reporte de Pago",
-      "estado_anterior": "",
-      "estado_nuevo": "Reportado",
-      "observacion": "Monto: RD$12,000.00 | Período: Septiembre 2026 | Cubículo: C-002"
-    },
-    {
-      "id": "H-1790111544484-224",
-      "tipo_documento": "RECLAMACION",
-      "codigo_documento": "CL-001",
-      "fecha": "22/09/2026",
-      "hora": "05:12 p. m.",
-      "usuario": "Administración",
-      "accion": "Nota Administrativa",
-      "estado_anterior": "En proceso",
-      "estado_nuevo": "En proceso",
-      "observacion": "Repuesto en camino para reemplazo"
-    },
-    {
-      "id": "H-1790111603432-704",
-      "tipo_documento": "RECLAMACION",
-      "codigo_documento": "CL-005",
-      "fecha": "22/09/2026",
-      "hora": "05:13 p. m.",
-      "usuario": "Juan Pérez",
-      "accion": "Creación de Reclamación",
-      "estado_anterior": "",
-      "estado_nuevo": "Recibida",
-      "observacion": "Asunto: Problema eléctrico | Cubículo: C-001"
-    },
-    {
-      "id": "H-1790111605695-157",
-      "tipo_documento": "RECLAMACION",
-      "codigo_documento": "CL-006",
-      "fecha": "22/09/2026",
-      "hora": "05:13 p. m.",
-      "usuario": "María Gómez",
-      "accion": "Creación de Reclamación",
-      "estado_anterior": "",
-      "estado_nuevo": "Recibida",
-      "observacion": "Asunto: Filtración | Cubículo: C-002"
-    },
-    {
-      "id": "H-1790111608809-281",
-      "tipo_documento": "PAGO",
-      "codigo_documento": "PG-005",
-      "fecha": "22/09/2026",
-      "hora": "05:13 p. m.",
-      "usuario": "Juan Pérez",
-      "accion": "Reporte de Pago",
-      "estado_anterior": "",
-      "estado_nuevo": "Reportado",
-      "observacion": "Monto: RD$5,000.00 | Período: Septiembre 2026 | Cubículo: C-001"
-    },
-    {
-      "id": "H-1790111611067-443",
-      "tipo_documento": "PAGO",
-      "codigo_documento": "PG-006",
-      "fecha": "22/09/2026",
-      "hora": "05:13 p. m.",
-      "usuario": "María Gómez",
-      "accion": "Reporte de Pago",
-      "estado_anterior": "",
-      "estado_nuevo": "Reportado",
-      "observacion": "Monto: RD$12,000.00 | Período: Septiembre 2026 | Cubículo: C-002"
-    },
-    {
-      "id": "H-1790111613869-363",
-      "tipo_documento": "RECLAMACION",
-      "codigo_documento": "CL-001",
-      "fecha": "22/09/2026",
-      "hora": "05:13 p. m.",
-      "usuario": "Administración",
-      "accion": "Nota Administrativa",
-      "estado_anterior": "En proceso",
-      "estado_nuevo": "En proceso",
-      "observacion": "Repuesto en camino para reemplazo"
+      "observacion": "Cargados 33 locales oficiales, 17 propietarios/inquilinos con RNC y Presupuesto Período 2026."
     }
   ]
 }
