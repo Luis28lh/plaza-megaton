@@ -1423,11 +1423,11 @@
     },
     {
       "parametro": "url_publica",
-      "valor": "https://luis28lh.github.io/plaza-megaton/"
+      "valor": "https://megaton1026.vercel.app"
     },
     {
       "parametro": "google_apps_script_url",
-      "valor": "https://script.google.com/macros/s/AKfycbxBnqJdUmj9sZkRupF1Obu-EqF4SPIBmferL7RMLdU3gwiCJJx8pOo6-92ba9g6DN7ImA/exec"
+      "valor": "https://script.google.com/macros/s/AKfycbz3Ke4jrxn_cmQ8EC--_K-FbCfYIRdCAIVtplW6pKWclTukaG1tYLIWmdBgaBPf5tzSWA/exec"
     },
     {
       "parametro": "google_drive_folder_id",

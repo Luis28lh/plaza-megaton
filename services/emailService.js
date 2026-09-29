@@ -128,7 +128,7 @@ class EmailService {
    * 1. Correo automático de Bienvenida post-registro
    */
   async sendWelcomeEmail({ nombre, email, cubiculoCodigos, userId, portalUrl }) {
-    const finalPortalUrl = portalUrl || 'https://luis28lh.github.io/wes-plataforma/plaza-megaton/index.html';
+    const finalPortalUrl = portalUrl || 'https://megaton1026.vercel.app/';
     const cubiculosStr = Array.isArray(cubiculoCodigos)
       ? cubiculoCodigos.map(c => {
           if (typeof c === 'object' && c !== null) {

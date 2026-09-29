@@ -138,9 +138,8 @@ app.post('/api/usuarios/registro', async (req, res) => {
     }
 
     const host = req.get('host') || '';
-    const portalUrl = host.includes('localhost')
-      ? `${req.protocol}://${host}/index.html`
-      : 'https://luis28lh.github.io/wes-plataforma/plaza-megaton/index.html';
+    const configuredUrl = await dataService.getConfigValue('url_publica', 'https://megaton1026.vercel.app');
+    const portalUrl = configuredUrl || (host ? `${req.protocol}://${host}/` : 'https://megaton1026.vercel.app/');
 
     // Despachar correo de felicitación y confirmación oficial de membresía
     const mailResult = await emailService.sendWelcomeEmail({

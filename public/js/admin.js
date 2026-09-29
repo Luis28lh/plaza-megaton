@@ -99,7 +99,7 @@ function switchAdminTab(tabName) {
     btn.classList.toggle('active', btn.dataset.tab === tabName);
   });
 
-  const sections = ['kpis', 'locales', 'presupuesto', 'usuarios', 'reclamaciones', 'pagos', 'historial', 'qr', 'config'];
+  const sections = ['kpis', 'locales', 'presupuesto', 'usuarios', 'reclamaciones', 'pagos', 'historial', 'config'];
   sections.forEach(s => {
     const el = document.getElementById(`tab-section-${s}`);
     if (el) el.style.display = (s === tabName) ? 'block' : 'none';
@@ -112,7 +112,6 @@ function switchAdminTab(tabName) {
   if (tabName === 'reclamaciones') loadReclamaciones();
   if (tabName === 'pagos') loadPagos();
   if (tabName === 'historial') loadHistorial();
-  if (tabName === 'qr') loadQRInfo();
   if (tabName === 'config') loadConfig();
 }
 
@@ -123,7 +122,6 @@ async function loadAllAdminData() {
   loadUsuarios();
   loadReclamaciones();
   loadPagos();
-  loadQRInfo();
 }
 
 // ==========================================
