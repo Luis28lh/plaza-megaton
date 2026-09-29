@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.js" },
+    { "source": "/registro", "destination": "/registro.html" },
+    { "source": "/solicitudes", "destination": "/solicitudes.html" },
+    { "source": "/pagos", "destination": "/pagos.html" },
+    { "source": "/mis-solicitudes", "destination": "/mis-solicitudes.html" },
+    { "source": "/mis-pagos", "destination": "/mis-pagos.html" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/admin", "destination": "/admin.html" }
+  ]
+}

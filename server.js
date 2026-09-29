@@ -639,12 +639,16 @@ for (const [route, file] of Object.entries(routes)) {
   });
 }
 
-// Iniciar servidor
-app.listen(PORT, () => {
-  console.log(`\n======================================================`);
-  console.log(`🚀 [PLAZA MEGATÓN] Sistema de Gestión Inmobiliaria`);
-  console.log(`📡 Servidor activo en: http://localhost:${PORT}`);
-  console.log(`📱 Formulario QR directo: http://localhost:${PORT}/registro.html`);
-  console.log(`💼 Portal Administrativo: http://localhost:${PORT}/admin.html`);
-  console.log(`======================================================\n`);
-});
+// Iniciar servidor local si se ejecuta directamente (no en Vercel serverless)
+if (require.main === module || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`\n======================================================`);
+    console.log(`🚀 [PLAZA MEGATÓN] Sistema de Gestión Inmobiliaria`);
+    console.log(`📡 Servidor activo en: http://localhost:${PORT}`);
+    console.log(`📱 Formulario QR directo: http://localhost:${PORT}/registro.html`);
+    console.log(`💼 Portal Administrativo: http://localhost:${PORT}/admin.html`);
+    console.log(`======================================================\n`);
+  });
+}
+
+module.exports = app;
