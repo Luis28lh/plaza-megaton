@@ -152,7 +152,7 @@ async function handleRequestResetCode(event) {
     const data = await res.json();
 
     if (res.ok && data.success) {
-      App.showToast('Código de seguridad enviado a tu correo.', 'success');
+      App.showToast('Código de seguridad enviado. Revisa tu Bandeja Principal o la carpeta de Spam.', 'success');
       showVerifyStep(email, data.previewUrl);
     } else {
       App.showToast(data.error || 'No se pudo enviar el código.', 'error');
@@ -316,6 +316,7 @@ async function handleSendMagicLink() {
     const data = await res.json();
 
     if (data.success) {
+      App.showToast('Enlace de acceso enviado. Revisa tu Bandeja Principal o carpeta de Spam.', 'success');
       hideAllSteps();
       document.getElementById('login-sent-step').style.display = 'block';
       document.getElementById('sent-email-address').innerText = email;
