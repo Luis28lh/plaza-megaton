@@ -1424,7 +1424,15 @@
     },
     {
       "parametro": "correo_administracion",
-      "valor": "administracion@plazamegaton.com"
+      "valor": "plazamegaton2000@gmail.com"
+    },
+    {
+      "parametro": "smtp_user",
+      "valor": "plazamegaton2000@gmail.com"
+    },
+    {
+      "parametro": "smtp_pass",
+      "valor": "unvppwjmzbnfmtad"
     },
     {
       "parametro": "telefono",
