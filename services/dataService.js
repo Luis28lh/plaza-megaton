@@ -5,7 +5,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const DB_PATH = path.join(__dirname, '..', 'database', 'local_db.json');
+const DB_PATH = process.env.VERCEL 
+  ? path.join('/tmp', 'local_db.json') 
+  : path.join(__dirname, '..', 'database', 'local_db.json');
 const INITIAL_CATALOG_PATH = path.join(__dirname, '..', 'database', 'initial_catalog.json');
 
 class DataService {
@@ -26,12 +28,12 @@ class DataService {
         this.db = JSON.parse(raw);
       } else {
         // Inicializar desde catálogo inicial usando require para empaquetado automático en Vercel
-        this.db = require('../database/initial_catalog.json');
+        this.db = JSON.parse(JSON.stringify(require('../database/initial_catalog.json')));
         this.persist();
       }
     } catch (err) {
       try {
-        this.db = require('../database/initial_catalog.json');
+        this.db = JSON.parse(JSON.stringify(require('../database/initial_catalog.json')));
       } catch (_) {
         this.db = { CUBICULOS: [], USUARIOS: [], USUARIO_CUBICULO: [], PRESUPUESTO_2026: null, RECLAMACIONES: [], PAGOS: [], CONFIGURACION: [], HISTORIAL: [] };
       }
@@ -39,11 +41,10 @@ class DataService {
   }
 
   persist() {
-    if (process.env.VERCEL) return;
     try {
       fs.writeFileSync(DB_PATH, JSON.stringify(this.db, null, 2), 'utf8');
     } catch (err) {
-      console.warn('[DataService] Aviso guardando DB local:', err.message);
+      console.warn('[DataService] Aviso guardando DB:', err.message);
     }
   }
 
@@ -198,6 +199,11 @@ class DataService {
 
     Object.assign(user, updates);
     this.persist();
+
+    // Sincronizar con Google si está conectado
+    if (this.googleBridge) {
+      this.googleBridge.syncUsuario(user).catch(err => console.error('[GoogleBridge Error]', err));
+    }
 
     if (changedFields.length > 0) {
       await this.addHistorial({
