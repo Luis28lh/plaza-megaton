@@ -570,6 +570,10 @@ function openEditUserModal(userId) {
           Actualizar Clave
         </button>
       </div>
+      <label style="font-size:12px; color:#475569; display:flex; align-items:center; gap:6px; margin-top:8px; cursor:pointer;">
+        <input type="checkbox" id="edit-user-is-temp" checked>
+        <span>Exigir cambio obligatorio al iniciar sesión (Clave temporal para inquilino)</span>
+      </label>
       <div id="pwd-change-msg" style="font-size:12px; margin-top:6px; display:none;"></div>
     </div>
 
@@ -601,8 +605,10 @@ function openEditUserModal(userId) {
 
 async function submitChangePassword(userId) {
   const pwdInput = document.getElementById('edit-user-new-password');
+  const tempCheckbox = document.getElementById('edit-user-is-temp');
   const msgEl = document.getElementById('pwd-change-msg');
   const newPwd = pwdInput ? pwdInput.value.trim() : '';
+  const isTemp = tempCheckbox ? tempCheckbox.checked : true;
 
   if (!newPwd) {
     App.showToast('Ingresa una contraseña válida para el usuario.', 'error');
@@ -616,7 +622,10 @@ async function submitChangePassword(userId) {
         'Content-Type': 'application/json',
         'x-admin-pin': getAdminPin()
       },
-      body: JSON.stringify({ password: newPwd })
+      body: JSON.stringify({ 
+        password: newPwd,
+        debe_cambiar_password: isTemp
+      })
     });
 
     const data = await res.json();
@@ -625,7 +634,7 @@ async function submitChangePassword(userId) {
       if (msgEl) {
         msgEl.style.display = 'block';
         msgEl.style.color = '#15803D';
-        msgEl.innerHTML = `✅ Contraseña cambiada con éxito a: <strong>${newPwd}</strong>`;
+        msgEl.innerHTML = `✅ Contraseña cambiada con éxito a: <strong>${newPwd}</strong> ${isTemp ? '(temporal, el inquilino deberá cambiarla al ingresar)' : '(definitiva)'}`;
       }
       pwdInput.value = '';
       loadUsuarios();

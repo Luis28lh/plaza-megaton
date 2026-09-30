@@ -262,12 +262,51 @@ app.post('/api/auth/login', async (req, res) => {
       cubiculos
     });
 
+    // Detectar si es contraseña temporal que requiere cambio obligatorio
+    const isTemp = Boolean(user.debe_cambiar_password || user.password_temporal || (!user.password && enteredPwd === '123456'));
+
     res.json({
       success: true,
-      message: 'Inicio de sesión exitoso.',
+      message: isTemp 
+        ? 'Acceso concedido con contraseña temporal. Debes establecer tu contraseña definitiva.' 
+        : 'Inicio de sesión exitoso.',
+      mustChangePassword: isTemp,
       sessionToken: session.sessionToken,
       user: session.user
     });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 4c. Solicitar Código de Seguridad por Correo para Restablecer Contraseña
+app.post('/api/auth/reset-code', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const result = await authService.requestPasswordResetCode(email);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 4d. Validar Código de 6 Dígitos y Restablecer Contraseña
+app.post('/api/auth/reset-password', async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+    const result = await authService.verifyAndResetPassword(email, code, newPassword);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 4e. Cambiar Contraseña Temporal en el Primer Inicio
+app.post('/api/auth/change-temp-password', async (req, res) => {
+  try {
+    const { userId, newPassword } = req.body;
+    const result = await authService.changeTemporaryPassword(userId, newPassword);
+    res.json(result);
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -558,7 +597,13 @@ app.patch('/api/admin/usuarios/:userId', requireAdmin, async (req, res) => {
     if (estado !== undefined) updates.estado = estado;
     if (nombre !== undefined) updates.nombre = nombre;
     if (telefono !== undefined) updates.telefono = telefono;
-    if (password !== undefined && String(password).trim()) updates.password = String(password).trim();
+    if (password !== undefined && String(password).trim()) {
+      updates.password = String(password).trim();
+      if (req.body.debe_cambiar_password !== undefined) {
+        updates.debe_cambiar_password = Boolean(req.body.debe_cambiar_password);
+        updates.password_temporal = Boolean(req.body.debe_cambiar_password);
+      }
+    }
 
     if (Object.keys(updates).length > 0) {
       await dataService.updateUsuario(userId, updates, adminName);

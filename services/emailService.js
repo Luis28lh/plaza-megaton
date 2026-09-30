@@ -362,6 +362,50 @@ class EmailService {
       text
     });
   }
+
+  /**
+   * 7. Correo con Código de Seguridad para Restablecer Contraseña
+   */
+  async sendPasswordResetCodeEmail({ nombre, email, code }) {
+    const subject = `🔐 Código de Seguridad [${code}] para Restablecer Contraseña — Plaza Megatón`;
+
+    const htmlBody = `
+      <div style="text-align: center; margin-bottom: 20px;">
+        <span style="background: #FEE2E2; color: #991B1B; font-weight: 800; font-size: 11px; padding: 4px 14px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.5px;">
+          Protocolo de Seguridad Oficial
+        </span>
+        <h2 style="font-size: 22px; font-weight: 900; color: #0F172A; margin: 12px 0 4px;">Código de Verificación</h2>
+        <p style="font-size: 14px; color: #475569; margin: 0;">
+          Hola, <strong>${nombre || 'Estimado Inquilino'}</strong>. Hemos recibido tu solicitud para modificar o restablecer la contraseña de tu cuenta.
+        </p>
+      </div>
+
+      <div style="background: #F8FAFC; border: 2px dashed #D32F2F; border-radius: 12px; padding: 22px; text-align: center; margin: 24px 0;">
+        <p style="margin: 0 0 6px; font-size: 12px; color: #64748B; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Tu Código de Seguridad Oficial:</p>
+        <div style="font-size: 38px; font-weight: 900; letter-spacing: 8px; color: #D32F2F; margin: 6px 0; font-family: monospace;">${code}</div>
+        <p style="margin: 6px 0 0; font-size: 12px; color: #94A3B8;">Código de un solo uso válido durante los próximos 15 minutos.</p>
+      </div>
+
+      <p style="font-size: 14px; color: #334155; line-height: 1.6;">
+        Ingresa este código de 6 dígitos en la pantalla de acceso del portal web de Plaza Megatón. Con esta validación, el sistema confirmará que eres el titular legítimo del correo y te permitirá establecer tu nueva contraseña de forma inmediata.
+      </p>
+
+      <div style="background: #FEF3C7; border-left: 4px solid #F59E0B; padding: 12px 16px; border-radius: 6px; margin: 22px 0; font-size: 13px; color: #92400E; line-height: 1.5;">
+        🛡️ <strong>Seguridad Anti-Suplantación:</strong> Ningún tercero puede acceder a tu cuenta ni cambiar tu contraseña sin tener acceso directo a este correo. Si no solicitaste este cambio, puedes ignorar este mensaje; tu cuenta permanecerá protegida.
+      </div>
+
+      <p style="margin-top: 24px;">Atentamente,<br><strong>Consejo de Administración — Plaza Megatón</strong></p>
+    `;
+
+    const text = `Hola, ${nombre}:\n\nTu código de seguridad oficial para cambiar tu contraseña en Plaza Megatón es:\n\n[ ${code} ]\n\nEste código vence en 15 minutos. Ingrésalo en el portal web para definir tu nueva contraseña.\n\nAdministración Plaza Megatón`;
+
+    return this.sendMail({
+      to: email,
+      subject,
+      html: this.wrapTemplate('Seguridad de Cuenta', htmlBody),
+      text
+    });
+  }
 }
 
 module.exports = EmailService;
