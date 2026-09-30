@@ -52,7 +52,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/assets/uploads', express.static(path.join(__dirname, 'public', 'assets', 'uploads')));
 
 // Servidor de subidas dinámico con soporte serverless para Vercel
-app.get('/assets/uploads/*', (req, res) => {
+const handleUploadServing = (req, res) => {
   try {
     const rawPath = req.params[0] || '';
     const decodedRelPath = decodeURIComponent(rawPath);
@@ -105,19 +105,33 @@ app.get('/assets/uploads/*', (req, res) => {
         </defs>
         <rect width="600" height="420" fill="url(#grad)" rx="16"/>
         <rect x="20" y="20" width="560" height="380" fill="none" stroke="#E2E8F0" stroke-width="2" rx="12"/>
-        <circle cx="300" cy="140" r="48" fill="#FEE2E2"/>
-        <text x="300" y="155" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="44" text-anchor="middle">🧾</text>
-        <text x="300" y="225" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#0F172A">Comprobante de Pago Registrado</text>
-        <text x="300" y="255" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#D32F2F">${matchPago ? matchPago[0] : (matchRec ? matchRec[0] : 'VOUCHER')}</text>
-        <text x="300" y="285" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" text-anchor="middle" fill="#64748B">Este comprobante fue recibido exitosamente por el sistema de Plaza Megatón.</text>
-        <text x="300" y="310" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" text-anchor="middle" fill="#64748B">Estado actual: En proceso de conciliación administrativa.</text>
-        <rect x="180" y="340" width="240" height="36" fill="#D32F2F" rx="8"/>
-        <text x="300" y="363" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#FFFFFF">✓ VALIDADO EN SISTEMA</text>
+        <circle cx="300" cy="130" r="44" fill="#FEE2E2"/>
+        <text x="300" y="145" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="40" text-anchor="middle">🧾</text>
+        <text x="300" y="215" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#0F172A">Comprobante de Pago Registrado</text>
+        <text x="300" y="245" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="700" text-anchor="middle" fill="#D32F2F">${matchPago ? matchPago[0] : (matchRec ? matchRec[0] : 'VOUCHER')}</text>
+        <text x="300" y="275" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" text-anchor="middle" fill="#475569">Tu comprobante fue recibido correctamente y está registrado en Plaza Megatón.</text>
+        <text x="300" y="300" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" text-anchor="middle" fill="#475569">El departamento administrativo está validando la conciliación bancaria.</text>
+        <rect x="170" y="335" width="260" height="40" fill="#D32F2F" rx="8"/>
+        <text x="300" y="360" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#FFFFFF">✓ VALIDADO EN EL SISTEMA</text>
       </svg>
     `);
   } catch (err) {
     res.status(500).send('Error al procesar el archivo: ' + err.message);
   }
+};
+
+app.get('/api/uploads/*', handleUploadServing);
+app.get('/assets/uploads/*', handleUploadServing);
+app.get('/api/pagos/:codigo/voucher', async (req, res) => {
+  const { codigo } = req.params;
+  const pago = (dataService.db?.PAGOS || []).find(p => p.codigo.toUpperCase() === codigo.toUpperCase());
+  if (!pago) return res.status(404).send('Pago no encontrado');
+  if (pago.voucher_base64) {
+    res.setHeader('Content-Type', pago.voucher_mime || 'image/jpeg');
+    return res.send(Buffer.from(pago.voucher_base64, 'base64'));
+  }
+  req.params[0] = pago.voucher ? pago.voucher.replace(/^\/api\/uploads\//, '').replace(/^\/assets\/uploads\//, '') : `02 - PAGOS/${pago.codigo}/voucher.jpg`;
+  return handleUploadServing(req, res);
 });
 
 // Roles Administrativos y PINs / Credenciales Master

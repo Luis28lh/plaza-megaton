@@ -783,11 +783,14 @@ function openAdminReclamacionModal(codigo) {
       <div style="margin-top:14px;">
         <div style="font-size:13px; font-weight:700; margin-bottom:6px;">Fotografías de Evidencia (${item.archivos.length}):</div>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          ${item.archivos.map(url => `
-            <a href="${url}" target="_blank">
-              <img src="${url}" style="width:100px; height:100px; object-fit:cover; border-radius:8px; border:1px solid #CBD5E1;">
-            </a>
-          `).join('')}
+          ${item.archivos.map(url => {
+            const safeUrl = url.replace('/assets/uploads/', '/api/uploads/');
+            return `
+              <a href="${safeUrl}" target="_blank">
+                <img src="${safeUrl}" style="width:100px; height:100px; object-fit:cover; border-radius:8px; border:1px solid #CBD5E1;">
+              </a>
+            `;
+          }).join('')}
         </div>
       </div>
     `;
@@ -943,10 +946,11 @@ function openAdminPagoModal(codigo) {
 
   let voucherHtml = '<div style="color:#94A3B8; font-size:13px;">Sin comprobante adjunto.</div>';
   if (item.voucher) {
+    const safeVoucherUrl = item.voucher.replace('/assets/uploads/', '/api/uploads/');
     if (item.voucher.toLowerCase().endsWith('.pdf')) {
       voucherHtml = `
         <div style="margin-top:10px;">
-          <a href="${item.voucher}" target="_blank" class="btn-secondary" style="display:inline-flex; width:auto; padding:10px 20px;">
+          <a href="${safeVoucherUrl}" target="_blank" class="btn-secondary" style="display:inline-flex; width:auto; padding:10px 20px;">
             📄 Abrir Voucher en PDF
           </a>
         </div>
@@ -954,8 +958,8 @@ function openAdminPagoModal(codigo) {
     } else {
       voucherHtml = `
         <div style="margin-top:10px; text-align:center;">
-          <a href="${item.voucher}" target="_blank">
-            <img src="${item.voucher}" style="max-height:220px; max-width:100%; border-radius:8px; border:1px solid #CBD5E1; box-shadow:var(--shadow-sm);">
+          <a href="${safeVoucherUrl}" target="_blank">
+            <img src="${safeVoucherUrl}" style="max-height:220px; max-width:100%; border-radius:8px; border:1px solid #CBD5E1; box-shadow:var(--shadow-sm);">
           </a>
           <div style="font-size:11px; color:#64748B; margin-top:4px;">Haz clic en la imagen para ver en alta resolución</div>
         </div>

@@ -56,7 +56,7 @@ class GoogleDriveService {
           fs.writeFileSync(destPath, file.buffer);
         }
 
-        const fileUrl = `/assets/uploads/01 - RECLAMACIONES/${codigo}/${safeFilename}`;
+        const fileUrl = `/api/uploads/01 - RECLAMACIONES/${codigo}/${safeFilename}`;
         urls.push(fileUrl);
       }
     } catch (e) {
@@ -99,7 +99,7 @@ class GoogleDriveService {
         fs.writeFileSync(destPath, file.buffer);
       }
 
-      fileUrl = `/assets/uploads/02 - PAGOS/${codigo}/${safeFilename}`;
+      fileUrl = `/api/uploads/02 - PAGOS/${codigo}/${safeFilename}`;
     } catch (e) {
       console.warn('[GoogleDriveService] Aviso almacenamiento voucher en serverless:', e.message);
     }

@@ -110,11 +110,14 @@ function openSolicitudModal(codigo) {
       <div style="margin-top:14px;">
         <div style="font-size:13px; font-weight:700; margin-bottom:6px;">Fotografías de Evidencia:</div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          ${item.archivos.map(url => `
-            <a href="${url}" target="_blank">
-              <img src="${url}" style="width:84px; height:84px; object-fit:cover; border-radius:8px; border:1px solid #CBD5E1;">
-            </a>
-          `).join('')}
+          ${item.archivos.map(url => {
+            const safeUrl = url.replace('/assets/uploads/', '/api/uploads/');
+            return `
+              <a href="${safeUrl}" target="_blank">
+                <img src="${safeUrl}" style="width:84px; height:84px; object-fit:cover; border-radius:8px; border:1px solid #CBD5E1;">
+              </a>
+            `;
+          }).join('')}
         </div>
       </div>
     `;

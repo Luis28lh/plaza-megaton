@@ -90,7 +90,7 @@ function renderPagosList(items) {
 
       <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #F1F5F9; padding-top:8px; font-size:12px; color:var(--text-muted);">
         <div>Fecha: ${item.fecha_pago || item.fecha_registro}</div>
-        ${item.voucher ? `<a href="${item.voucher}" target="_blank" style="color:#2563EB; font-weight:700; text-decoration:none;">📄 Ver Voucher</a>` : '<span style="color:#94A3B8;">Sin voucher</span>'}
+        ${item.voucher ? `<a href="${item.voucher.replace('/assets/uploads/', '/api/uploads/')}" target="_blank" style="color:#2563EB; font-weight:700; text-decoration:none;">📄 Ver Voucher</a>` : '<span style="color:#94A3B8;">Sin voucher</span>'}
       </div>
       ${item.observaciones ? `<div style="background:#FFF5F5; border-radius:6px; padding:6px 10px; margin-top:8px; font-size:12px; color:#B91C1C;"><strong>Nota administración:</strong> ${item.observaciones}</div>` : ''}
     `;
