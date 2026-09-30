@@ -105,9 +105,14 @@ class EmailService {
       const mailOptions = {
         from: `"Plaza Megatón — Administración" <${senderUser}>`,
         to,
+        replyTo: senderUser,
         subject,
-        text,
-        html
+        text: text || `${subject} - Notificación del Sistema de Plaza Megatón. Visita https://megaton1026.vercel.app/ para más detalles.`,
+        html,
+        headers: {
+          'X-Entity-Ref-ID': Date.now().toString(),
+          'X-Auto-Response-Suppress': 'OOF, AutoReply'
+        }
       };
 
       const info = await transporter.sendMail(mailOptions);
