@@ -38,6 +38,7 @@ class GoogleDriveService {
    */
   async saveReclamacionFiles(codigo, files = []) {
     this.ensureDirs();
+    const urls = [];
     try {
       const folderPath = path.join(this.reclamacionesDir, codigo);
       if (!fs.existsSync(folderPath)) {

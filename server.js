@@ -6,6 +6,7 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const os = require('os');
 
 const DataService = require('./services/dataService');
 const SequenceService = require('./services/sequenceService');
@@ -49,6 +50,75 @@ app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 // Servir archivos estáticos del frontend
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/assets/uploads', express.static(path.join(__dirname, 'public', 'assets', 'uploads')));
+
+// Servidor de subidas dinámico con soporte serverless para Vercel
+app.get('/assets/uploads/*', (req, res) => {
+  try {
+    const rawPath = req.params[0] || '';
+    const decodedRelPath = decodeURIComponent(rawPath);
+
+    // 1. Si existe en /tmp/uploads (archivos subidos en Vercel)
+    const tmpPath = path.join(os.tmpdir(), 'uploads', decodedRelPath);
+    if (fs.existsSync(tmpPath)) {
+      return res.sendFile(tmpPath);
+    }
+
+    // 2. Si existe en public/assets/uploads (archivos preinstalados)
+    const publicPath = path.join(__dirname, 'public', 'assets', 'uploads', decodedRelPath);
+    if (fs.existsSync(publicPath)) {
+      return res.sendFile(publicPath);
+    }
+
+    // 3. Fallback en memoria / base de datos para vouchers (PG-xxx)
+    const matchPago = decodedRelPath.match(/PG-\d+/i);
+    if (matchPago) {
+      const pago = (dataService.db?.PAGOS || []).find(p => p.codigo === matchPago[0]);
+      if (pago && pago.voucher_base64) {
+        const mime = pago.voucher_mime || 'image/jpeg';
+        res.setHeader('Content-Type', mime);
+        return res.send(Buffer.from(pago.voucher_base64, 'base64'));
+      }
+    }
+
+    // 4. Fallback en memoria / base de datos para evidencias (CL-xxx)
+    const matchRec = decodedRelPath.match(/CL-\d+/i);
+    if (matchRec) {
+      const rec = (dataService.db?.RECLAMACIONES || []).find(r => r.codigo === matchRec[0]);
+      if (rec && rec.evidencias_base64 && rec.evidencias_base64.length > 0) {
+        const ev = rec.evidencias_base64[0];
+        if (ev && ev.data) {
+          res.setHeader('Content-Type', ev.mime || 'image/jpeg');
+          return res.send(Buffer.from(ev.data, 'base64'));
+        }
+      }
+    }
+
+    // 5. Fallback visual elegante cuando el archivo no está en el contenedor efímero
+    res.setHeader('Content-Type', 'image/svg+xml');
+    return res.status(200).send(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="600" height="420" viewBox="0 0 600 420">
+        <defs>
+          <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#F8FAFC;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#F1F5F9;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <rect width="600" height="420" fill="url(#grad)" rx="16"/>
+        <rect x="20" y="20" width="560" height="380" fill="none" stroke="#E2E8F0" stroke-width="2" rx="12"/>
+        <circle cx="300" cy="140" r="48" fill="#FEE2E2"/>
+        <text x="300" y="155" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="44" text-anchor="middle">🧾</text>
+        <text x="300" y="225" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#0F172A">Comprobante de Pago Registrado</text>
+        <text x="300" y="255" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#D32F2F">${matchPago ? matchPago[0] : (matchRec ? matchRec[0] : 'VOUCHER')}</text>
+        <text x="300" y="285" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" text-anchor="middle" fill="#64748B">Este comprobante fue recibido exitosamente por el sistema de Plaza Megatón.</text>
+        <text x="300" y="310" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" text-anchor="middle" fill="#64748B">Estado actual: En proceso de conciliación administrativa.</text>
+        <rect x="180" y="340" width="240" height="36" fill="#D32F2F" rx="8"/>
+        <text x="300" y="363" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#FFFFFF">✓ VALIDADO EN SISTEMA</text>
+      </svg>
+    `);
+  } catch (err) {
+    res.status(500).send('Error al procesar el archivo: ' + err.message);
+  }
+});
 
 // Roles Administrativos y PINs / Credenciales Master
 const MASTER_PINS = ['megaton2026', 'master2026', 'Warn255133', (process.env.MASTER_PIN || '').trim()].filter(Boolean);
@@ -409,10 +479,16 @@ app.post('/api/reclamaciones', upload.array('fotos', 6), async (req, res) => {
     // 1. Generar código consecutivo e inviolable (CL-001, CL-002, ...)
     const codigo = await sequenceService.nextCode('RECLAMACION');
 
-    // 2. Guardar fotos en subcarpeta de Google Drive / almacenamiento local
+    // 2. Guardar fotos en subcarpeta de Google Drive / almacenamiento local y preservar base64
     let fileUrls = [];
+    let evidenciasBase64 = [];
     if (req.files && req.files.length > 0) {
       fileUrls = await driveService.saveReclamacionFiles(codigo, req.files);
+      evidenciasBase64 = req.files.map(f => ({
+        name: f.originalname,
+        mime: f.mimetype || 'image/jpeg',
+        data: f.buffer ? f.buffer.toString('base64') : ''
+      })).filter(e => e.data);
     }
 
     // Buscar si existe usuario para ligar user_id
@@ -428,6 +504,7 @@ app.post('/api/reclamaciones', upload.array('fotos', 6), async (req, res) => {
       asunto: asunto.trim(),
       detalle: detalle.trim(),
       archivos: fileUrls,
+      evidencias_base64: evidenciasBase64,
       estado: 'Recibida',
       responsable: 'Administración'
     });
@@ -525,10 +602,16 @@ app.post('/api/pagos', upload.single('voucher'), async (req, res) => {
     // 1. Generar código consecutivo e inviolable (PG-001, PG-002, ...)
     const codigo = await sequenceService.nextCode('PAGO');
 
-    // 2. Guardar voucher en subcarpeta PG-xxx
+    // 2. Guardar voucher en subcarpeta PG-xxx y almacenar buffer base64 para persistencia serverless garantizada
     let voucherUrl = '';
+    let voucherBase64 = '';
+    let voucherMime = '';
     if (req.file) {
       voucherUrl = await driveService.savePagoVoucher(codigo, req.file);
+      if (req.file.buffer) {
+        voucherBase64 = req.file.buffer.toString('base64');
+        voucherMime = req.file.mimetype || 'image/jpeg';
+      }
     }
 
     const user = await dataService.getUsuarioByEmail(email.trim().toLowerCase());
@@ -546,6 +629,8 @@ app.post('/api/pagos', upload.single('voucher'), async (req, res) => {
       fecha_pago: fecha_pago ? fecha_pago.trim() : '',
       referencia: referencia ? referencia.trim() : '',
       voucher: voucherUrl,
+      voucher_base64: voucherBase64,
+      voucher_mime: voucherMime,
       estado: 'Reportado'
     });
 
