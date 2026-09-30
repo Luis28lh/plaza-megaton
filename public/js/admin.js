@@ -24,13 +24,54 @@ async function fetchCatalogFallback() {
   return null;
 }
 
-// Autenticación por PIN
+// Autenticación por PIN y Roles (MASTER vs GESTOR)
 function getAdminPin() {
   return sessionStorage.getItem('megaton_admin_pin') || '';
 }
 
 function setAdminPin(pin) {
   sessionStorage.setItem('megaton_admin_pin', pin);
+}
+
+function getAdminRole() {
+  return sessionStorage.getItem('megaton_admin_role') || 'GESTOR';
+}
+
+function setAdminRole(role) {
+  sessionStorage.setItem('megaton_admin_role', role);
+}
+
+function applyRolePermissions(role) {
+  const badge = document.getElementById('admin-user-badge');
+  const tabHistorial = document.getElementById('tab-btn-historial');
+  const tabConfig = document.getElementById('tab-btn-config');
+
+  if (role === 'MASTER') {
+    if (badge) {
+      badge.innerHTML = '⭐ MASTER';
+      badge.style.background = '#F59E0B';
+      badge.style.color = '#78350F';
+      badge.title = 'Super Administrador con Control Total y Código';
+    }
+    if (tabHistorial) tabHistorial.style.display = 'inline-flex';
+    if (tabConfig) tabConfig.style.display = 'inline-flex';
+  } else {
+    // GESTOR OPERATIVO
+    if (badge) {
+      badge.innerHTML = '💼 GESTOR';
+      badge.style.background = '#10B981';
+      badge.style.color = '#064E3B';
+      badge.title = 'Administrador Operativo de Plaza Megatón';
+    }
+    // Ocultar Historial y Configuración para el Usuario Gestor
+    if (tabHistorial) tabHistorial.style.display = 'none';
+    if (tabConfig) tabConfig.style.display = 'none';
+
+    // Si estaba posicionado en una de las pestañas restringidas, volver a KPIs
+    if (currentTab === 'historial' || currentTab === 'config') {
+      switchAdminTab('kpis');
+    }
+  }
 }
 
 async function checkAdminAuth() {
@@ -44,33 +85,50 @@ async function checkAdminAuth() {
     return false;
   }
 
-  // Verificar PIN contra la API local
+  // Verificar PIN contra la API del servidor
   try {
     const res = await fetch('/api/admin/dashboard', {
       headers: { 'x-admin-pin': pin }
     });
 
     if (res.ok) {
+      const data = await res.json();
+      const detectedRole = data.role || (['megaton2026', 'master2026'].includes(pin) ? 'MASTER' : 'GESTOR');
+      setAdminRole(detectedRole);
+
       if (authGate) authGate.style.display = 'none';
       if (panel) panel.style.display = 'block';
+
+      applyRolePermissions(detectedRole);
       loadAllAdminData();
       return true;
     }
   } catch (err) {
-    console.warn('Backend local no disponible o entorno estático (GitHub Pages), validando PIN maestro...');
+    console.warn('Backend API no disponible directamente, evaluando credenciales en modo autónomo...');
   }
 
-  // Validación de PIN maestro para GitHub Pages y modo público
-  if (pin === 'megaton2026') {
+  // Fallback offline / estático
+  let clientRole = null;
+  if (['megaton2026', 'master2026'].includes(pin)) {
+    clientRole = 'MASTER';
+  } else if (['gestor2026', 'admin2026'].includes(pin)) {
+    clientRole = 'GESTOR';
+  }
+
+  if (clientRole) {
+    setAdminRole(clientRole);
     if (authGate) authGate.style.display = 'none';
     if (panel) panel.style.display = 'block';
+
+    applyRolePermissions(clientRole);
     loadAllAdminData();
     return true;
   } else {
     sessionStorage.removeItem('megaton_admin_pin');
+    sessionStorage.removeItem('megaton_admin_role');
     if (authGate) authGate.style.display = 'flex';
     if (panel) panel.style.display = 'none';
-    alert('PIN incorrecto. Ingrese el PIN administrativo asignado (ej. megaton2026).');
+    alert('PIN incorrecto. Ingrese el PIN asignado (Master: megaton2026 / Gestor: gestor2026).');
     return false;
   }
 }
@@ -87,19 +145,28 @@ function handlePinSubmit(e) {
 
 function adminLogout() {
   sessionStorage.removeItem('megaton_admin_pin');
+  sessionStorage.removeItem('megaton_admin_role');
   window.location.reload();
 }
 
 // ==========================================
-// CARGA Y PESTAÑAS
+// CARGA Y PESTAÑAS CON VALIDACIÓN RBAC
 // ==========================================
 function switchAdminTab(tabName) {
+  const role = getAdminRole();
+
+  // Si es Usuario Gestor e intenta acceder a Historial o Configuración, bloquear
+  if (role === 'GESTOR' && (tabName === 'historial' || tabName === 'config')) {
+    App.showToast('Acceso restringido: Esta sección está reservada exclusivamente para el Usuario Master.', 'error');
+    tabName = 'kpis';
+  }
+
   currentTab = tabName;
   document.querySelectorAll('.admin-tab-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tab === tabName);
   });
 
-  const sections = ['kpis', 'locales', 'presupuesto', 'usuarios', 'reclamaciones', 'pagos', 'historial', 'config'];
+  const sections = ['kpis', 'locales', 'presupuesto', 'usuarios', 'reclamaciones', 'pagos', 'roles', 'historial', 'config'];
   sections.forEach(s => {
     const el = document.getElementById(`tab-section-${s}`);
     if (el) el.style.display = (s === tabName) ? 'block' : 'none';
@@ -111,8 +178,8 @@ function switchAdminTab(tabName) {
   if (tabName === 'usuarios') loadUsuarios();
   if (tabName === 'reclamaciones') loadReclamaciones();
   if (tabName === 'pagos') loadPagos();
-  if (tabName === 'historial') loadHistorial();
-  if (tabName === 'config') loadConfig();
+  if (tabName === 'historial' && role === 'MASTER') loadHistorial();
+  if (tabName === 'config' && role === 'MASTER') loadConfig();
 }
 
 async function loadAllAdminData() {
@@ -429,7 +496,10 @@ function renderUsuariosTable(users) {
       <td><span style="background:#FEE2E2; color:#B71C1C; padding:4px 8px; border-radius:6px; font-weight:600; font-size:12px; display:inline-block;">${cubsHtml}</span></td>
       <td><span class="badge ${u.estado === 'Activo' ? 'badge-activo' : 'badge-rechazado'}">${u.estado}</span></td>
       <td>
-        <button class="btn-sm btn-sm-outline" onclick="openEditUserModal('${u.user_id}')">⚙️ Gestionar</button>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button class="btn-sm btn-sm-outline" onclick="openEditUserModal('${u.user_id}')">⚙️ Gestionar</button>
+          <button class="btn-sm btn-sm-primary" style="padding:6px 10px;" onclick="openEditUserModal('${u.user_id}')" title="Asignar o cambiar contraseña">🔑 Clave</button>
+        </div>
       </td>
     `;
     tbody.appendChild(tr);
@@ -484,6 +554,25 @@ function openEditUserModal(userId) {
         <option value="Inactivo" ${user.estado === 'Inactivo' ? 'selected' : ''}>Inactivo</option>
       </select>
     </div>
+
+    <!-- SECCIÓN: CAMBIO DE CONTRASEÑA / PIN DEL USUARIO -->
+    <div style="background:#F8FAFC; border:1.5px solid #CBD5E1; border-radius:10px; padding:14px; margin-top:14px; margin-bottom:14px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <label class="form-label" style="margin:0; font-size:13px; font-weight:800; color:#0F172A;">🔑 Cambiar Contraseña / PIN de Acceso:</label>
+        <span style="font-size:11px; background:#DCFCE7; color:#15803D; font-weight:700; padding:2px 8px; border-radius:6px;">Habilitado Gestor & Master</span>
+      </div>
+      <p style="font-size:12px; color:#64748B; margin:0 0 10px;">
+        Establece una contraseña o PIN para este inquilino para que pueda ingresar a su portal personal directamente.
+      </p>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="edit-user-new-password" class="form-input" placeholder="Nueva contraseña (ej. megaton123)" style="font-weight:600;">
+        <button type="button" class="btn-sm btn-sm-primary" style="white-space:nowrap; padding:0 14px;" onclick="submitChangePassword('${user.user_id}')">
+          Actualizar Clave
+        </button>
+      </div>
+      <div id="pwd-change-msg" style="font-size:12px; margin-top:6px; display:none;"></div>
+    </div>
+
     <div class="form-group">
       <label class="form-label">Cubículos actualmente asociados:</label>
       <div style="font-size:13px; color:#B71C1C; margin-bottom:8px; line-height:1.5;">${cubsFormatted}</div>
@@ -508,6 +597,45 @@ function openEditUserModal(userId) {
 
   document.getElementById('btn-save-user').onclick = () => saveUserBasicInfo(user.user_id);
   modal.classList.add('open');
+}
+
+async function submitChangePassword(userId) {
+  const pwdInput = document.getElementById('edit-user-new-password');
+  const msgEl = document.getElementById('pwd-change-msg');
+  const newPwd = pwdInput ? pwdInput.value.trim() : '';
+
+  if (!newPwd) {
+    App.showToast('Ingresa una contraseña válida para el usuario.', 'error');
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/admin/usuarios/${userId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-pin': getAdminPin()
+      },
+      body: JSON.stringify({ password: newPwd })
+    });
+
+    const data = await res.json();
+    if (res.ok && data.success) {
+      App.showToast('Contraseña de usuario actualizada correctamente.', 'success');
+      if (msgEl) {
+        msgEl.style.display = 'block';
+        msgEl.style.color = '#15803D';
+        msgEl.innerHTML = `✅ Contraseña cambiada con éxito a: <strong>${newPwd}</strong>`;
+      }
+      pwdInput.value = '';
+      loadUsuarios();
+    } else {
+      App.showToast(data.error || 'No se pudo actualizar la contraseña.', 'error');
+    }
+  } catch (err) {
+    console.error('Error al actualizar contraseña:', err);
+    App.showToast('Error de conexión al actualizar contraseña.', 'error');
+  }
 }
 
 async function saveUserBasicInfo(userId) {

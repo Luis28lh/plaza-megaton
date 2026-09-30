@@ -149,7 +149,7 @@ class DataService {
     return { ...user, cubiculos };
   }
 
-  async createUsuario({ user_id, nombre, email, telefono, estado = 'Activo' }) {
+  async createUsuario({ user_id, nombre, email, telefono, password, estado = 'Activo' }) {
     const fecha_registro = new Date().toLocaleDateString('es-DO', {
       day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Santo_Domingo'
     });
@@ -159,6 +159,7 @@ class DataService {
       nombre,
       email: email.trim().toLowerCase(),
       telefono: telefono || '',
+      password: password ? String(password).trim() : '123456',
       fecha_registro,
       estado
     };
@@ -175,11 +176,36 @@ class DataService {
     return newUser;
   }
 
-  async updateUsuario(userId, updates) {
+  async updateUsuario(userId, updates, adminUser = 'Administración') {
     const user = (this.db.USUARIOS || []).find(u => u.user_id === userId);
     if (!user) return null;
+
+    const changedFields = [];
+    if (updates.password && updates.password !== user.password) {
+      changedFields.push('contraseña');
+    }
+    if (updates.estado && updates.estado !== user.estado) {
+      changedFields.push(`estado (${user.estado} -> ${updates.estado})`);
+    }
+    if (updates.telefono && updates.telefono !== user.telefono) {
+      changedFields.push('teléfono');
+    }
+
     Object.assign(user, updates);
     this.persist();
+
+    if (changedFields.length > 0) {
+      await this.addHistorial({
+        tipo_documento: 'USUARIO',
+        codigo_documento: user.user_id,
+        usuario: adminUser,
+        accion: 'Actualización de Usuario',
+        estado_anterior: 'ACTIVO',
+        estado_nuevo: user.estado || 'ACTIVO',
+        observacion: `Modificación de ${changedFields.join(', ')} para ${user.nombre} (${user.email}) por ${adminUser}.`
+      });
+    }
+
     return user;
   }
 

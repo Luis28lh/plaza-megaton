@@ -50,13 +50,47 @@ app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/assets/uploads', express.static(path.join(__dirname, 'public', 'assets', 'uploads')));
 
-// Helper de autenticación administrativa
+// Roles Administrativos y PINs
+const MASTER_PINS = ['megaton2026', 'master2026', (process.env.MASTER_PIN || '').trim()].filter(Boolean);
+const GESTOR_PINS = ['gestor2026', 'admin2026', (process.env.GESTOR_PIN || '').trim()].filter(Boolean);
+
+function authenticateAdmin(pin) {
+  if (!pin) return null;
+  const clean = String(pin).trim();
+  if (MASTER_PINS.includes(clean)) {
+    return { role: 'MASTER', nombre: 'Usuario Master (Super Admin)' };
+  }
+  if (GESTOR_PINS.includes(clean)) {
+    return { role: 'GESTOR', nombre: 'Usuario Gestor (Administrador Operativo)' };
+  }
+  return null;
+}
+
+// Helper de autenticación administrativa (Permite Master y Gestor)
 function requireAdmin(req, res, next) {
   const pin = req.headers['x-admin-pin'] || req.query.admin_pin;
-  const expectedPin = process.env.ADMIN_PIN || 'megaton2026';
-  if (!pin || pin !== expectedPin) {
+  const auth = authenticateAdmin(pin);
+  if (!auth) {
+    return res.status(401).json({ success: false, error: 'Acceso no autorizado al panel administrativo. Ingrese un PIN válido.' });
+  }
+  req.adminAuth = auth;
+  next();
+}
+
+// Helper exclusivo para Usuario Master (Super Admin con acceso a Configuración e Historial)
+function requireMaster(req, res, next) {
+  const pin = req.headers['x-admin-pin'] || req.query.admin_pin;
+  const auth = authenticateAdmin(pin);
+  if (!auth) {
     return res.status(401).json({ success: false, error: 'Acceso no autorizado al panel administrativo.' });
   }
+  if (auth.role !== 'MASTER') {
+    return res.status(403).json({ 
+      success: false, 
+      error: 'Acceso restringido: Esta acción o módulo está reservado exclusivamente para el Usuario Master.' 
+    });
+  }
+  req.adminAuth = auth;
   next();
 }
 
@@ -198,6 +232,47 @@ app.get('/api/auth/verify', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
+// 4b. Inicio de Sesión de Inquilino / Ocupante con Contraseña o PIN
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ success: false, error: 'Debes ingresar tu correo y contraseña.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const user = await dataService.getUsuarioByEmail(cleanEmail);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'No se encontró ningún usuario registrado con este correo.' });
+    }
+
+    const enteredPwd = String(password).trim();
+    const userPwd = String(user.password || '').trim();
+
+    // Validar contraseña asignada por admin, o por defecto '123456' / PIN temporal
+    const isValid = userPwd ? (userPwd === enteredPwd) : (enteredPwd === '123456' || enteredPwd === 'megaton2026');
+    if (!isValid) {
+      return res.status(401).json({ success: false, error: 'Contraseña o PIN incorrecto. Si no la recuerdas, solicita un enlace a tu correo o contacta al Administrador Gestor.' });
+    }
+
+    const cubiculos = await dataService.getCubiculosByUser(user.user_id);
+    const session = authService.createSession({
+      ...user,
+      cubiculos
+    });
+
+    res.json({
+      success: true,
+      message: 'Inicio de sesión exitoso.',
+      sessionToken: session.sessionToken,
+      user: session.user
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 
 // 5. Datos del usuario autenticado
 app.get('/api/auth/me', async (req, res) => {
@@ -451,7 +526,12 @@ app.patch('/api/pagos/:codigo', requireAdmin, async (req, res) => {
 app.get('/api/admin/dashboard', requireAdmin, async (req, res) => {
   try {
     const kpis = await dataService.getDashboardKPIs();
-    res.json({ success: true, kpis });
+    res.json({ 
+      success: true, 
+      kpis,
+      role: req.adminAuth ? req.adminAuth.role : 'GESTOR',
+      roleName: req.adminAuth ? req.adminAuth.nombre : 'Usuario Gestor'
+    });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -467,14 +547,21 @@ app.get('/api/admin/usuarios', requireAdmin, async (req, res) => {
   }
 });
 
-// 14. Panel Administrativo: Modificar Usuario (asignar/quitar cubículos o activar/desactivar)
+// 14. Panel Administrativo: Modificar Usuario (cambiar contraseña, asignar/quitar cubículos o activar/desactivar)
 app.patch('/api/admin/usuarios/:userId', requireAdmin, async (req, res) => {
   try {
     const { userId } = req.params;
-    const { estado, nombre, telefono, agregarCubiculo, quitarCubiculo } = req.body;
+    const { estado, nombre, telefono, password, agregarCubiculo, quitarCubiculo } = req.body;
+    const adminName = req.adminAuth ? req.adminAuth.nombre : 'Administración';
 
-    if (estado || nombre || telefono) {
-      await dataService.updateUsuario(userId, { estado, nombre, telefono });
+    const updates = {};
+    if (estado !== undefined) updates.estado = estado;
+    if (nombre !== undefined) updates.nombre = nombre;
+    if (telefono !== undefined) updates.telefono = telefono;
+    if (password !== undefined && String(password).trim()) updates.password = String(password).trim();
+
+    if (Object.keys(updates).length > 0) {
+      await dataService.updateUsuario(userId, updates, adminName);
     }
 
     if (agregarCubiculo) {
@@ -486,14 +573,14 @@ app.patch('/api/admin/usuarios/:userId', requireAdmin, async (req, res) => {
     }
 
     const updatedUser = await dataService.getUsuarioById(userId);
-    res.json({ success: true, usuario: updatedUser });
+    res.json({ success: true, usuario: updatedUser, message: 'Usuario actualizado correctamente.' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// 15. Panel Administrativo: Historial y Auditoría
-app.get('/api/admin/historial', requireAdmin, async (req, res) => {
+// 15. Panel Administrativo: Historial y Auditoría (Solo Usuario Master)
+app.get('/api/admin/historial', requireMaster, async (req, res) => {
   try {
     const filter = {};
     if (req.query.tipo) filter.tipo_documento = req.query.tipo;
@@ -506,8 +593,8 @@ app.get('/api/admin/historial', requireAdmin, async (req, res) => {
   }
 });
 
-// 16. Panel Administrativo: Configuración
-app.get('/api/admin/config', requireAdmin, async (req, res) => {
+// 16. Panel Administrativo: Configuración (Solo Usuario Master)
+app.get('/api/admin/config', requireMaster, async (req, res) => {
   try {
     const config = await dataService.getConfig();
     res.json({ success: true, config });
@@ -516,7 +603,7 @@ app.get('/api/admin/config', requireAdmin, async (req, res) => {
   }
 });
 
-app.post('/api/admin/config', requireAdmin, async (req, res) => {
+app.post('/api/admin/config', requireMaster, async (req, res) => {
   try {
     const { parametro, valor } = req.body;
     if (!parametro) return res.status(400).json({ success: false, error: 'Parámetro requerido.' });

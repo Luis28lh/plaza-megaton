@@ -48,7 +48,7 @@
           <a href="index.html" style="text-decoration:none;">
             <img src="assets/logo-megaton.svg" alt="Logo" style="height:36px; filter:brightness(0) invert(1);">
           </a>
-          <span class="admin-badge">ADMIN</span>
+          <span id="admin-user-badge" class="admin-badge">ADMIN</span>
         </div>
         <div style="display:flex; align-items:center; gap:12px;">
           <a href="index.html" class="btn-sm btn-sm-outline" style="background:#1E293B; border-color:#334155; color:#F8FAFC;">🌐 Ver Web</a>
@@ -60,14 +60,15 @@
     <!-- Barra de Pestañas del Administrador -->
     <nav class="admin-tabs-nav">
       <div class="admin-tabs-container">
-        <button class="admin-tab-btn active" data-tab="kpis" onclick="switchAdminTab('kpis')">📊 Indicadores</button>
-        <button class="admin-tab-btn" data-tab="locales" onclick="switchAdminTab('locales')">🏢 Locales & Mantenimiento (33)</button>
-        <button class="admin-tab-btn" data-tab="presupuesto" onclick="switchAdminTab('presupuesto')">📑 Presupuesto 2026</button>
-        <button class="admin-tab-btn" data-tab="usuarios" onclick="switchAdminTab('usuarios')">👥 Usuarios</button>
-        <button class="admin-tab-btn" data-tab="reclamaciones" onclick="switchAdminTab('reclamaciones')">🛠️ Reclamaciones</button>
-        <button class="admin-tab-btn" data-tab="pagos" onclick="switchAdminTab('pagos')">💳 Pagos</button>
-        <button class="admin-tab-btn" data-tab="historial" onclick="switchAdminTab('historial')">📜 Historial</button>
-        <button class="admin-tab-btn" data-tab="config" onclick="switchAdminTab('config')">⚙️ Configuración</button>
+        <button class="admin-tab-btn active" id="tab-btn-kpis" data-tab="kpis" onclick="switchAdminTab('kpis')">📊 Indicadores</button>
+        <button class="admin-tab-btn" id="tab-btn-locales" data-tab="locales" onclick="switchAdminTab('locales')">🏢 Locales & Mantenimiento (33)</button>
+        <button class="admin-tab-btn" id="tab-btn-presupuesto" data-tab="presupuesto" onclick="switchAdminTab('presupuesto')">📑 Presupuesto 2026</button>
+        <button class="admin-tab-btn" id="tab-btn-usuarios" data-tab="usuarios" onclick="switchAdminTab('usuarios')">👥 Usuarios</button>
+        <button class="admin-tab-btn" id="tab-btn-reclamaciones" data-tab="reclamaciones" onclick="switchAdminTab('reclamaciones')">🛠️ Reclamaciones</button>
+        <button class="admin-tab-btn" id="tab-btn-pagos" data-tab="pagos" onclick="switchAdminTab('pagos')">💳 Pagos</button>
+        <button class="admin-tab-btn" id="tab-btn-roles" data-tab="roles" onclick="switchAdminTab('roles')">📋 Roles & Criterios</button>
+        <button class="admin-tab-btn" id="tab-btn-historial" data-tab="historial" onclick="switchAdminTab('historial')">📜 Historial</button>
+        <button class="admin-tab-btn" id="tab-btn-config" data-tab="config" onclick="switchAdminTab('config')">⚙️ Configuración</button>
       </div>
     </nav>
 
@@ -404,36 +405,162 @@
         </div>
       </section>
 
-      <!-- 6. PESTAÑA: CÓDIGO QR -->
-      <section id="tab-section-qr" style="display:none;">
-        <div class="qr-display-card">
-          <div style="font-size:13px; font-weight:800; color:var(--primary-red); text-transform:uppercase; letter-spacing:1px;">
-            Acceso Rápido para Reuniones e Inquilinos
+      <!-- 6. PESTAÑA: ROLES & CRITERIOS DE ACCESO -->
+      <section id="tab-section-roles" style="display:none;">
+        <div style="margin-bottom:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+            <div>
+              <h2 style="font-size:20px; font-weight:900; color:var(--text-main); margin:0;">📋 Matriz Oficial de Perfiles, Criterios y Permisos</h2>
+              <p style="font-size:13px; color:var(--text-muted); margin:4px 0 0;">Políticas de seguridad, control de accesos y responsabilidades operativas en Plaza Megatón</p>
+            </div>
+            <div>
+              <span class="badge" style="background:#EFF6FF; color:#1D4ED8; font-size:12px; font-weight:700; padding:6px 12px; border-radius:8px;">
+                🛡️ Sistema de Control RBAC Activo
+              </span>
+            </div>
           </div>
-          <h2 style="font-size:22px; font-weight:900; margin:6px 0 10px;">REGISTRO PLAZA MEGATÓN</h2>
-          <p style="font-size:13px; color:var(--text-muted);">
-            Escanea con cualquier celular (cámara de iPhone o Android) para completar tus datos y cubículos.
-          </p>
+        </div>
 
-          <div class="qr-box-img">
-            <img id="qr-code-img" alt="Código QR de Registro Plaza Megatón" src="">
+        <!-- Tarjetas Descriptivas de los 3 Perfiles -->
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:18px; margin-bottom:24px;">
+          
+          <!-- Master -->
+          <div style="background:#FFFFFF; border:2px solid #F59E0B; border-radius:14px; padding:20px; box-shadow:var(--shadow-sm); position:relative; overflow:hidden;">
+            <div style="position:absolute; top:0; right:0; background:#F59E0B; color:#FFFFFF; font-size:10px; font-weight:900; padding:4px 10px; border-bottom-left-radius:8px; text-transform:uppercase;">
+              Máximo Privilegio
+            </div>
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+              <span style="font-size:28px;">⭐</span>
+              <div>
+                <h3 style="margin:0; font-size:16px; font-weight:900; color:#0F172A;">Usuario Master</h3>
+                <span style="font-size:11px; color:#B45309; font-weight:700;">Super Administrador / Control Total</span>
+              </div>
+            </div>
+            <p style="font-size:13px; color:#475569; line-height:1.5; margin-bottom:12px;">
+              <strong>Criterio:</strong> Es el responsable técnico superior de la plataforma. Diseña, programa, administra variables del sistema y tiene acceso irrestricto. Es el <strong>único usuario facultado</strong> para modificar la ⚙️ Configuración y auditar el 📜 Historial.
+            </p>
+            <div style="background:#FEF3C7; border:1px solid #FDE68A; border-radius:8px; padding:10px; font-size:12px; color:#92400E;">
+              🔑 <strong>PIN de Acceso:</strong> <code>megaton2026</code> / <code>master2026</code>
+            </div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label" style="font-size:12px;">Enlace fijo directo:</label>
-            <input type="text" id="qr-target-url" class="form-input" readonly style="font-size:13px; text-align:center; background:#F8FAFC;">
+          <!-- Gestor -->
+          <div style="background:#FFFFFF; border:2px solid #10B981; border-radius:14px; padding:20px; box-shadow:var(--shadow-sm); position:relative; overflow:hidden;">
+            <div style="position:absolute; top:0; right:0; background:#10B981; color:#FFFFFF; font-size:10px; font-weight:900; padding:4px 10px; border-bottom-left-radius:8px; text-transform:uppercase;">
+              Operativo
+            </div>
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+              <span style="font-size:28px;">💼</span>
+              <div>
+                <h3 style="margin:0; font-size:16px; font-weight:900; color:#0F172A;">Usuario Gestor</h3>
+                <span style="font-size:11px; color:#047857; font-weight:700;">Administrador de Plaza Megatón</span>
+              </div>
+            </div>
+            <p style="font-size:13px; color:#475569; line-height:1.5; margin-bottom:12px;">
+              <strong>Criterio:</strong> Es el encargado de la administración operativa diaria: verificar pagos, atender solicitudes/averías, revisar el catálogo de 33 locales, consultar presupuesto y <strong>cambiar contraseñas de los usuarios</strong>. No tiene acceso a Historial ni Configuración.
+            </p>
+            <div style="background:#D1FAE5; border:1px solid #A7F3D0; border-radius:8px; padding:10px; font-size:12px; color:#065F46;">
+              🔑 <strong>PIN de Acceso:</strong> <code>gestor2026</code>
+            </div>
           </div>
 
-          <div style="display:flex; gap:10px; justify-content:center; margin-top:16px;">
-            <button class="btn-primary" onclick="downloadQR()" style="min-height:44px; width:auto; padding:0 20px;">
-              💾 Descargar Imagen QR
-            </button>
-            <button class="btn-secondary" onclick="printQRCard()" style="min-height:44px; width:auto; padding:0 20px;">
-              🖨️ Imprimir Cartel
-            </button>
+          <!-- Inquilino / Cliente -->
+          <div style="background:#FFFFFF; border:2px solid #3B82F6; border-radius:14px; padding:20px; box-shadow:var(--shadow-sm); position:relative; overflow:hidden;">
+            <div style="position:absolute; top:0; right:0; background:#3B82F6; color:#FFFFFF; font-size:10px; font-weight:900; padding:4px 10px; border-bottom-left-radius:8px; text-transform:uppercase;">
+              Cliente / Ocupante
+            </div>
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+              <span style="font-size:28px;">👤</span>
+              <div>
+                <h3 style="margin:0; font-size:16px; font-weight:900; color:#0F172A;">Usuario Cliente / Inquilino</h3>
+                <span style="font-size:11px; color:#1D4ED8; font-weight:700;">Ocupante o Propietario de Cubículo</span>
+              </div>
+            </div>
+            <p style="font-size:13px; color:#475569; line-height:1.5; margin-bottom:12px;">
+              <strong>Criterio:</strong> Usuario final titular de uno o más cubículos. Solo tiene derecho a consultar lo estrictamente relacionado a su local: sus tickets de soporte, cuotas de mantenimiento y comprobantes de pago. No tiene acceso al panel administrativo.
+            </p>
+            <div style="background:#DBEAFE; border:1px solid #BFDBFE; border-radius:8px; padding:10px; font-size:12px; color:#1E40AF;">
+              🌐 <strong>Acceso:</strong> Correo registrado + Contraseña (o Magic Link)
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Tabla Detallada de Permisos y Criterios -->
+        <div style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:14px; padding:20px; box-shadow:var(--shadow-sm);">
+          <h3 style="font-size:16px; font-weight:900; color:#0F172A; margin:0 0 16px;">📊 Tabla de Criterios y Matriz de Permisos por Rol</h3>
+          
+          <div class="table-responsive">
+            <table class="data-table" style="font-size:13px;">
+              <thead>
+                <tr style="background:#F8FAFC;">
+                  <th style="width:25%;">Módulo / Funcionalidad</th>
+                  <th style="width:25%; text-align:center;">⭐ Usuario Master</th>
+                  <th style="width:25%; text-align:center;">💼 Usuario Gestor</th>
+                  <th style="width:25%; text-align:center;">👤 Usuario Cliente / Inquilino</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>📊 Indicadores (KPIs)</strong><br><small style="color:#64748B;">Métricas globales de la plaza</small></td>
+                  <td style="text-align:center;"><span class="badge badge-activo">✅ Acceso Total</span></td>
+                  <td style="text-align:center;"><span class="badge badge-activo">✅ Acceso Total</span></td>
+                  <td style="text-align:center;"><span class="badge badge-rechazado">❌ Sin Acceso</span></td>
+                </tr>
+                <tr>
+                  <td><strong>🏢 Locales & Mantenimiento (33)</strong><br><small style="color:#64748B;">Catálogo oficial, metrajes y cuotas</small></td>
+                  <td style="text-align:center;"><span class="badge badge-activo">✅ Acceso Total</span></td>
+                  <td style="text-align:center;"><span class="badge badge-activo">✅ Acceso Total</span></td>
+                  <td style="text-align:center;"><span style="color:#64748B; font-size:12px;">🔒 Solo sus cubículos</span></td>
+                </tr>
+                <tr>
+                  <td><strong>📑 Presupuesto 2026</strong><br><small style="color:#64748B;">Ingresos, egresos y nómina fija</small></td>
+                  <td style="text-align:center;"><span class="badge badge-activo">✅ Acceso Total</span></td>
+                  <td style="text-align:center;"><span class="badge badge-activo">✅ Acceso Total</span></td>
+                  <td style="text-align:center;"><span class="badge badge-rechazado">❌ Sin Acceso</span></td>
+                </tr>
+                <tr>
+                  <td><strong>👥 Usuarios y Cambio de Contraseñas</strong><br><small style="color:#64748B;">Vincular cubículos y resetear claves</small></td>
+                  <td style="text-align:center;"><span class="badge badge-activo">✅ Acceso Total</span></td>
+                  <td style="text-align:center;"><span class="badge badge-activo">✅ Cambiar Contraseñas</span></td>
+                  <td style="text-align:center;"><span style="color:#64748B; font-size:12px;">🔒 Solo su propio perfil</span></td>
+                </tr>
+                <tr>
+                  <td><strong>🛠️ Reclamaciones y Averías</strong><br><small style="color:#64748B;">Atender tickets y presupuestar reparaciones</small></td>
+                  <td style="text-align:center;"><span class="badge badge-activo">✅ Gestionar Todas</span></td>
+                  <td style="text-align:center;"><span class="badge badge-activo">✅ Gestionar Todas</span></td>
+                  <td style="text-align:center;"><span style="color:#64748B; font-size:12px;">🔒 Solo reportar / ver las suyas</span></td>
+                </tr>
+                <tr>
+                  <td><strong>💳 Pagos y Vouchers</strong><br><small style="color:#64748B;">Conciliar comprobantes y confirmar recibos</small></td>
+                  <td style="text-align:center;"><span class="badge badge-activo">✅ Conciliar / Aprobar</span></td>
+                  <td style="text-align:center;"><span class="badge badge-activo">✅ Conciliar / Aprobar</span></td>
+                  <td style="text-align:center;"><span style="color:#64748B; font-size:12px;">🔒 Solo reportar / ver sus pagos</span></td>
+                </tr>
+                <tr style="background:#FFFBEB;">
+                  <td><strong>📜 Historial de Auditoría</strong><br><small style="color:#B45309;">Trazabilidad inmutable de todas las acciones</small></td>
+                  <td style="text-align:center;"><span class="badge" style="background:#F59E0B; color:#FFFFFF;">🔐 EXCLUSIVO MASTER</span></td>
+                  <td style="text-align:center;"><span class="badge badge-rechazado">❌ BLOQUEADO</span></td>
+                  <td style="text-align:center;"><span class="badge badge-rechazado">❌ Sin Acceso</span></td>
+                </tr>
+                <tr style="background:#FFFBEB;">
+                  <td><strong>⚙️ Configuración del Sistema</strong><br><small style="color:#B45309;">Parámetros globales, Drive y Apps Script</small></td>
+                  <td style="text-align:center;"><span class="badge" style="background:#F59E0B; color:#FFFFFF;">🔐 EXCLUSIVO MASTER</span></td>
+                  <td style="text-align:center;"><span class="badge badge-rechazado">❌ BLOQUEADO</span></td>
+                  <td style="text-align:center;"><span class="badge badge-rechazado">❌ Sin Acceso</span></td>
+                </tr>
+                <tr>
+                  <td><strong>🔐 Acceso al Panel Admin (/admin)</strong><br><small style="color:#64748B;">Ingreso mediante PIN administrativo</small></td>
+                  <td style="text-align:center;"><span class="badge badge-activo">✅ Permitido (megaton2026)</span></td>
+                  <td style="text-align:center;"><span class="badge badge-activo">✅ Permitido (gestor2026)</span></td>
+                  <td style="text-align:center;"><span class="badge badge-rechazado">❌ Denegado</span></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </section>
+
 
       <!-- 7. PESTAÑA: CONFIGURACIÓN -->
       <section id="tab-section-config" style="display:none;">
