@@ -9,39 +9,46 @@ class EmailService {
   }
 
   async getTransporter() {
-    if (this.transporter) return this.transporter;
+    if (this.transporter && !this.isTestAccount) return this.transporter;
 
-    const host = process.env.SMTP_HOST;
-    const user = process.env.SMTP_USER;
-    const pass = process.env.SMTP_PASS;
-    const port = Number(process.env.SMTP_PORT || 587);
+    let user = process.env.SMTP_USER || 'plazamegaton2000@gmail.com';
+    let pass = process.env.SMTP_PASS;
 
-    if (host && user && pass) {
-      this.transporter = nodemailer.createTransport({
-        host,
-        port,
-        secure: port === 465,
-        auth: { user, pass }
-      });
-      this.isTestAccount = false;
-      console.log(`[EmailService] Conectado a SMTP oficial: ${host} (${user})`);
-    } else {
-      // Entorno de desarrollo / pruebas: Buzón Ethereal con URL pública de previsualización
-      console.log('[EmailService] SMTP no configurado en .env. Generando buzón seguro de pruebas Ethereal...');
-      const testAccount = await nodemailer.createTestAccount();
-      this.transporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false,
-        auth: {
-          user: testAccount.user,
-          pass: testAccount.pass
-        }
-      });
-      this.isTestAccount = true;
-      console.log(`[EmailService] Buzón de pruebas listo: ${testAccount.user}`);
+    // Fallback a configuración en DB si existe
+    if (!pass && this.dataService) {
+      const dbUser = await this.dataService.getConfigValue('smtp_user', '');
+      const dbPass = await this.dataService.getConfigValue('smtp_pass', '');
+      if (dbUser) user = dbUser;
+      if (dbPass) pass = dbPass;
     }
 
+    if (user && pass) {
+      this.transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: user.trim(),
+          pass: pass.replace(/\s+/g, '') // Soporta formato "abcd efgh ijkl mnop"
+        }
+      });
+      this.isTestAccount = false;
+      console.log(`[EmailService] Conectado a Gmail Oficial: ${user}`);
+      return this.transporter;
+    }
+
+    // Entorno de pruebas temporal hasta ingresar la contraseña de aplicación de Gmail
+    console.log('[EmailService] Contraseña de aplicación pendiente. Generando buzón seguro de pruebas Ethereal...');
+    const testAccount = await nodemailer.createTestAccount();
+    this.transporter = nodemailer.createTransport({
+      host: 'smtp.ethereal.email',
+      port: 587,
+      secure: false,
+      auth: {
+        user: testAccount.user,
+        pass: testAccount.pass
+      }
+    });
+    this.isTestAccount = true;
+    console.log(`[EmailService] Buzón de pruebas listo: ${testAccount.user}`);
     return this.transporter;
   }
 
@@ -92,8 +99,8 @@ class EmailService {
   async sendMail({ to, subject, html, text }) {
     try {
       const transporter = await this.getTransporter();
-      const adminEmail = await this.dataService.getConfigValue('correo_administracion', 'administracion@plazamegaton.com');
-      const senderUser = process.env.SMTP_USER || adminEmail;
+      const dbUser = await this.dataService.getConfigValue('smtp_user', '');
+      const senderUser = process.env.SMTP_USER || dbUser || 'plazamegaton2000@gmail.com';
 
       const mailOptions = {
         from: `"Plaza Megatón — Administración" <${senderUser}>`,
