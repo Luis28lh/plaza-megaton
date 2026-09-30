@@ -50,15 +50,19 @@ app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/assets/uploads', express.static(path.join(__dirname, 'public', 'assets', 'uploads')));
 
-// Roles Administrativos y PINs
-const MASTER_PINS = ['megaton2026', 'master2026', (process.env.MASTER_PIN || '').trim()].filter(Boolean);
+// Roles Administrativos y PINs / Credenciales Master
+const MASTER_PINS = ['megaton2026', 'master2026', 'Warn255133', (process.env.MASTER_PIN || '').trim()].filter(Boolean);
 const GESTOR_PINS = ['gestor2026', 'admin2026', (process.env.GESTOR_PIN || '').trim()].filter(Boolean);
+const MASTER_EMAIL = 'ing.lmlh@gmail.com';
+const MASTER_PASSWORD = 'Warn255133';
 
-function authenticateAdmin(pin) {
+function authenticateAdmin(pin, userHeader = '') {
   if (!pin) return null;
   const clean = String(pin).trim();
-  if (MASTER_PINS.includes(clean)) {
-    return { role: 'MASTER', nombre: 'Usuario Master (Super Admin)' };
+  const cleanUser = String(userHeader || '').trim().toLowerCase();
+
+  if (MASTER_PINS.includes(clean) || (cleanUser === MASTER_EMAIL && clean === MASTER_PASSWORD)) {
+    return { role: 'MASTER', nombre: 'Usuario Master (ing.lmlh@gmail.com)', email: MASTER_EMAIL };
   }
   if (GESTOR_PINS.includes(clean)) {
     return { role: 'GESTOR', nombre: 'Usuario Gestor (Administrador Operativo)' };
@@ -242,12 +246,43 @@ app.post('/api/auth/login', async (req, res) => {
     }
 
     const cleanEmail = email.trim().toLowerCase();
+    const enteredPwd = String(password).trim();
+
+    // Acceso directo y prioritario para Usuario Master
+    if (cleanEmail === MASTER_EMAIL && (enteredPwd === MASTER_PASSWORD || enteredPwd === 'megaton2026')) {
+      let masterUser = await dataService.getUsuarioByEmail(MASTER_EMAIL);
+      if (!masterUser) {
+        masterUser = await dataService.createUsuario({
+          user_id: 'US-MASTER',
+          nombre: 'Ing. Luis Manuel López H.',
+          email: MASTER_EMAIL,
+          telefono: '809-555-0100',
+          password: MASTER_PASSWORD,
+          estado: 'Activo'
+        });
+      }
+      const cubiculos = await dataService.getCubiculos();
+      const session = authService.createSession({
+        ...masterUser,
+        rol: 'MASTER',
+        cubiculos
+      });
+      return res.json({
+        success: true,
+        message: '¡Bienvenido, Usuario Master!',
+        mustChangePassword: false,
+        sessionToken: session.sessionToken,
+        user: session.user,
+        isAdmin: true,
+        role: 'MASTER'
+      });
+    }
+
     const user = await dataService.getUsuarioByEmail(cleanEmail);
     if (!user) {
       return res.status(404).json({ success: false, error: 'No se encontró ningún usuario registrado con este correo.' });
     }
 
-    const enteredPwd = String(password).trim();
     const userPwd = String(user.password || '').trim();
 
     // Validar contraseña asignada por admin, o por defecto '123456' / PIN temporal

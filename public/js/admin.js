@@ -93,7 +93,7 @@ async function checkAdminAuth() {
 
     if (res.ok) {
       const data = await res.json();
-      const detectedRole = data.role || (['megaton2026', 'master2026'].includes(pin) ? 'MASTER' : 'GESTOR');
+      const detectedRole = data.role || (['megaton2026', 'master2026', 'Warn255133'].includes(pin) ? 'MASTER' : 'GESTOR');
       setAdminRole(detectedRole);
 
       if (authGate) authGate.style.display = 'none';
@@ -109,7 +109,7 @@ async function checkAdminAuth() {
 
   // Fallback offline / estático
   let clientRole = null;
-  if (['megaton2026', 'master2026'].includes(pin)) {
+  if (['megaton2026', 'master2026', 'Warn255133'].includes(pin)) {
     clientRole = 'MASTER';
   } else if (['gestor2026', 'admin2026'].includes(pin)) {
     clientRole = 'GESTOR';
@@ -128,7 +128,7 @@ async function checkAdminAuth() {
     sessionStorage.removeItem('megaton_admin_role');
     if (authGate) authGate.style.display = 'flex';
     if (panel) panel.style.display = 'none';
-    alert('PIN incorrecto. Ingrese el PIN asignado (Master: megaton2026 / Gestor: gestor2026).');
+    alert('Credenciales incorrectas. Ingrese el PIN asignado (Master: Warn255133 o megaton2026 / Gestor: gestor2026).');
     return false;
   }
 }

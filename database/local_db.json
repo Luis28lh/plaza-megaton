@@ -465,6 +465,27 @@
   ],
   "USUARIOS": [
     {
+      "user_id": "US-MASTER",
+      "nombre": "Ing. Luis Manuel López H.",
+      "rnc": "",
+      "email": "ing.lmlh@gmail.com",
+      "telefono": "809-555-0100",
+      "tipo": "Usuario Master / Super Admin",
+      "rol": "MASTER",
+      "password": "Warn255133",
+      "debe_cambiar_password": false,
+      "cubiculos": [
+        "A-101", "A-102", "A-103", "A-104", "A-105", "A-105-A",
+        "A-201", "A-202", "A-203", "A-204", "A-205", "A-206",
+        "A-207", "A-208", "A-209", "A-210", "A-211", "A-212",
+        "A-213", "A-214", "A-215", "A-216", "A-217", "A-218",
+        "A-219", "A-220", "A-301", "A-302", "A-303", "A-304",
+        "A-305", "A-311", "A-312"
+      ],
+      "fecha_registro": "28/09/2026",
+      "estado": "Activo"
+    },
+    {
       "user_id": "US-001",
       "nombre": "YESENIA GRULLON",
       "rnc": "",
