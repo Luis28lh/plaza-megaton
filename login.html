@@ -61,7 +61,7 @@
               autocomplete="current-password"
             >
             <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
-              Si es tu primer ingreso, utiliza la contraseña temporal que te asignó la administración.
+              💡 <strong>¿Primer ingreso?</strong> Tu contraseña temporal es tu mismo correo electrónico.
             </div>
           </div>
 
@@ -189,26 +189,26 @@
         </form>
       </div>
 
-      <!-- Paso 4: Cambio Obligatorio de Contraseña Temporal -->
+      <!-- Paso 4: Generación de PIN o Contraseña Definitiva -->
       <div id="temp-password-step" style="display:none;">
         <div class="card-box-header" style="text-align: center;">
-          <div style="font-size: 36px; margin-bottom: 8px;">⚠️</div>
-          <h1 class="card-title" style="justify-content: center;">Establece tu Contraseña Definitiva</h1>
-          <p class="card-subtitle">Por seguridad, debes personalizar tu clave de acceso</p>
+          <div style="font-size: 36px; margin-bottom: 8px;">🔐</div>
+          <h1 class="card-title" style="justify-content: center;">Genera tu Propio PIN o Contraseña</h1>
+          <p class="card-subtitle" id="temp-password-subtitle">Crea tu clave de acceso personalizada</p>
         </div>
 
-        <div style="background:#FEF3C7; border:1px solid #FDE68A; border-radius:8px; padding:12px; font-size:13px; color:#92400E; margin-bottom:16px;">
-          🛡️ Has ingresado con una contraseña temporal. Por protocolo de seguridad de Plaza Megatón, debes definir una contraseña personal que solo tú conozcas.
+        <div id="temp-password-banner" style="background:#EFF6FF; border:1px solid #BFDBFE; border-radius:8px; padding:12px; font-size:13px; color:#1E40AF; margin-bottom:16px;">
+          🛡️ <strong>Acceso con Clave Temporal:</strong> Has ingresado con tu correo. Ahora genera tu propio PIN o contraseña definitiva para acceder directamente en lo adelante.
         </div>
 
         <form id="temp-password-form" onsubmit="handleChangeTempPassword(event)">
           <div class="form-group">
-            <label class="form-label" for="temp-new-password">Nueva Contraseña Definitiva <span class="req">*</span></label>
+            <label class="form-label" for="temp-new-password">Nuevo PIN o Contraseña Definitiva <span class="req">*</span></label>
             <input 
               type="password" 
               id="temp-new-password" 
               class="form-input" 
-              placeholder="Mínimo 4 caracteres" 
+              placeholder="Ej: PIN de 4 dígitos o contraseña segura" 
               required
               minlength="4"
               autocomplete="new-password"
@@ -216,12 +216,12 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="temp-confirm-password">Confirmar Contraseña Definitiva <span class="req">*</span></label>
+            <label class="form-label" for="temp-confirm-password">Confirmar Nuevo PIN o Contraseña <span class="req">*</span></label>
             <input 
               type="password" 
               id="temp-confirm-password" 
               class="form-input" 
-              placeholder="Repite la contraseña" 
+              placeholder="Repite tu PIN o contraseña" 
               required
               minlength="4"
               autocomplete="new-password"
@@ -229,7 +229,7 @@
           </div>
 
           <button type="submit" id="btn-submit-temp-password" class="btn-primary">
-            ✓ Guardar Contraseña y Continuar
+            ✓ Guardar mi PIN / Contraseña y Entrar
           </button>
         </form>
       </div>

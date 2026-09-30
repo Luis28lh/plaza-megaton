@@ -285,10 +285,18 @@ app.post('/api/auth/login', async (req, res) => {
 
     const userPwd = String(user.password || '').trim();
 
-    // Validar contraseña asignada por admin, o por defecto '123456' / PIN temporal
-    const isValid = userPwd ? (userPwd === enteredPwd) : (enteredPwd === '123456' || enteredPwd === 'megaton2026');
+    // Protocolo de Acceso Oficial:
+    // Tu propia dirección de correo sirve como contraseña temporal para ingresar y generar tu propio PIN o contraseña definitiva
+    const isUsingEmailAsPassword = (enteredPwd.toLowerCase() === cleanEmail);
+    const isMatchingPermanentPwd = userPwd ? (userPwd === enteredPwd) : false;
+    const isLegacyTempPwd = (enteredPwd === '123456' || enteredPwd === 'megaton2026');
+
+    const isValid = isUsingEmailAsPassword || isMatchingPermanentPwd || isLegacyTempPwd;
     if (!isValid) {
-      return res.status(401).json({ success: false, error: 'Contraseña o PIN incorrecto. Si no la recuerdas, solicita un enlace a tu correo o contacta al Administrador Gestor.' });
+      return res.status(401).json({ 
+        success: false, 
+        error: 'Contraseña o PIN incorrecto. Si es tu primer ingreso, tu clave temporal es tu propio correo electrónico. Si la olvidaste, solicita un código de seguridad a tu correo.' 
+      });
     }
 
     const cubiculos = await dataService.getCubiculosByUser(user.user_id);
@@ -298,14 +306,16 @@ app.post('/api/auth/login', async (req, res) => {
     });
 
     // Detectar si es contraseña temporal que requiere cambio obligatorio
-    const isTemp = Boolean(user.debe_cambiar_password || user.password_temporal || (!user.password && enteredPwd === '123456'));
+    // Si usó su correo como contraseña, o si tiene la bandera debe_cambiar_password, o si usó clave temporal por defecto
+    const isTemp = Boolean(isUsingEmailAsPassword || user.debe_cambiar_password || user.password_temporal || (!user.password && isLegacyTempPwd));
 
     res.json({
       success: true,
       message: isTemp 
-        ? 'Acceso concedido con contraseña temporal. Debes establecer tu contraseña definitiva.' 
+        ? 'Acceso concedido con tu clave temporal. Ahora genera tu propio PIN o contraseña definitiva.' 
         : 'Inicio de sesión exitoso.',
       mustChangePassword: isTemp,
+      isEmailAsPassword: isUsingEmailAsPassword,
       sessionToken: session.sessionToken,
       user: session.user
     });

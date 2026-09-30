@@ -54,11 +54,16 @@ function showVerifyStep(email, previewUrl = null) {
   }
 }
 
-function showTempPasswordStep(user, sessionToken) {
+function showTempPasswordStep(user, sessionToken, isEmailAsPassword = false) {
   hideAllSteps();
   pendingSession = { user, sessionToken };
   const el = document.getElementById('temp-password-step');
   if (el) el.style.display = 'block';
+
+  const subtitle = document.getElementById('temp-password-subtitle');
+  if (subtitle && user && user.nombre) {
+    subtitle.innerText = `¡Hola, ${user.nombre}! Genera tu PIN o contraseña definitiva`;
+  }
 }
 
 // 1. Inicio de Sesión
@@ -94,12 +99,12 @@ async function handleLoginSubmit(event) {
     const data = await res.json();
 
     if (res.ok && data.success && data.user) {
-      // Si el usuario tiene una contraseña temporal asignada, forzar cambio antes de entrar
+      // Si el usuario ingresó con su correo o clave temporal, guiarlo a crear su propio PIN o contraseña
       if (data.mustChangePassword) {
-        App.showToast('Contraseña temporal detectada. Por favor define tu contraseña definitiva.', 'info');
+        App.showToast(data.message || 'Clave temporal aceptada. Por favor crea tu propio PIN o contraseña definitiva.', 'info');
         submitBtn.disabled = false;
         submitBtn.innerHTML = '🔑 Iniciar Sesión';
-        showTempPasswordStep(data.user, data.sessionToken);
+        showTempPasswordStep(data.user, data.sessionToken, data.isEmailAsPassword);
         return;
       }
 
@@ -252,7 +257,7 @@ async function handleChangeTempPassword(event) {
   }
 
   submitBtn.disabled = true;
-  submitBtn.innerHTML = '⏳ Guardando contraseña definitiva...';
+  submitBtn.innerHTML = '⏳ Guardando tu PIN o contraseña...';
 
   try {
     const res = await fetch('/api/auth/change-temp-password', {
@@ -268,20 +273,20 @@ async function handleChangeTempPassword(event) {
 
     if (res.ok && data.success) {
       App.setSession(pendingSession.user, pendingSession.sessionToken);
-      App.showToast('¡Contraseña definitiva guardada con éxito! Bienvenido.', 'success');
+      App.showToast('¡PIN / Contraseña guardada exitosamente! Bienvenido.', 'success');
       setTimeout(() => {
         window.location.href = 'mis-solicitudes.html';
       }, 700);
     } else {
       App.showToast(data.error || 'No se pudo guardar la contraseña.', 'error');
       submitBtn.disabled = false;
-      submitBtn.innerHTML = '✓ Guardar Contraseña y Continuar';
+      submitBtn.innerHTML = '✓ Guardar mi PIN / Contraseña y Entrar';
     }
   } catch (err) {
     console.error('Error guardando contraseña definitiva:', err);
     App.showToast('Error de conexión con el servidor.', 'error');
     submitBtn.disabled = false;
-    submitBtn.innerHTML = '✓ Guardar Contraseña y Continuar';
+    submitBtn.innerHTML = '✓ Guardar mi PIN / Contraseña y Entrar';
   }
 }
 
