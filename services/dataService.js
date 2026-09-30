@@ -265,16 +265,8 @@ class DataService {
       );
 
       if (!cub) {
-        // Crear nuevo cubículo en el catálogo si fue especificado por el usuario
-        cub = {
-          cubiculo_id: `CUB-${cleanCode}`,
-          codigo: cleanCode,
-          nombre_local: nombreLocal,
-          actividad_comercial: actividadComercial,
-          estado: 'Ocupado',
-          observaciones: 'Registrado por usuario'
-        };
-        this.db.CUBICULOS.push(cub);
+        console.warn(`[dataService] Cubículo "${cleanCode}" no existe en el catálogo oficial de 33 locales. Omitiendo.`);
+        continue;
       } else {
         cub.estado = 'Ocupado';
         if (nombreLocal) cub.nombre_local = nombreLocal;

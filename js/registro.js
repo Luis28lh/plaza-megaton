@@ -1,53 +1,90 @@
 // Controlador del Formulario de Registro QR - Plaza Megatón
-// Soporte para entrada manual de cubículos, apilados uno debajo del otro,
-// con casillas opcionales de "Nombre del local" y "Actividad comercial".
+// Validación estricta: los cubículos deben existir en el catálogo oficial de 33 locales
+// y estar vinculados a los correos legítimos de sus titulares.
 
 let catalogCubiculos = [];
 
+const OFFICIAL_33_CUBICULOS = [
+  { codigo: 'A-101', nombre: 'Yesenia Grullón', nivel: 'Primer Nivel' },
+  { codigo: 'A-102', nombre: 'Alba María García Rodríguez', nivel: 'Primer Nivel' },
+  { codigo: 'A-103', nombre: 'Consultorio Dra. Melissa', nivel: 'Primer Nivel' },
+  { codigo: 'A-104', nombre: 'Warn Electrical Services SRL', nivel: 'Primer Nivel' },
+  { codigo: 'A-105', nombre: 'Armería La Mocana SRL - Pablo Abreu', nivel: 'Primer Nivel' },
+  { codigo: 'A-105-A', nombre: 'Bingo', nivel: 'Primer Nivel' },
+  { codigo: 'A-201', nombre: 'INABIE', nivel: 'Segundo Nivel' },
+  { codigo: 'A-202', nombre: 'Luis María García', nivel: 'Segundo Nivel' },
+  { codigo: 'A-203', nombre: 'Jet Pack', nivel: 'Segundo Nivel' },
+  { codigo: 'A-204', nombre: 'Santos', nivel: 'Segundo Nivel' },
+  { codigo: 'A-205', nombre: 'Elda Bencosme', nivel: 'Segundo Nivel' },
+  { codigo: 'A-206', nombre: 'Alba Rodríguez & Asociados SRL', nivel: 'Segundo Nivel' },
+  { codigo: 'A-207', nombre: 'Alba Rodríguez & Asociados SRL', nivel: 'Segundo Nivel' },
+  { codigo: 'A-208', nombre: 'Nicolás Grullón', nivel: 'Segundo Nivel' },
+  { codigo: 'A-209', nombre: 'Ahsdiel Music Bar SRL', nivel: 'Segundo Nivel' },
+  { codigo: 'A-210', nombre: 'Ahsdiel Music Bar SRL', nivel: 'Segundo Nivel' },
+  { codigo: 'A-211', nombre: 'Local 211', nivel: 'Segundo Nivel' },
+  { codigo: 'A-212', nombre: 'Local 212', nivel: 'Segundo Nivel' },
+  { codigo: 'A-213', nombre: 'Local 213', nivel: 'Segundo Nivel' },
+  { codigo: 'A-214', nombre: 'Local 214', nivel: 'Segundo Nivel' },
+  { codigo: 'A-215', nombre: 'Local 215', nivel: 'Segundo Nivel' },
+  { codigo: 'A-216', nombre: 'Local 216', nivel: 'Segundo Nivel' },
+  { codigo: 'A-217', nombre: 'Local 217', nivel: 'Segundo Nivel' },
+  { codigo: 'A-218', nombre: 'Local 218', nivel: 'Segundo Nivel' },
+  { codigo: 'A-219', nombre: 'Local 219', nivel: 'Segundo Nivel' },
+  { codigo: 'A-220', nombre: 'Local 220', nivel: 'Segundo Nivel' },
+  { codigo: 'A-301-A', nombre: 'Vipsania Grullón', nivel: 'Tercer Nivel' },
+  { codigo: 'A-301-B', nombre: 'Vipsania Grullón', nivel: 'Tercer Nivel' },
+  { codigo: 'A-301-C', nombre: 'Vipsania Grullón', nivel: 'Tercer Nivel' },
+  { codigo: 'A-301-D', nombre: 'Vipsania Grullón', nivel: 'Tercer Nivel' },
+  { codigo: 'A-302', nombre: 'Grupo de Desarrollo Internacional', nivel: 'Tercer Nivel' },
+  { codigo: 'A-303', nombre: 'Grupo de Desarrollo Internacional', nivel: 'Tercer Nivel' },
+  { codigo: 'A-304', nombre: 'Grupo de Desarrollo Internacional', nivel: 'Tercer Nivel' },
+  { codigo: 'A-305', nombre: 'Grupo de Desarrollo Internacional', nivel: 'Tercer Nivel' },
+  { codigo: 'A-306', nombre: 'Grupo de Desarrollo Internacional', nivel: 'Tercer Nivel' },
+  { codigo: 'A-307', nombre: 'Grupo de Desarrollo Internacional', nivel: 'Tercer Nivel' },
+  { codigo: 'A-307-ANT', nombre: 'Edward Grullón', nivel: 'Tercer Nivel' },
+  { codigo: 'A-307-COF', nombre: 'Nicolás Grullón', nivel: 'Tercer Nivel' },
+  { codigo: 'A-308', nombre: 'Bertha Soury', nivel: 'Tercer Nivel' },
+  { codigo: 'A-309', nombre: 'Bertha Soury', nivel: 'Tercer Nivel' },
+  { codigo: 'A-310', nombre: 'B&B Operadora de Filmes & Gym SRL', nivel: 'Tercer Nivel' },
+  { codigo: 'A-311', nombre: 'Elda Bencosme', nivel: 'Tercer Nivel' },
+  { codigo: 'A-312', nombre: 'Grupo de Desarrollo Internacional', nivel: 'Tercer Nivel' }
+];
+
 async function loadCubiculosCatalog() {
-  const datalist = document.getElementById('catalog-cubiculos-list');
-  if (!datalist) return;
-
-  if (App.isStaticHost()) {
-    let local = JSON.parse(localStorage.getItem('pm_cubiculos') || '[]');
-    if (local.length === 0) {
-      local = Array.from({ length: 30 }, (_, i) => {
-        const num = String(i + 1).padStart(3, '0');
-        return {
-          cubiculo_id: `CUB-${num}`,
-          codigo: `C-${num}`,
-          estado: 'Disponible',
-          observaciones: 'Nivel 1'
-        };
-      });
-      localStorage.setItem('pm_cubiculos', JSON.stringify(local));
-    }
-    catalogCubiculos = local;
-    renderCatalogDatalist(local);
-    return;
-  }
-
   try {
     const res = await fetch('/api/catalog/cubiculos');
     const data = await res.json();
-    if (data.success && data.cubiculos) {
+    if (data.success && data.cubiculos && data.cubiculos.length > 0) {
       catalogCubiculos = data.cubiculos;
-      renderCatalogDatalist(data.cubiculos);
+    } else {
+      catalogCubiculos = OFFICIAL_33_CUBICULOS;
     }
   } catch (err) {
-    console.warn('No se pudo cargar catálogo remoto, usando base local:', err);
+    console.warn('Usando catálogo oficial precargado:', err);
+    catalogCubiculos = OFFICIAL_33_CUBICULOS;
   }
+  populateAllCubiculoSelects();
 }
 
-function renderCatalogDatalist(list) {
-  const datalist = document.getElementById('catalog-cubiculos-list');
-  if (!datalist) return;
-  datalist.innerHTML = '';
+function getCubiculoSelectOptionsHtml(selectedCode = '') {
+  const list = (catalogCubiculos && catalogCubiculos.length > 0) ? catalogCubiculos : OFFICIAL_33_CUBICULOS;
+  let html = `<option value="">-- Seleccionar Cubículo Oficial (${list.length}) --</option>`;
   list.forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c.codigo;
-    opt.textContent = `${c.codigo} (${c.estado || 'Disponible'})`;
-    datalist.appendChild(opt);
+    const isSel = (c.codigo.toUpperCase() === String(selectedCode).trim().toUpperCase()) ? 'selected' : '';
+    const nom = c.nombre_local || c.nombre || '';
+    const label = `${c.codigo}${nom ? ' — ' + nom : ''} (${c.nivel || 'Plaza Megatón'})`;
+    html += `<option value="${c.codigo}" ${isSel} data-nombre="${nom}" data-actividad="${c.actividad_comercial || c.actividad || ''}">${label}</option>`;
+  });
+  return html;
+}
+
+function populateAllCubiculoSelects() {
+  document.querySelectorAll('.cubiculo-item-code').forEach(sel => {
+    if (sel.tagName.toLowerCase() === 'select') {
+      const curVal = sel.value;
+      sel.innerHTML = getCubiculoSelectOptionsHtml(curVal);
+      if (curVal) sel.value = curVal;
+    }
   });
 }
 
@@ -75,7 +112,6 @@ function addCubiculoInputRow(initialData = {}) {
 
   const currentCount = container.querySelectorAll('.cubiculo-card-block').length;
   const nextNum = currentCount + 1;
-  const exampleCode = nextNum === 1 ? 'Ej: C1 o C-001' : `Ej: C${nextNum}`;
 
   const initialCode = typeof initialData === 'object' ? (initialData.codigo || '') : String(initialData || '');
   const initialName = typeof initialData === 'object' ? (initialData.nombre || initialData.nombre_local || '') : '';
@@ -94,21 +130,15 @@ function addCubiculoInputRow(initialData = {}) {
       </button>
     </div>
 
-    <!-- Campo 1: Número / Código de Cubículo (Manual o de Lista) -->
+    <!-- Campo 1: Selección obligatoria del Cubículo Oficial -->
     <div class="cubiculo-field-group">
       <label class="cubiculo-field-label">
-        <span>Número del Cubículo o Local</span>
-        <span class="cubiculo-field-opt">Escribe a mano o selecciona</span>
+        <span>Número del Cubículo o Local <strong style="color:var(--primary-red);">*</strong></span>
+        <span class="cubiculo-field-opt" style="color:#059669; font-weight:700;">✓ Catálogo Oficial</span>
       </label>
-      <input 
-        type="text" 
-        class="form-input cubiculo-item-code" 
-        placeholder="${exampleCode}" 
-        value="${initialCode}" 
-        list="catalog-cubiculos-list"
-        style="text-transform: uppercase; font-weight: 700; font-size: 15px; letter-spacing: 0.5px;"
-        autocomplete="off"
-      >
+      <select class="form-input cubiculo-item-code" required style="font-weight:700; font-size:14px; background:#FFFFFF;">
+        ${getCubiculoSelectOptionsHtml(initialCode)}
+      </select>
     </div>
 
     <!-- Campo 2: Nombre del Cubículo o Local (Opcional) -->
@@ -137,11 +167,31 @@ function addCubiculoInputRow(initialData = {}) {
         class="form-input cubiculo-item-activity" 
         placeholder="Ej: Reparación de celulares, Venta de ropa..." 
         value="${initialActivity}" 
-        list="actividad-comercial-list"
+        list="actividad-comercial-list" 
         autocomplete="off"
       >
     </div>
   `;
+
+  // Autocompletar nombre y actividad al seleccionar un cubículo
+  const selectEl = block.querySelector('.cubiculo-item-code');
+  if (selectEl) {
+    selectEl.onchange = () => {
+      const selectedOpt = selectEl.options[selectEl.selectedIndex];
+      if (selectedOpt && selectedOpt.value) {
+        const nom = selectedOpt.getAttribute('data-nombre');
+        const act = selectedOpt.getAttribute('data-actividad');
+        const nameInput = block.querySelector('.cubiculo-item-name');
+        const actInput = block.querySelector('.cubiculo-item-activity');
+        if (nameInput && (!nameInput.value || nameInput.value === initialName)) {
+          if (nom) nameInput.value = nom;
+        }
+        if (actInput && (!actInput.value || actInput.value === initialActivity)) {
+          if (act) actInput.value = act;
+        }
+      }
+    };
+  }
 
   // Manejar eliminación de bloque
   const removeBtn = block.querySelector('.btn-remove-cubiculo-block');
@@ -162,12 +212,6 @@ function addCubiculoInputRow(initialData = {}) {
   };
 
   container.appendChild(block);
-
-  // Si no es el primero, enfocar el campo de código
-  if (nextNum > 1) {
-    const newCodeInput = block.querySelector('.cubiculo-item-code');
-    if (newCodeInput) newCodeInput.focus();
-  }
 }
 
 function renumberCubiculoRows() {
@@ -178,13 +222,9 @@ function renumberCubiculoRows() {
   blocks.forEach((block, index) => {
     const badge = block.querySelector('.cubiculo-row-badge');
     const titleSpan = block.querySelector('.cubiculo-card-title span:last-child');
-    const codeInput = block.querySelector('.cubiculo-item-code');
     const num = index + 1;
     if (badge) badge.innerText = num;
     if (titleSpan) titleSpan.innerText = `Cubículo o Local #${num}`;
-    if (codeInput && !codeInput.value) {
-      codeInput.placeholder = num === 1 ? 'Ej: C1 o C-001' : `Ej: C${num}`;
-    }
   });
 }
 
@@ -194,6 +234,8 @@ function getEnteredCubiculos() {
 
   const blocks = container.querySelectorAll('.cubiculo-card-block');
   const list = [];
+  const seenCodes = new Set();
+
   blocks.forEach(block => {
     const codeInput = block.querySelector('.cubiculo-item-code');
     const nameInput = block.querySelector('.cubiculo-item-name');
@@ -203,16 +245,10 @@ function getEnteredCubiculos() {
     const nombre = nameInput ? nameInput.value.trim() : '';
     const actividad = actInput ? actInput.value.trim() : '';
 
-    if (codigo) {
+    if (codigo && !seenCodes.has(codigo)) {
+      seenCodes.add(codigo);
       list.push({
         codigo,
-        nombre: nombre || '',
-        actividad: actividad || ''
-      });
-    } else if (nombre || actividad) {
-      // Si colocó nombre o actividad sin código específico
-      list.push({
-        codigo: 'SIN-NUMERO',
         nombre: nombre || '',
         actividad: actividad || ''
       });
@@ -236,6 +272,10 @@ async function handleRegistroSubmit(event) {
   }
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     App.showToast('Por favor ingresa un correo electrónico válido.', 'error');
+    return;
+  }
+  if (!cubiculosArr || cubiculosArr.length === 0) {
+    App.showToast('Debes seleccionar al menos un cubículo oficial de la lista.', 'error');
     return;
   }
 

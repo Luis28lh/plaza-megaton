@@ -216,7 +216,7 @@ app.post('/api/usuarios/registro', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Debe ingresar un correo electrónico válido.' });
     }
 
-    // Cubículos es opcional: puede ser array de strings o de objetos { codigo, nombre, actividad }
+    // Cubículos es OBLIGATORIO: debe estar relacionado a un cubículo existente
     let cubiculosList = [];
     if (Array.isArray(cubiculos)) {
       cubiculosList = cubiculos.map(c => {
@@ -234,7 +234,62 @@ app.post('/api/usuarios/registro', async (req, res) => {
       cubiculosList = [{ codigo: String(cubiculos).trim().toUpperCase(), nombre: '', actividad: '' }];
     }
 
+    if (!cubiculosList || cubiculosList.length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Debes seleccionar al menos un cubículo o local registrado para completar tu registro.' 
+      });
+    }
+
     const cleanEmail = email.trim().toLowerCase();
+    const allCubiculos = await dataService.getCubiculos();
+    const allUsers = dataService.db.USUARIOS || [];
+    const allRelations = dataService.db.USUARIO_CUBICULO || [];
+
+    // Validar que cada cubículo exista en el catálogo oficial (33 locales) y verificar titularidad
+    for (const cItem of cubiculosList) {
+      const rawCode = cItem.codigo;
+      const cub = allCubiculos.find(c => 
+        c.cubiculo_id.toUpperCase() === rawCode || 
+        c.codigo.toUpperCase() === rawCode ||
+        c.codigo.toUpperCase().replace(/[^A-Z0-9]/g, '') === rawCode.replace(/[^A-Z0-9]/g, '')
+      );
+
+      if (!cub) {
+        return res.status(400).json({ 
+          success: false, 
+          error: `El cubículo "${rawCode}" no existe en el catálogo oficial de Plaza Megatón (33 cubículos autorizados).` 
+        });
+      }
+
+      // Normalizar al código oficial
+      cItem.codigo = cub.codigo;
+      cItem.cubiculo_id = cub.cubiculo_id;
+
+      // Buscar si el cubículo ya tiene un titular/correo asignado
+      const rel = allRelations.find(r => 
+        (r.cubiculo_id === cub.cubiculo_id || r.codigo_local === cub.codigo) && r.estado === 'Activo'
+      );
+      let assignedUser = null;
+      if (rel) {
+        assignedUser = allUsers.find(u => u.user_id === rel.user_id);
+      }
+      if (!assignedUser) {
+        assignedUser = allUsers.find(u => u.cubiculos && u.cubiculos.includes(cub.codigo));
+      }
+
+      if (assignedUser && assignedUser.email) {
+        const assignedEmail = assignedUser.email.trim().toLowerCase();
+        // Si el cubículo ya tiene correo incorporado y se intenta registrar con un correo ajeno:
+        if (assignedEmail !== cleanEmail) {
+          return res.status(403).json({
+            success: false,
+            error: `Acceso restringido: El cubículo ${cub.codigo} ya está vinculado a su titular oficial. No está permitido registrarse con un correo distinto. Si eres el nuevo propietario o inquilino, contacta a la Administración para validar tu cuenta.`
+          });
+        }
+      }
+    }
+
     let user = await dataService.getUsuarioByEmail(cleanEmail);
 
     if (!user) {
@@ -253,7 +308,7 @@ app.post('/api/usuarios/registro', async (req, res) => {
       });
     }
 
-    // Asociar cubículos indicados (si colocó alguno)
+    // Asociar cubículos indicados
     let assignedCodes = [];
     if (cubiculosList.length > 0) {
       assignedCodes = await dataService.assignCubiculosToUser(user.user_id, cubiculosList);
@@ -364,22 +419,21 @@ app.post('/api/auth/login', async (req, res) => {
 
     const user = await dataService.getUsuarioByEmail(cleanEmail);
     if (!user) {
-      return res.status(404).json({ success: false, error: 'No se encontró ningún usuario registrado con este correo.' });
+      return res.status(401).json({ success: false, error: 'Credenciales inválidas o correo no registrado.' });
     }
 
     const userPwd = String(user.password || '').trim();
 
     // Protocolo de Acceso Oficial:
-    // Tu propia dirección de correo sirve como contraseña temporal para ingresar y generar tu propio PIN o contraseña definitiva
+    // Tu propia dirección de correo sirve como contraseña temporal para primer ingreso
     const isUsingEmailAsPassword = (enteredPwd.toLowerCase() === cleanEmail);
     const isMatchingPermanentPwd = userPwd ? (userPwd === enteredPwd) : false;
-    const isLegacyTempPwd = (enteredPwd === '123456' || enteredPwd === 'megaton2026');
 
-    const isValid = isUsingEmailAsPassword || isMatchingPermanentPwd || isLegacyTempPwd;
+    const isValid = isUsingEmailAsPassword || isMatchingPermanentPwd;
     if (!isValid) {
       return res.status(401).json({ 
         success: false, 
-        error: 'Contraseña o PIN incorrecto. Si es tu primer ingreso, tu clave temporal es tu propio correo electrónico. Si la olvidaste, solicita un código de seguridad a tu correo.' 
+        error: 'Contraseña o PIN incorrecto. Si no recuerdas tu clave, pulsa "¿Olvidaste o quieres cambiarla?" para recibir un código de seguridad en tu correo registrado.' 
       });
     }
 
@@ -390,8 +444,7 @@ app.post('/api/auth/login', async (req, res) => {
     });
 
     // Detectar si es contraseña temporal que requiere cambio obligatorio
-    // Si usó su correo como contraseña, o si tiene la bandera debe_cambiar_password, o si usó clave temporal por defecto
-    const isTemp = Boolean(isUsingEmailAsPassword || user.debe_cambiar_password || user.password_temporal || (!user.password && isLegacyTempPwd));
+    const isTemp = Boolean(isUsingEmailAsPassword || user.debe_cambiar_password || user.password_temporal);
 
     res.json({
       success: true,
