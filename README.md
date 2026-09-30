@@ -4,22 +4,16 @@
 
 Diseñada para registrar propietarios e inquilinos mediante código QR, gestionar solicitudes y reclamaciones de mantenimiento con evidencias fotográficas, conciliar pagos con comprobantes bancarios (vouchers) y emitir notificaciones automáticas por correo electrónico con identidad corporativa roja.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FLuis28lh%2Fplaza-megaton&project-name=plaza-megaton&env=ADMIN_PIN,GOOGLE_APPS_SCRIPT_URL)
-
 ---
 
-## 🌐 Estándar Mandatorio: Publicación Remota y Versionado Continuo
-> **Política Operativa:** Todo desarrollo completado se envía de forma inmediata al repositorio remoto en GitHub (`Luis28lh`) y se publica en Internet para permitir acceso, pruebas y operación móvil continua desde el exterior (Android, iPhone, tablet o PC) sin restricciones de red local.
+## 🌐 Enlaces Oficiales de Producción
 
-### 🔗 Enlaces Públicos en Vivo (Acceso Móvil / Remoto)
-* 🏠 **Portal de Inicio (GitHub Pages):** [https://luis28lh.github.io/plaza-megaton/](https://luis28lh.github.io/plaza-megaton/)
-* 📱 **Formulario QR Directo:** [https://luis28lh.github.io/plaza-megaton/registro.html](https://luis28lh.github.io/plaza-megaton/registro.html)
-* 🛠️ **Solicitudes y Reclamaciones:** [https://luis28lh.github.io/plaza-megaton/solicitudes.html](https://luis28lh.github.io/plaza-megaton/solicitudes.html)
-* 💳 **Reporte de Pagos:** [https://luis28lh.github.io/plaza-megaton/pagos.html](https://luis28lh.github.io/plaza-megaton/pagos.html)
-* 📋 **Mis Solicitudes:** [https://luis28lh.github.io/plaza-megaton/mis-solicitudes.html](https://luis28lh.github.io/plaza-megaton/mis-solicitudes.html)
-* 💰 **Mis Pagos:** [https://luis28lh.github.io/plaza-megaton/mis-pagos.html](https://luis28lh.github.io/plaza-megaton/mis-pagos.html)
-* 💼 **Panel Administrativo:** [https://luis28lh.github.io/plaza-megaton/admin.html](https://luis28lh.github.io/plaza-megaton/admin.html) *(PIN: `megaton2026`)*
-* 🚀 **Despliegue Serverless Vercel:** [https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FLuis28lh%2Fplaza-megaton&project-name=plaza-megaton&env=ADMIN_PIN,GOOGLE_APPS_SCRIPT_URL](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FLuis28lh%2Fplaza-megaton&project-name=plaza-megaton&env=ADMIN_PIN,GOOGLE_APPS_SCRIPT_URL)
+* 🏠 **Portal de Clientes / Inquilinos:** [https://megaton1026.vercel.app/](https://megaton1026.vercel.app/)
+* 💼 **Panel de Administración:** [https://megaton1026.vercel.app/admin](https://megaton1026.vercel.app/admin)
+* 🛠️ **Solicitudes y Reclamaciones:** [https://megaton1026.vercel.app/solicitudes.html](https://megaton1026.vercel.app/solicitudes.html)
+* 💳 **Reporte de Pagos:** [https://megaton1026.vercel.app/pagos.html](https://megaton1026.vercel.app/pagos.html)
+* 📋 **Mis Solicitudes:** [https://megaton1026.vercel.app/mis-solicitudes.html](https://megaton1026.vercel.app/mis-solicitudes.html)
+* 💰 **Mis Pagos:** [https://megaton1026.vercel.app/mis-pagos.html](https://megaton1026.vercel.app/mis-pagos.html)
 
 ---
 
