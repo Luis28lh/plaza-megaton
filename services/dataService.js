@@ -116,7 +116,7 @@ class DataService {
     const cubiculos = this.db.CUBICULOS || [];
 
     return users.map(u => {
-      const userCubRels = relations.filter(r => r.user_id === u.user_id && r.estado === 'Activo');
+      const userCubRels = relations.filter(r => r.user_id === u.user_id && (r.estado === 'Activo' || r.estado === 'Pendiente'));
       const cubList = userCubRels.map(rel => {
         const c = cubiculos.find(cb => cb.cubiculo_id === rel.cubiculo_id);
         const cod = c ? c.codigo : rel.cubiculo_id;
@@ -223,8 +223,10 @@ class DataService {
   // ==========================================
   // RELACIÓN USUARIO - CUBÍCULOS
   // ==========================================
-  async getCubiculosByUser(userId) {
-    const relations = (this.db.USUARIO_CUBICULO || []).filter(r => r.user_id === userId && r.estado === 'Activo');
+  async getCubiculosByUser(userId, includePending = true) {
+    const relations = (this.db.USUARIO_CUBICULO || []).filter(r => 
+      r.user_id === userId && (r.estado === 'Activo' || (includePending && r.estado === 'Pendiente'))
+    );
     const cubiculos = this.db.CUBICULOS || [];
     return relations.map(r => {
       const c = cubiculos.find(cb => cb.cubiculo_id === r.cubiculo_id);
@@ -234,12 +236,13 @@ class DataService {
         nivel: c ? c.nivel : '',
         nombre: r.nombre_local || (c ? c.nombre_local : '') || '',
         actividad: r.actividad_comercial || (c ? c.actividad_comercial : '') || '',
-        observaciones: c ? c.observaciones : ''
+        observaciones: c ? c.observaciones : '',
+        estado_relacion: r.estado || 'Activo'
       };
     });
   }
 
-  async assignCubiculosToUser(userId, cubiculoIds) {
+  async assignCubiculosToUser(userId, cubiculoIds, initialStatus = 'Activo') {
     if (!this.db.USUARIO_CUBICULO) this.db.USUARIO_CUBICULO = [];
     if (!this.db.CUBICULOS) this.db.CUBICULOS = [];
 
@@ -257,7 +260,7 @@ class DataService {
       if (!rawCode || !String(rawCode).trim()) continue;
       const cleanCode = String(rawCode).trim().toUpperCase();
 
-      // Buscar por ID, código exacto o código alfanumérico (ej: "C1" hace match con "C-001" o se crea)
+      // Buscar por ID, código exacto o código alfanumérico
       let cub = this.db.CUBICULOS.find(c => 
         c.cubiculo_id.toUpperCase() === cleanCode || 
         c.codigo.toUpperCase() === cleanCode ||
@@ -268,7 +271,9 @@ class DataService {
         console.warn(`[dataService] Cubículo "${cleanCode}" no existe en el catálogo oficial de 33 locales. Omitiendo.`);
         continue;
       } else {
-        cub.estado = 'Ocupado';
+        if (initialStatus === 'Activo') {
+          cub.estado = 'Ocupado';
+        }
         if (nombreLocal) cub.nombre_local = nombreLocal;
         if (actividadComercial) cub.actividad_comercial = actividadComercial;
       }
@@ -276,7 +281,7 @@ class DataService {
       // Verificar si ya existe relación
       let existing = this.db.USUARIO_CUBICULO.find(r => r.user_id === userId && r.cubiculo_id === cub.cubiculo_id);
       if (existing) {
-        existing.estado = 'Activo';
+        existing.estado = initialStatus;
         if (nombreLocal) existing.nombre_local = nombreLocal;
         if (actividadComercial) existing.actividad_comercial = actividadComercial;
       } else {
@@ -288,7 +293,7 @@ class DataService {
           nombre_local: nombreLocal,
           actividad_comercial: actividadComercial,
           fecha_asignacion: now,
-          estado: 'Activo'
+          estado: initialStatus
         });
       }
 
@@ -297,11 +302,95 @@ class DataService {
 
     this.persist();
 
-    if (this.googleBridge && assigned.length > 0) {
+    if (this.googleBridge && assigned.length > 0 && initialStatus === 'Activo') {
       this.googleBridge.syncAsignaciones(userId, assigned).catch(err => console.error('[GoogleBridge Error]', err));
     }
 
     return assigned;
+  }
+
+  /**
+   * Activa un usuario en estado "Pendiente de Aprobación" y confirma sus cubículos
+   */
+  async activateUserAndCubiculos(userId, adminName = 'Administración') {
+    const user = (this.db.USUARIOS || []).find(u => u.user_id === userId);
+    if (!user) return null;
+
+    const oldEstado = user.estado;
+    user.estado = 'Activo';
+    user.debe_cambiar_password = true; // Exige cambio de clave en primer ingreso
+    user.password_temporal = true;
+
+    // Activar relaciones de cubículos pendientes de este usuario
+    const relations = (this.db.USUARIO_CUBICULO || []).filter(r => r.user_id === userId);
+    const assignedCodes = [];
+    relations.forEach(r => {
+      r.estado = 'Activo';
+      const cub = (this.db.CUBICULOS || []).find(c => c.cubiculo_id === r.cubiculo_id);
+      if (cub) {
+        cub.estado = 'Ocupado';
+        if (r.nombre_local) cub.nombre_local = r.nombre_local;
+        if (r.actividad_comercial) cub.actividad_comercial = r.actividad_comercial;
+        if (!assignedCodes.includes(cub.codigo)) {
+          assignedCodes.push(cub.codigo);
+        }
+      }
+    });
+
+    this.persist();
+
+    if (this.googleBridge) {
+      this.googleBridge.syncUsuario(user).catch(err => console.error('[GoogleBridge Error]', err));
+      if (assignedCodes.length > 0) {
+        this.googleBridge.syncAsignaciones(userId, assignedCodes).catch(err => console.error('[GoogleBridge Error]', err));
+      }
+    }
+
+    await this.addHistorial({
+      tipo_documento: 'USUARIO',
+      codigo_documento: user.user_id,
+      usuario: adminName,
+      accion: 'Aprobación de Registro y Concesión de Acceso',
+      estado_anterior: oldEstado || 'Pendiente de Aprobación',
+      estado_nuevo: 'Activo',
+      observacion: `Aprobado registro del inquilino ${user.nombre} (${user.email}) para los cubículos: ${assignedCodes.join(', ') || 'N/A'}. Notificación y credenciales oficiales despachadas por correo.`
+    });
+
+    return { user, assignedCodes };
+  }
+
+  /**
+   * Rechaza la solicitud de registro de un usuario
+   */
+  async rejectUserRegistration(userId, adminName = 'Administración', motivo = '') {
+    const user = (this.db.USUARIOS || []).find(u => u.user_id === userId);
+    if (!user) return null;
+
+    const oldEstado = user.estado;
+    user.estado = 'Rechazado';
+
+    const relations = (this.db.USUARIO_CUBICULO || []).filter(r => r.user_id === userId);
+    relations.forEach(r => {
+      r.estado = 'Rechazado';
+    });
+
+    this.persist();
+
+    if (this.googleBridge) {
+      this.googleBridge.syncUsuario(user).catch(err => console.error('[GoogleBridge Error]', err));
+    }
+
+    await this.addHistorial({
+      tipo_documento: 'USUARIO',
+      codigo_documento: user.user_id,
+      usuario: adminName,
+      accion: 'Rechazo de Registro',
+      estado_anterior: oldEstado || 'Pendiente de Aprobación',
+      estado_nuevo: 'Rechazado',
+      observacion: `Solicitud de registro de ${user.nombre} (${user.email}) rechazada por ${adminName}.${motivo ? ' Motivo: ' + motivo : ''}`
+    });
+
+    return user;
   }
 
   async removeCubiculoFromUser(userId, cubiculoIdOrCode) {
@@ -616,6 +705,7 @@ class DataService {
 
     const totalUsuarios = usuarios.length;
     const usuariosActivos = usuarios.filter(u => u.estado === 'Activo').length;
+    const usuariosPendientes = usuarios.filter(u => u.estado === 'Pendiente de Aprobación' || u.estado === 'Pendiente').length;
 
     const reclAbiertas = reclamaciones.filter(r => ['Recibida', 'En revisión', 'Asignada', 'En proceso'].includes(r.estado)).length;
     const reclPendientes = reclamaciones.filter(r => r.estado === 'Pendiente de información').length;
@@ -634,7 +724,8 @@ class DataService {
       },
       usuarios: {
         total: totalUsuarios,
-        activos: usuariosActivos
+        activos: usuariosActivos,
+        pendientes: usuariosPendientes
       },
       reclamaciones: {
         total: reclamaciones.length,

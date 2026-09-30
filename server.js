@@ -299,48 +299,39 @@ app.post('/api/usuarios/registro', async (req, res) => {
         nombre: nombre.trim(),
         email: cleanEmail,
         telefono: telefono ? telefono.trim() : '',
-        estado: 'Activo'
+        estado: 'Pendiente de Aprobación'
       });
     } else {
       await dataService.updateUsuario(user.user_id, {
         nombre: nombre.trim(),
-        telefono: telefono ? telefono.trim() : user.telefono
+        telefono: telefono ? telefono.trim() : user.telefono,
+        estado: 'Pendiente de Aprobación'
       });
     }
 
-    // Asociar cubículos indicados
+    // Asociar cubículos indicados en estado Pendiente
     let assignedCodes = [];
     if (cubiculosList.length > 0) {
-      assignedCodes = await dataService.assignCubiculosToUser(user.user_id, cubiculosList);
+      assignedCodes = await dataService.assignCubiculosToUser(user.user_id, cubiculosList, 'Pendiente');
     }
 
-    const host = req.get('host') || '';
-    const configuredUrl = await dataService.getConfigValue('url_publica', 'https://megaton1026.vercel.app');
-    const portalUrl = configuredUrl || (host ? `${req.protocol}://${host}/` : 'https://megaton1026.vercel.app/');
-
-    // Despachar correo de felicitación y confirmación oficial de membresía
-    const mailResult = await emailService.sendWelcomeEmail({
-      nombre: user.nombre,
-      email: user.email,
-      cubiculoCodigos: assignedCodes.length > 0 ? assignedCodes : ['Pendiente de asignar'],
-      userId: user.user_id,
-      portalUrl
-    });
-
-    // Crear sesión automática para que el usuario navegue sin trabas
-    const session = authService.createSession({
-      ...user,
-      cubiculos: await dataService.getCubiculosByUser(user.user_id)
+    // Registrar en auditoría
+    await dataService.addHistorial({
+      tipo_documento: 'USUARIO',
+      codigo_documento: user.user_id,
+      usuario: user.nombre,
+      accion: 'Solicitud de Registro Web',
+      estado_anterior: 'N/A',
+      estado_nuevo: 'Pendiente de Aprobación',
+      observacion: `El usuario ${user.nombre} (${user.email}) solicitó registro para el local: ${assignedCodes.join(', ') || 'N/A'}. En espera de validación y aprobación por la administración.`
     });
 
     res.json({
       success: true,
-      message: '¡Registro completado! Gracias por confirmar tus datos.',
+      pendingApproval: true,
+      message: '¡Solicitud enviada! Tu registro para el cubículo ha sido recibido y está en proceso de validación por la administración de Plaza Megatón 2000. Tan pronto sea aprobado por el Gestor o Administrador, recibirás un correo de bienvenida con tus accesos para entrar a la plataforma.',
       user_id: user.user_id,
-      cubiculosAsignados: assignedCodes,
-      sessionToken: session.sessionToken,
-      user: session.user,
-      emailPreviewUrl: mailResult.previewUrl
+      cubiculosAsignados: assignedCodes
     });
   } catch (err) {
     console.error('Error en registro:', err);
@@ -420,6 +411,20 @@ app.post('/api/auth/login', async (req, res) => {
     const user = await dataService.getUsuarioByEmail(cleanEmail);
     if (!user) {
       return res.status(401).json({ success: false, error: 'Credenciales inválidas o correo no registrado.' });
+    }
+
+    if (user.estado === 'Pendiente de Aprobación' || user.estado === 'Pendiente') {
+      return res.status(403).json({
+        success: false,
+        error: 'Tu registro está en proceso de validación y aprobación por la administración de Plaza Megatón 2000. Recibirás una notificación por correo tan pronto sea validado y activado tu acceso.'
+      });
+    }
+
+    if (user.estado === 'Inactivo' || user.estado === 'Rechazado') {
+      return res.status(403).json({
+        success: false,
+        error: 'Tu cuenta se encuentra inactiva o ha sido rechazada por la administración. Comunícate con la administración.'
+      });
     }
 
     const userPwd = String(user.password || '').trim();
@@ -817,6 +822,69 @@ app.patch('/api/admin/usuarios/:userId', requireAdmin, async (req, res) => {
     const updatedUser = await dataService.getUsuarioById(userId);
     res.json({ success: true, usuario: updatedUser, message: 'Usuario actualizado correctamente.' });
   } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 14b. Panel Administrativo: Aprobar Registro de Usuario y Despachar Credenciales Oficiales
+app.post('/api/admin/usuarios/:userId/aprobar', requireAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const adminName = req.adminAuth ? req.adminAuth.nombre : 'Administración';
+
+    const result = await dataService.activateUserAndCubiculos(userId, adminName);
+    if (!result) {
+      return res.status(404).json({ success: false, error: 'Usuario no encontrado.' });
+    }
+
+    const { user, assignedCodes } = result;
+
+    const host = req.get('host') || '';
+    const configuredUrl = await dataService.getConfigValue('url_publica', 'https://megaton1026.vercel.app');
+    let portalUrl = configuredUrl || (host ? `${req.protocol}://${host}/` : 'https://megaton1026.vercel.app/');
+    if (!portalUrl.endsWith('/')) portalUrl += '/';
+
+    // Despachar correo de felicitación y acceso oficial al inquilino
+    const mailResult = await emailService.sendAccountApprovedEmail({
+      nombre: user.nombre,
+      email: user.email,
+      cubiculoCodigos: assignedCodes.length > 0 ? assignedCodes : ['Cubículo Oficial'],
+      userId: user.user_id,
+      portalUrl,
+      adminName
+    });
+
+    res.json({
+      success: true,
+      message: `¡Usuario ${user.nombre} aprobado con éxito! Credenciales oficiales e instrucciones despachadas a ${user.email}.`,
+      usuario: user,
+      emailPreviewUrl: mailResult ? mailResult.previewUrl : null
+    });
+  } catch (err) {
+    console.error('Error al aprobar usuario:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 14c. Panel Administrativo: Rechazar Solicitud de Registro de Usuario
+app.post('/api/admin/usuarios/:userId/rechazar', requireAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { motivo } = req.body || {};
+    const adminName = req.adminAuth ? req.adminAuth.nombre : 'Administración';
+
+    const user = await dataService.rejectUserRegistration(userId, adminName, motivo);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'Usuario no encontrado.' });
+    }
+
+    res.json({
+      success: true,
+      message: `Solicitud de registro de ${user.nombre} rechazada correctamente.`,
+      usuario: user
+    });
+  } catch (err) {
+    console.error('Error al rechazar usuario:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });

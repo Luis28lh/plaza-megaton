@@ -20,6 +20,20 @@ class AuthService {
       return { success: false, error: 'No encontramos ningún usuario registrado con este correo electrónico.' };
     }
 
+    if (user.estado === 'Pendiente de Aprobación' || user.estado === 'Pendiente') {
+      return {
+        success: false,
+        error: 'Tu registro está en proceso de validación y aprobación por la administración de Plaza Megatón 2000. Recibirás una notificación por correo tan pronto sea validado y activado tu acceso.'
+      };
+    }
+
+    if (user.estado === 'Inactivo' || user.estado === 'Rechazado') {
+      return {
+        success: false,
+        error: 'Tu cuenta se encuentra inactiva o ha sido rechazada por la administración. Comunícate con la administración para más información.'
+      };
+    }
+
     const token = crypto.randomBytes(24).toString('hex');
     const expiresAt = Date.now() + 60 * 60 * 1000; // 1 hora de validez
 
@@ -113,6 +127,20 @@ class AuthService {
 
     if (!user) {
       return { success: false, error: 'No se encontró ningún usuario registrado con este correo electrónico.' };
+    }
+
+    if (user.estado === 'Pendiente de Aprobación' || user.estado === 'Pendiente') {
+      return {
+        success: false,
+        error: 'Tu cuenta está en proceso de validación y aprobación por la administración de Plaza Megatón 2000. Recibirás una notificación por correo tan pronto sea validado y activado tu acceso.'
+      };
+    }
+
+    if (user.estado === 'Inactivo' || user.estado === 'Rechazado') {
+      return {
+        success: false,
+        error: 'Tu cuenta se encuentra inactiva o ha sido rechazada por la administración.'
+      };
     }
 
     // Código numérico seguro de 6 dígitos

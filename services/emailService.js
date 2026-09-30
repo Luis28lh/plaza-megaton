@@ -418,6 +418,79 @@ class EmailService {
       text
     });
   }
+
+  /**
+   * 8. Correo Oficial de Aprobación de Cuenta y Habilitación de Acceso
+   */
+  async sendAccountApprovedEmail({ nombre, email, cubiculoCodigos, userId, portalUrl, adminName }) {
+    const cubDisplay = Array.isArray(cubiculoCodigos) ? cubiculoCodigos.join(', ') : (cubiculoCodigos || 'Cubículo Oficial');
+    const subject = `🎉 ¡Cuenta Aprobada! Tu acceso a Plaza Megatón ha sido habilitado [${cubDisplay}]`;
+
+    const htmlBody = `
+      <div style="text-align: center; margin-bottom: 20px;">
+        <span style="background: #DCFCE7; color: #15803D; font-weight: 800; font-size: 11px; padding: 4px 14px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.5px;">
+          Validación Oficial Aprobada
+        </span>
+        <h2 style="font-size: 22px; font-weight: 900; color: #0F172A; margin: 12px 0 4px;">¡Bienvenido a Plaza Megatón!</h2>
+        <p style="font-size: 14px; color: #475569; margin: 0;">
+          Estimado(a) <strong>${nombre}</strong>, la Administración ha validado tu solicitud de registro con éxito.
+        </p>
+      </div>
+
+      <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px; margin: 20px 0;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <tr>
+            <td style="padding: 6px 0; color: #64748B;"><strong>Titular:</strong></td>
+            <td style="padding: 6px 0; color: #0F172A; font-weight: 700; text-align: right;">${nombre}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #64748B;"><strong>Correo autorizado:</strong></td>
+            <td style="padding: 6px 0; color: #0F172A; font-weight: 700; text-align: right;">${email}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #64748B;"><strong>Cubículo(s) Asignado(s):</strong></td>
+            <td style="padding: 6px 0; color: #D32F2F; font-weight: 800; text-align: right;">${cubDisplay}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #64748B;"><strong>Código de Usuario:</strong></td>
+            <td style="padding: 6px 0; color: #0F172A; font-weight: 700; text-align: right;">${userId}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #64748B;"><strong>Validado por:</strong></td>
+            <td style="padding: 6px 0; color: #15803D; font-weight: 700; text-align: right;">${adminName || 'Consejo de Administración'}</td>
+          </tr>
+        </table>
+      </div>
+
+      <div style="text-align: center; margin: 26px 0;">
+        <a href="${portalUrl}login.html" target="_blank" style="background: #D32F2F; color: #FFFFFF; font-weight: 800; font-size: 15px; padding: 14px 28px; border-radius: 8px; text-decoration: none; display: inline-block; box-shadow: 0 4px 12px rgba(211,47,47,0.25);">
+          🔑 Ingresar al Portal de Plaza Megatón
+        </a>
+      </div>
+
+      <div style="background: #FEF3C7; border-left: 4px solid #F59E0B; padding: 12px 16px; border-radius: 6px; margin: 20px 0; font-size: 13px; color: #78350F; line-height: 1.5;">
+        📌 <strong>Instrucciones para tu primer ingreso:</strong><br>
+        1. Ingresa a través del botón superior.<br>
+        2. En la casilla de contraseña, utiliza tu mismo correo electrónico (<strong>${email}</strong>) como clave temporal.<br>
+        3. El sistema te solicitará inmediatamente generar tu propio PIN o contraseña definitiva de acceso.
+      </div>
+
+      <p style="font-size: 13px; color: #64748B; line-height: 1.5;">
+        Desde tu portal podrás reportar pagos con comprobante bancario, dar seguimiento a solicitudes de mantenimiento y consultar el estado de tu cuenta en tiempo real.
+      </p>
+
+      <p style="margin-top: 24px;">Atentamente,<br><strong>Consejo de Administración — Plaza Megatón</strong></p>
+    `;
+
+    const text = `Hola, ${nombre}:\n\n¡Tu cuenta ha sido aprobada por la Administración de Plaza Megatón!\n\nCubículo(s) asignados: ${cubDisplay}\nUsuario: ${userId}\n\nIngresa al portal aquí: ${portalUrl}login.html\nPara tu primer ingreso, tu clave temporal es tu correo (${email}). Se te pedirá definir tu propia clave definitiva.\n\nAdministración Plaza Megatón`;
+
+    return this.sendMail({
+      to: email,
+      subject,
+      html: this.wrapTemplate('Aprobación de Cuenta', htmlBody),
+      text
+    });
+  }
 }
 
 module.exports = EmailService;

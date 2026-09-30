@@ -208,6 +208,8 @@ async function loadKPIs() {
 
       document.getElementById('kpi-users-total').innerText = k.usuarios.total;
       document.getElementById('kpi-users-activos').innerText = k.usuarios.activos;
+      const pendUsersEl = document.getElementById('kpi-users-pendientes');
+      if (pendUsersEl) pendUsersEl.innerText = k.usuarios.pendientes || 0;
 
       document.getElementById('kpi-rec-abiertas').innerText = k.reclamaciones.abiertas;
       document.getElementById('kpi-rec-pend').innerText = k.reclamaciones.pendientes;
@@ -467,18 +469,47 @@ async function loadUsuarios() {
   }
 }
 
+function updateUsuariosTabBadge() {
+  const pendingCount = (adminData.usuarios || []).filter(u => u.estado === 'Pendiente de Aprobación' || u.estado === 'Pendiente').length;
+  const tabBtn = document.getElementById('tab-btn-usuarios');
+  if (tabBtn) {
+    if (pendingCount > 0) {
+      tabBtn.innerHTML = `👥 Usuarios <span style="background:#EF4444; color:#FFFFFF; font-size:11px; font-weight:800; padding:2px 7px; border-radius:999px; margin-left:6px;">${pendingCount} pendientes</span>`;
+    } else {
+      tabBtn.innerHTML = `👥 Usuarios`;
+    }
+  }
+}
+
 function renderUsuariosTable(users) {
   const tbody = document.getElementById('table-usuarios-body');
   if (!tbody) return;
+
+  updateUsuariosTabBadge();
 
   if (users.length === 0) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:#64748B;">No hay usuarios registrados aún.</td></tr>';
     return;
   }
 
+  // Ordenar para mostrar los pendientes de aprobación prioritariamente arriba
+  const sortedUsers = [...users].sort((a, b) => {
+    const isAPending = (a.estado === 'Pendiente de Aprobación' || a.estado === 'Pendiente');
+    const isBPending = (b.estado === 'Pendiente de Aprobación' || b.estado === 'Pendiente');
+    if (isAPending && !isBPending) return -1;
+    if (!isAPending && isBPending) return 1;
+    return 0;
+  });
+
   tbody.innerHTML = '';
-  users.forEach(u => {
+  sortedUsers.forEach(u => {
+    const isPending = (u.estado === 'Pendiente de Aprobación' || u.estado === 'Pendiente');
+    const isActivo = (u.estado === 'Activo');
     const tr = document.createElement('tr');
+    if (isPending) {
+      tr.style.background = '#FFFBEB'; // Resaltado ámbar suave
+    }
+
     const cubsHtml = Array.isArray(u.cubiculos) && u.cubiculos.length > 0
       ? u.cubiculos.map(c => {
           if (typeof c === 'object' && c !== null) {
@@ -489,21 +520,109 @@ function renderUsuariosTable(users) {
         }).join('')
       : '<span style="color:#94A3B8;">Ninguno</span>';
 
-    tr.innerHTML = `
-      <td><strong>${u.user_id}</strong></td>
-      <td><strong>${u.nombre}</strong></td>
-      <td>${u.email}<br><small style="color:#64748B;">${u.telefono || 'Sin tel.'}</small></td>
-      <td><span style="background:#FEE2E2; color:#B71C1C; padding:4px 8px; border-radius:6px; font-weight:600; font-size:12px; display:inline-block;">${cubsHtml}</span></td>
-      <td><span class="badge ${u.estado === 'Activo' ? 'badge-activo' : 'badge-rechazado'}">${u.estado}</span></td>
-      <td>
+    // Badge según estado
+    let badgeHtml = '';
+    if (isPending) {
+      badgeHtml = `<span class="badge" style="background:#FEF3C7; color:#B45309; border:1px solid #FCD34D; font-weight:700; white-space:nowrap;">⏳ Pendiente</span>`;
+    } else if (isActivo) {
+      badgeHtml = `<span class="badge badge-activo">Activo</span>`;
+    } else {
+      badgeHtml = `<span class="badge badge-rechazado">${u.estado || 'Inactivo'}</span>`;
+    }
+
+    // Botones de acción
+    let actionsHtml = '';
+    const safeName = (u.nombre || '').replace(/'/g, "\\'");
+    if (isPending) {
+      actionsHtml = `
+        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+          <button class="btn-sm" style="background:#15803D; color:#FFFFFF; font-weight:700; border:none; padding:6px 10px; border-radius:6px; cursor:pointer;" onclick="approveUserRegistration('${u.user_id}', '${safeName}')" title="Aprobar cubículo y despachar correo de activación">
+            ✅ Aprobar y Dar Acceso
+          </button>
+          <button class="btn-sm btn-sm-danger" style="padding:6px 9px;" onclick="rejectUserRegistration('${u.user_id}', '${safeName}')" title="Rechazar solicitud">
+            ✕ Rechazar
+          </button>
+          <button class="btn-sm btn-sm-outline" style="padding:6px 8px;" onclick="openEditUserModal('${u.user_id}')" title="Ver y editar">
+            ⚙️
+          </button>
+        </div>
+      `;
+    } else {
+      actionsHtml = `
         <div style="display:flex; gap:6px; flex-wrap:wrap;">
           <button class="btn-sm btn-sm-outline" onclick="openEditUserModal('${u.user_id}')">⚙️ Gestionar</button>
           <button class="btn-sm btn-sm-primary" style="padding:6px 10px;" onclick="openEditUserModal('${u.user_id}')" title="Asignar o cambiar contraseña">🔑 Clave</button>
         </div>
-      </td>
+      `;
+    }
+
+    tr.innerHTML = `
+      <td><strong>${u.user_id}</strong></td>
+      <td><strong>${u.nombre}</strong></td>
+      <td>${u.email}<br><small style="color:#64748B;">${u.telefono || 'Sin tel.'}</small></td>
+      <td><span style="background:${isPending ? '#FEF3C7' : '#FEE2E2'}; color:${isPending ? '#B45309' : '#B71C1C'}; padding:4px 8px; border-radius:6px; font-weight:600; font-size:12px; display:inline-block;">${cubsHtml}</span></td>
+      <td>${badgeHtml}</td>
+      <td>${actionsHtml}</td>
     `;
     tbody.appendChild(tr);
   });
+}
+
+async function approveUserRegistration(userId, userName) {
+  if (!confirm(`¿Aprobar el registro y otorgar acceso oficial a "${userName}"?\n\nAl confirmar:\n1. El cubículo solicitado quedará formalmente vinculado a su nombre.\n2. Se despachará automáticamente un correo electrónico oficial de bienvenida con sus credenciales e instrucciones de acceso.`)) {
+    return;
+  }
+
+  try {
+    App.showToast('Procesando aprobación y despachando correo oficial...', 'info');
+    const res = await fetch(`/api/admin/usuarios/${userId}/aprobar`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-pin': getAdminPin()
+      }
+    });
+
+    const data = await res.json();
+    if (res.ok && data.success) {
+      App.showToast(data.message || 'Usuario aprobado con éxito.', 'success');
+      loadUsuarios();
+      loadKPIs();
+    } else {
+      App.showToast(data.error || 'No se pudo aprobar el usuario.', 'error');
+    }
+  } catch (err) {
+    console.error('Error aprobando usuario:', err);
+    App.showToast('Error de conexión al aprobar usuario.', 'error');
+  }
+}
+
+async function rejectUserRegistration(userId, userName) {
+  const motivo = prompt(`¿Rechazar la solicitud de registro de "${userName}"?\n(Opcional) Indica el motivo del rechazo:`);
+  if (motivo === null) return;
+
+  try {
+    const res = await fetch(`/api/admin/usuarios/${userId}/rechazar`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-pin': getAdminPin()
+      },
+      body: JSON.stringify({ motivo })
+    });
+
+    const data = await res.json();
+    if (res.ok && data.success) {
+      App.showToast(data.message || 'Solicitud rechazada.', 'info');
+      loadUsuarios();
+      loadKPIs();
+    } else {
+      App.showToast(data.error || 'No se pudo rechazar la solicitud.', 'error');
+    }
+  } catch (err) {
+    console.error('Error rechazando usuario:', err);
+    App.showToast('Error de conexión al rechazar usuario.', 'error');
+  }
 }
 
 function filterUsuarios() {
@@ -524,6 +643,8 @@ function openEditUserModal(userId) {
   const user = adminData.usuarios.find(u => u.user_id === userId);
   if (!user) return;
 
+  const isPending = (user.estado === 'Pendiente de Aprobación' || user.estado === 'Pendiente');
+  const safeName = (user.nombre || '').replace(/'/g, "\\'");
   const modal = document.getElementById('edit-user-modal');
   const body = document.getElementById('edit-user-body');
 
@@ -539,6 +660,19 @@ function openEditUserModal(userId) {
 
   body.innerHTML = `
     <div style="font-size:16px; font-weight:800; margin-bottom:12px;">Usuario: ${user.nombre} (${user.user_id})</div>
+
+    ${isPending ? `
+    <div style="background:#FFFBEB; border:1.5px solid #FCD34D; border-radius:10px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div>
+        <div style="font-weight:800; color:#B45309; font-size:13px;">⏳ Registro Pendiente de Aprobación</div>
+        <div style="font-size:12px; color:#78350F; margin-top:2px;">El ocupante espera validación. Puedes aprobar su cubículo y enviarle su correo de activación.</div>
+      </div>
+      <button type="button" class="btn-sm" style="background:#15803D; color:#FFFFFF; font-weight:800; border:none; padding:8px 14px; border-radius:6px; cursor:pointer;" onclick="approveUserRegistration('${user.user_id}', '${safeName}'); closeEditUserModal();">
+        ✅ Aprobar y Dar Acceso Ahora
+      </button>
+    </div>
+    ` : ''}
+
     <div class="form-group">
       <label class="form-label">Correo:</label>
       <input type="text" class="form-input" value="${user.email}" readonly style="background:#F1F5F9;">
@@ -550,8 +684,10 @@ function openEditUserModal(userId) {
     <div class="form-group">
       <label class="form-label">Estado:</label>
       <select id="edit-user-estado" class="form-select">
+        <option value="Pendiente de Aprobación" ${user.estado === 'Pendiente de Aprobación' || user.estado === 'Pendiente' ? 'selected' : ''}>⏳ Pendiente de Aprobación</option>
         <option value="Activo" ${user.estado === 'Activo' ? 'selected' : ''}>Activo</option>
         <option value="Inactivo" ${user.estado === 'Inactivo' ? 'selected' : ''}>Inactivo</option>
+        <option value="Rechazado" ${user.estado === 'Rechazado' ? 'selected' : ''}>Rechazado</option>
       </select>
     </div>
 

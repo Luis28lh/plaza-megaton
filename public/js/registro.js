@@ -14,23 +14,13 @@ const OFFICIAL_33_CUBICULOS = [
   { codigo: 'A-201', nombre: 'INABIE', nivel: 'Segundo Nivel' },
   { codigo: 'A-202', nombre: 'Luis María García', nivel: 'Segundo Nivel' },
   { codigo: 'A-203', nombre: 'Jet Pack', nivel: 'Segundo Nivel' },
-  { codigo: 'A-204', nombre: 'Santos', nivel: 'Segundo Nivel' },
-  { codigo: 'A-205', nombre: 'Elda Bencosme', nivel: 'Segundo Nivel' },
-  { codigo: 'A-206', nombre: 'Alba Rodríguez & Asociados SRL', nivel: 'Segundo Nivel' },
-  { codigo: 'A-207', nombre: 'Alba Rodríguez & Asociados SRL', nivel: 'Segundo Nivel' },
+  { codigo: 'A-204', nombre: 'Manuel Santos', nivel: 'Segundo Nivel' },
+  { codigo: 'A-205', nombre: 'Centro de Uña', nivel: 'Segundo Nivel' },
+  { codigo: 'A-206', nombre: 'Alba Rodríguez & Asociados, SRL', nivel: 'Segundo Nivel' },
+  { codigo: 'A-207', nombre: 'Alba Rodríguez & Asociados, SRL', nivel: 'Segundo Nivel' },
   { codigo: 'A-208', nombre: 'Nicolás Grullón', nivel: 'Segundo Nivel' },
   { codigo: 'A-209', nombre: 'Ahsdiel Music Bar SRL', nivel: 'Segundo Nivel' },
   { codigo: 'A-210', nombre: 'Ahsdiel Music Bar SRL', nivel: 'Segundo Nivel' },
-  { codigo: 'A-211', nombre: 'Local 211', nivel: 'Segundo Nivel' },
-  { codigo: 'A-212', nombre: 'Local 212', nivel: 'Segundo Nivel' },
-  { codigo: 'A-213', nombre: 'Local 213', nivel: 'Segundo Nivel' },
-  { codigo: 'A-214', nombre: 'Local 214', nivel: 'Segundo Nivel' },
-  { codigo: 'A-215', nombre: 'Local 215', nivel: 'Segundo Nivel' },
-  { codigo: 'A-216', nombre: 'Local 216', nivel: 'Segundo Nivel' },
-  { codigo: 'A-217', nombre: 'Local 217', nivel: 'Segundo Nivel' },
-  { codigo: 'A-218', nombre: 'Local 218', nivel: 'Segundo Nivel' },
-  { codigo: 'A-219', nombre: 'Local 219', nivel: 'Segundo Nivel' },
-  { codigo: 'A-220', nombre: 'Local 220', nivel: 'Segundo Nivel' },
   { codigo: 'A-301-A', nombre: 'Vipsania Grullón', nivel: 'Tercer Nivel' },
   { codigo: 'A-301-B', nombre: 'Vipsania Grullón', nivel: 'Tercer Nivel' },
   { codigo: 'A-301-C', nombre: 'Vipsania Grullón', nivel: 'Tercer Nivel' },
@@ -41,8 +31,8 @@ const OFFICIAL_33_CUBICULOS = [
   { codigo: 'A-305', nombre: 'Grupo de Desarrollo Internacional', nivel: 'Tercer Nivel' },
   { codigo: 'A-306', nombre: 'Grupo de Desarrollo Internacional', nivel: 'Tercer Nivel' },
   { codigo: 'A-307', nombre: 'Grupo de Desarrollo Internacional', nivel: 'Tercer Nivel' },
-  { codigo: 'A-307-ANT', nombre: 'Edward Grullón', nivel: 'Tercer Nivel' },
-  { codigo: 'A-307-COF', nombre: 'Nicolás Grullón', nivel: 'Tercer Nivel' },
+  { codigo: 'A-307-ANT', nombre: 'Esward-Sotea, Antena', nivel: 'Tercer Nivel' },
+  { codigo: 'A-307-COF', nombre: 'Mega Coffy', nivel: 'Tercer Nivel' },
   { codigo: 'A-308', nombre: 'Bertha Soury', nivel: 'Tercer Nivel' },
   { codigo: 'A-309', nombre: 'Bertha Soury', nivel: 'Tercer Nivel' },
   { codigo: 'A-310', nombre: 'B&B Operadora de Filmes & Gym SRL', nivel: 'Tercer Nivel' },
@@ -294,34 +284,10 @@ async function handleRegistroSubmit(event) {
         telefono,
         cubiculos: cubiculosArr,
         fecha_registro: new Date().toLocaleDateString('es-DO'),
-        estado: 'Activo'
+        estado: 'Pendiente de Aprobación'
       };
       users.push(newUser);
       localStorage.setItem('pm_usuarios', JSON.stringify(users));
-
-      // Actualizar cubículos en catálogo local
-      const catalog = JSON.parse(localStorage.getItem('pm_cubiculos') || '[]');
-      cubiculosArr.forEach(cItem => {
-        const cod = cItem.codigo;
-        let existing = catalog.find(c => c.codigo.toUpperCase() === cod.toUpperCase());
-        if (existing) {
-          existing.estado = 'Ocupado';
-          if (cItem.nombre) existing.nombre_local = cItem.nombre;
-          if (cItem.actividad) existing.actividad_comercial = cItem.actividad;
-        } else {
-          catalog.push({
-            cubiculo_id: 'CUB-' + cod,
-            codigo: cod,
-            nombre_local: cItem.nombre || '',
-            actividad_comercial: cItem.actividad || '',
-            estado: 'Ocupado',
-            observaciones: 'Ingresado por usuario'
-          });
-        }
-      });
-      localStorage.setItem('pm_cubiculos', JSON.stringify(catalog));
-
-      App.setSession(newUser, 'token_static_' + Date.now());
 
       // Sincronizar con Google Drive / Sheets si está configurado
       const scriptUrl = localStorage.getItem('pm_google_script_url');
@@ -369,7 +335,7 @@ async function handleRegistroSubmit(event) {
     const data = await res.json();
 
     if (data.success) {
-      if (data.user && data.sessionToken) {
+      if (data.user && data.sessionToken && !data.pendingApproval) {
         App.setSession(data.user, data.sessionToken);
       }
       showSuccessScreen({
@@ -386,8 +352,7 @@ async function handleRegistroSubmit(event) {
   } catch (err) {
     console.warn('Error conectando a backend, guardando en store local:', err);
     const userId = App.getNextSequence('US');
-    const newUser = { user_id: userId, nombre, email, telefono, cubiculos: cubiculosArr, estado: 'Activo' };
-    App.setSession(newUser, 'offline_' + Date.now());
+    const newUser = { user_id: userId, nombre, email, telefono, cubiculos: cubiculosArr, estado: 'Pendiente de Aprobación' };
     showSuccessScreen({
       nombre,
       email,

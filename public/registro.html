@@ -130,35 +130,36 @@
 
     <!-- Pantalla de Éxito / Confirmación -->
     <div id="success-registro-box" class="card-box success-screen" style="display: none;">
-      <div class="success-icon-bubble">🎉</div>
+      <div class="success-icon-bubble" style="background:#FEF3C7; color:#B45309; border:2px solid #FCD34D;">⏳</div>
       <h2 style="font-size: 22px; font-weight: 900; color: var(--text-main); margin-bottom: 6px;">
-        ¡Felicitaciones! Ya eres Miembro Oficial
+        ¡Solicitud de Registro Recibida!
       </h2>
-      <p style="font-size: 15px; color: var(--text-body); margin-bottom: 12px;">
-        Te confirmamos oficialmente como miembro activo de <strong>Plaza Megatón</strong>.
+      <p style="font-size: 15px; color: var(--text-body); margin-bottom: 14px; line-height: 1.5;">
+        Tu registro para el cubículo ha sido enviado con éxito y se encuentra en <strong>proceso de validación y aprobación</strong> por la administración de Plaza Megatón 2000.
       </p>
 
-      <div class="success-code-box">
-        <div style="font-size: 12px; color: var(--text-muted); text-transform: uppercase;">Cubículo(s) o Local(es) Vinculado(s)</div>
-        <div id="success-cubiculos" class="success-code-num" style="font-size: 18px; line-height: 1.4;">-</div>
+      <div class="success-code-box" style="background:#FFFBEB; border:1px solid #FCD34D; border-radius:10px; padding:14px; margin-bottom:16px;">
+        <div style="font-size: 12px; color: #92400E; text-transform: uppercase; font-weight:700;">Cubículo(s) o Local(es) Solicitado(s)</div>
+        <div id="success-cubiculos" class="success-code-num" style="font-size: 18px; line-height: 1.4; color:#B45309; font-weight:800;">-</div>
+        <div style="margin-top:8px; font-size:12px; color:#64748B;">
+          Estado actual: <span style="background:#FEF3C7; color:#B45309; padding:2px 8px; border-radius:4px; font-weight:700;">⏳ Pendiente de Aprobación</span>
+        </div>
       </div>
 
-      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">
-        Hemos enviado un correo electrónico de felicitación y confirmación oficial con el enlace a la plataforma a:<br>
-        <strong id="success-email-dest" style="color: var(--text-main);">-</strong>
-      </p>
+      <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:14px; text-align:left; font-size:13px; color:#475569; line-height:1.6; margin-bottom:20px;">
+        📩 <strong>¿Qué sucederá ahora?</strong><br>
+        1. El Administrador o Gestor validará que los datos correspondan al titular oficial del cubículo.<br>
+        2. Una vez aprobado tu acceso, te llegará automáticamente un <strong>correo oficial de bienvenida</strong> a: <strong id="success-email-dest" style="color:#0F172A;">-</strong> con el enlace y las instrucciones para ingresar a tu portal personal.
+      </div>
 
       <div id="preview-mail-container"></div>
 
-      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 24px;">
-        <a href="solicitudes.html" class="btn-primary">
-          🛠️ Crear mi Primera Solicitud
-        </a>
-        <a href="pagos.html" class="btn-secondary">
-          💳 Reportar un Pago
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 14px;">
+        <a href="login.html" class="btn-primary" style="background:#D32F2F;">
+          🔑 Ir a Pantalla de Acceso
         </a>
         <a href="index.html" class="btn-secondary">
-          🏠 Ir al Inicio
+          🏠 Volver al Inicio
         </a>
       </div>
     </div>
