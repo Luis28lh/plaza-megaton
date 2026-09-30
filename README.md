@@ -17,6 +17,13 @@ Diseñada para registrar propietarios e inquilinos mediante código QR, gestiona
 
 ---
 
+## 🧪 Entorno de Pruebas (Test / Staging)
+
+* **Rama activa de pruebas:** `test`
+* **Flujo seguro:** Todo cambio se prueba primero en la rama `test` antes de fusionarse a `main` (Producción).
+
+---
+
 ## 🚀 Características Principales
 
 1. **📱 Experiencia Móvil-First:**
