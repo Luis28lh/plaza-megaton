@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Novedades & Mensajes — Plaza Megatón</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <style>
+    .novedades-tabs-wrap {
+      display: flex;
+      background: #E2E8F0;
+      padding: 4px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      gap: 4px;
+    }
+    .novedades-tab-btn {
+      flex: 1;
+      padding: 10px 14px;
+      text-align: center;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .novedades-tab-btn.active {
+      background: #FFFFFF;
+      color: #0F172A;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+    .badge-counter {
+      background: #EF4444;
+      color: #FFFFFF;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 999px;
+    }
+    .novedad-card {
+      background: #FFFFFF;
+      border-radius: 14px;
+      border: 1px solid #E2E8F0;
+      padding: 18px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .novedad-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+    .novedad-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .badge-reunion { background: #EDE9FE; color: #6D28D9; border: 1px solid #DDD6FE; }
+    .badge-mantenimiento { background: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; }
+    .badge-aviso { background: #E0F2FE; color: #0369A1; border: 1px solid #BAE6FD; }
+    .badge-urgente { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .mensaje-card {
+      background: #FFFFFF;
+      border-radius: 14px;
+      border: 1.5px solid #E2E8F0;
+      padding: 16px;
+      margin-bottom: 14px;
+      position: relative;
+    }
+    .mensaje-card.unread {
+      border-color: #3B82F6;
+      background: #F8FAFC;
+    }
+    .mensaje-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+    .indicator-unread { background: #DBEAFE; color: #1D4ED8; }
+    .indicator-read { background: #F1F5F9; color: #64748B; }
+  </style>
+</head>
+<body>
+
+  <!-- Encabezado Principal -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="index.html" class="brand-logo-wrap">
+        <img src="assets/logo-megaton.svg" alt="Plaza Megatón Logo" class="brand-logo-img">
+      </a>
+      <div id="user-header-pill" class="user-status-pill">
+        🔑 Acceder
+      </div>
+    </div>
+  </header>
+
+  <main class="main-wrapper">
+
+    <!-- Encabezado de la página -->
+    <div style="margin-bottom: 16px;">
+      <h1 style="font-size: 22px; font-weight: 900; color: var(--text-main); margin-bottom: 4px;">
+        📢 Centro de Novedades & Mensajes
+      </h1>
+      <p style="font-size: 13px; color: var(--text-muted); margin: 0;">
+        Avisos comunitarios, reuniones y comunicados directos de la administración.
+      </p>
+    </div>
+
+    <!-- Pestañas Superiores -->
+    <div class="novedades-tabs-wrap">
+      <button type="button" class="novedades-tab-btn active" id="tab-btn-nov" onclick="switchNovedadesTab('novedades')">
+        <span>📢 Novedades de la Plaza</span>
+      </button>
+      <button type="button" class="novedades-tab-btn" id="tab-btn-msg" onclick="switchNovedadesTab('mensajes')">
+        <span>📬 Mis Mensajes</span>
+        <span id="unread-msg-badge" class="badge-counter" style="display: none;">0</span>
+      </button>
+    </div>
+
+    <!-- SECCIÓN 1: NOVEDADES GENERALES -->
+    <section id="section-novedades">
+      <div id="novedades-list-container">
+        <div style="text-align: center; padding: 30px; color: #64748B;">
+          ⏳ Cargando novedades comunitarias...
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 2: BUZÓN PRIVADO DE MENSAJES -->
+    <section id="section-mensajes" style="display: none;">
+      <!-- Caja de identificación si no tiene sesión activa -->
+      <div id="msg-auth-box" class="card-box" style="display: none; padding: 20px; text-align: center; margin-bottom: 16px;">
+        <div style="font-size: 32px; margin-bottom: 6px;">📬</div>
+        <h3 style="font-size: 17px; font-weight: 800; color: #0F172A; margin-bottom: 6px;">Consulta tu Buzón Digital</h3>
+        <p style="font-size: 13px; color: #64748B; margin-bottom: 14px; line-height: 1.5;">
+          Ingresa tu correo registrado para ver los comunicados y respuestas que la administración te ha enviado directamente.
+        </p>
+        <div style="display: flex; gap: 8px; max-width: 380px; margin: 0 auto;">
+          <input type="email" id="msg-lookup-email" class="form-input" placeholder="tu.correo@ejemplo.com" style="font-size: 14px;">
+          <button type="button" class="btn-primary" style="width: auto; padding: 0 16px; font-size: 14px;" onclick="lookupMensajesByEmail()">
+            Consultar
+          </button>
+        </div>
+        <div style="margin-top: 12px; font-size: 12px; color: #64748B;">
+          ¿Ya tienes clave o PIN? <a href="login.html" style="color: #D32F2F; font-weight: 700;">Inicia sesión aquí</a>
+        </div>
+      </div>
+
+      <!-- Contenedor dinámico de mensajes -->
+      <div id="mensajes-list-container"></div>
+    </section>
+
+  </main>
+
+  <!-- Barra de navegación inferior simplificada (3 accesos) -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <span class="nav-item-icon">🏠</span>
+      <span>Inicio</span>
+    </a>
+    <a href="novedades.html?tab=novedades" class="nav-item active" id="bnav-novedades">
+      <span class="nav-item-icon">📢</span>
+      <span>Novedades</span>
+    </a>
+    <a href="novedades.html?tab=mensajes" class="nav-item" id="bnav-mensajes">
+      <span class="nav-item-icon">📬</span>
+      <span>Mis Mensajes</span>
+    </a>
+  </nav>
+
+  <script src="js/app.js"></script>
+  <script src="js/novedades.js"></script>
+</body>
+</html>

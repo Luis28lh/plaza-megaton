@@ -1018,6 +1018,178 @@ app.post('/api/admin/google/sync-all', async (req, res) => {
   }
 });
 
+// 20. NOVEDADES COMUNITARIAS
+app.get('/api/novedades', async (req, res) => {
+  try {
+    const novedades = await dataService.getNovedades();
+    res.json({ success: true, novedades });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/admin/novedades', requireAdmin, async (req, res) => {
+  try {
+    const { titulo, categoria, fecha_evento, contenido } = req.body;
+    if (!titulo || !titulo.trim()) {
+      return res.status(400).json({ success: false, error: 'El título es obligatorio.' });
+    }
+    if (!contenido || !contenido.trim()) {
+      return res.status(400).json({ success: false, error: 'El contenido es obligatorio.' });
+    }
+
+    const adminName = req.adminAuth ? req.adminAuth.nombre : 'Consejo de Administración';
+    const novedad = await dataService.createNovedad({
+      titulo,
+      categoria,
+      fecha_evento,
+      contenido,
+      autor: adminName
+    });
+
+    res.json({ success: true, novedad, message: 'Novedad publicada exitosamente en el muro comunitario.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.delete('/api/admin/novedades/:id', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const adminName = req.adminAuth ? req.adminAuth.nombre : 'Administración';
+    const deleted = await dataService.deleteNovedad(id, adminName);
+    if (!deleted) {
+      return res.status(404).json({ success: false, error: 'Novedad no encontrada.' });
+    }
+    res.json({ success: true, message: 'Novedad eliminada correctamente.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 21. MENSAJERÍA DIRECTA / BUZÓN DE INQUILINOS
+app.get('/api/mensajes', async (req, res) => {
+  try {
+    const session = getUserSession(req);
+    const pin = req.headers['x-admin-pin'];
+    const isAdmin = (pin === (process.env.ADMIN_PIN || 'megaton2026') || pin === 'gestor2026' || pin === 'Warn255133');
+
+    if (isAdmin && !req.query.email) {
+      const mensajes = await dataService.getAllMensajesAdmin();
+      return res.json({ success: true, mensajes });
+    }
+
+    const targetEmail = session ? session.email : (req.query.email ? req.query.email.trim().toLowerCase() : '');
+    const targetUserId = session ? session.userId : (req.query.user_id || '');
+
+    if (!targetEmail && !targetUserId) {
+      return res.status(400).json({ success: false, error: 'Debe especificar el correo o iniciar sesión para consultar su buzón.' });
+    }
+
+    const mensajes = await dataService.getMensajesByUser(targetEmail, targetUserId);
+    res.json({ success: true, mensajes });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/admin/mensajes', requireAdmin, async (req, res) => {
+  try {
+    const { user_id, email, cubiculo, asunto, contenido, enviar_email } = req.body;
+
+    if (!asunto || !asunto.trim()) {
+      return res.status(400).json({ success: false, error: 'El asunto del mensaje es requerido.' });
+    }
+    if (!contenido || !contenido.trim()) {
+      return res.status(400).json({ success: false, error: 'El cuerpo del mensaje no puede estar vacío.' });
+    }
+    if (!email && !user_id && !cubiculo) {
+      return res.status(400).json({ success: false, error: 'Debe seleccionar un destinatario (correo, usuario o cubículo).' });
+    }
+
+    // Resolver usuario si se proporcionó cubículo o email
+    let targetEmail = email ? email.trim().toLowerCase() : '';
+    let targetName = 'Inquilino';
+    let targetUserId = user_id || '';
+
+    if (targetEmail) {
+      const user = await dataService.getUsuarioByEmail(targetEmail);
+      if (user) {
+        targetName = user.nombre;
+        targetUserId = user.user_id;
+      }
+    } else if (targetUserId) {
+      const user = await dataService.getUsuarioById(targetUserId);
+      if (user) {
+        targetName = user.nombre;
+        targetEmail = user.email;
+      }
+    }
+
+    const adminName = req.adminAuth ? req.adminAuth.nombre : 'Consejo de Administración';
+
+    let emailSent = false;
+    let emailPreviewUrl = null;
+
+    if (enviar_email && targetEmail) {
+      const host = req.get('host') || '';
+      const configuredUrl = await dataService.getConfigValue('url_publica', 'https://megaton1026.vercel.app');
+      let portalUrl = configuredUrl || (host ? `${req.protocol}://${host}/` : 'https://megaton1026.vercel.app/');
+      if (!portalUrl.endsWith('/')) portalUrl += '/';
+
+      const mailRes = await emailService.sendDirectMessageEmail({
+        nombre: targetName,
+        email: targetEmail,
+        cubiculo: cubiculo || '',
+        asunto: asunto.trim(),
+        contenido: contenido.trim(),
+        adminName,
+        portalUrl
+      });
+      if (mailRes && mailRes.success) {
+        emailSent = true;
+        emailPreviewUrl = mailRes.previewUrl;
+      }
+    }
+
+    const mensaje = await dataService.createMensaje({
+      user_id: targetUserId,
+      email: targetEmail,
+      cubiculo: cubiculo || '',
+      asunto: asunto.trim(),
+      contenido: contenido.trim(),
+      autor: adminName,
+      enviado_email: emailSent
+    });
+
+    res.json({
+      success: true,
+      message: emailSent 
+        ? `Mensaje registrado en el buzón del inquilino y despachado con éxito a ${targetEmail}.`
+        : 'Mensaje registrado exitosamente en el buzón del inquilino.',
+      mensaje,
+      emailSent,
+      emailPreviewUrl
+    });
+  } catch (err) {
+    console.error('Error enviando mensaje administrativo:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.patch('/api/mensajes/:id/leido', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updated = await dataService.markMensajeLeido(id);
+    if (!updated) {
+      return res.status(404).json({ success: false, error: 'Mensaje no encontrado.' });
+    }
+    res.json({ success: true, mensaje: updated });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // Fallback de navegación amigable SPA / Páginas directas
 const routes = {
   '/registro': 'registro.html',
@@ -1025,6 +1197,7 @@ const routes = {
   '/pagos': 'pagos.html',
   '/mis-solicitudes': 'mis-solicitudes.html',
   '/mis-pagos': 'mis-pagos.html',
+  '/novedades': 'novedades.html',
   '/login': 'login.html',
   '/admin': 'admin.html'
 };

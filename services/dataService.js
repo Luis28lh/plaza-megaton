@@ -35,8 +35,48 @@ class DataService {
       try {
         this.db = JSON.parse(JSON.stringify(require('../database/initial_catalog.json')));
       } catch (_) {
-        this.db = { CUBICULOS: [], USUARIOS: [], USUARIO_CUBICULO: [], PRESUPUESTO_2026: null, RECLAMACIONES: [], PAGOS: [], CONFIGURACION: [], HISTORIAL: [] };
+        this.db = { CUBICULOS: [], USUARIOS: [], USUARIO_CUBICULO: [], PRESUPUESTO_2026: null, RECLAMACIONES: [], PAGOS: [], CONFIGURACION: [], HISTORIAL: [], NOVEDADES: [], MENSAJES: [] };
       }
+    }
+
+    if (!this.db.NOVEDADES) {
+      this.db.NOVEDADES = [
+        {
+          id: 'NOV-001',
+          titulo: 'Convocatoria a Reunión Ordinaria de Propietarios y Condóminos',
+          categoria: 'Reunión / Asamblea',
+          fecha_publicacion: '30/09/2026',
+          fecha_evento: '15/10/2026 - 6:30 PM',
+          contenido: 'Se convoca a todos los propietarios y ocupantes a la asamblea semestral para revisar los avances del presupuesto 2026, proyectos de iluminación y presentación de la nueva plataforma digital de la plaza.',
+          autor: 'Consejo de Administración',
+          destacado: true
+        },
+        {
+          id: 'NOV-002',
+          titulo: 'Mantenimiento Preventivo de Bomba y Cisterna de Agua',
+          categoria: 'Mantenimiento',
+          fecha_publicacion: '28/09/2026',
+          fecha_evento: '05/10/2026 - 7:00 AM a 11:00 AM',
+          contenido: 'Se llevará a cabo el lavado y desinfección de la cisterna principal de agua potable, así como la calibración de la bomba presurizadora. Los baños comunes funcionarán con reserva.',
+          autor: 'Administración Técnica',
+          destacado: false
+        },
+        {
+          id: 'NOV-003',
+          titulo: 'Habilitación de Portal Digital y Buzón de Comunicaciones',
+          categoria: 'Aviso General',
+          fecha_publicacion: '25/09/2026',
+          fecha_evento: 'Permanente',
+          contenido: 'Estimados ocupantes: Ya se encuentra en funcionamiento la plataforma web para crear solicitudes con fotos, reportar pagos con comprobante y consultar comunicados directos desde su teléfono.',
+          autor: 'Ing. Luis Manuel López H.',
+          destacado: true
+        }
+      ];
+      this.persist();
+    }
+
+    if (!this.db.MENSAJES) {
+      this.db.MENSAJES = [];
     }
   }
 
@@ -740,6 +780,143 @@ class DataService {
         confirmados: pagosConfirmados
       }
     };
+  }
+
+  // ==========================================
+  // NOVEDADES & AVISOS COMUNITARIOS
+  // ==========================================
+  async getNovedades() {
+    if (!this.db.NOVEDADES) this.db.NOVEDADES = [];
+    return this.db.NOVEDADES.slice().reverse();
+  }
+
+  async createNovedad({ titulo, categoria, fecha_evento, contenido, autor = 'Administración' }) {
+    if (!this.db.NOVEDADES) this.db.NOVEDADES = [];
+
+    const now = new Date();
+    const fecha_publicacion = now.toLocaleDateString('es-DO', {
+      day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Santo_Domingo'
+    });
+
+    const newNovedad = {
+      id: `NOV-${Date.now()}`,
+      titulo: titulo.trim(),
+      categoria: categoria ? categoria.trim() : 'Aviso General',
+      fecha_publicacion,
+      fecha_evento: fecha_evento ? fecha_evento.trim() : '',
+      contenido: contenido.trim(),
+      autor: autor || 'Administración',
+      fecha_iso: now.toISOString()
+    };
+
+    this.db.NOVEDADES.push(newNovedad);
+    this.persist();
+
+    await this.addHistorial({
+      tipo_documento: 'NOVEDAD',
+      codigo_documento: newNovedad.id,
+      usuario: autor,
+      accion: 'Publicación de Novedad',
+      estado_anterior: '',
+      estado_nuevo: 'Publicado',
+      observacion: `Novedad: "${newNovedad.titulo}" [${newNovedad.categoria}]`
+    });
+
+    return newNovedad;
+  }
+
+  async deleteNovedad(id, adminName = 'Administración') {
+    if (!this.db.NOVEDADES) return false;
+    const idx = this.db.NOVEDADES.findIndex(n => n.id === id);
+    if (idx === -1) return false;
+
+    const removed = this.db.NOVEDADES.splice(idx, 1)[0];
+    this.persist();
+
+    await this.addHistorial({
+      tipo_documento: 'NOVEDAD',
+      codigo_documento: id,
+      usuario: adminName,
+      accion: 'Eliminación de Novedad',
+      estado_anterior: 'Publicado',
+      estado_nuevo: 'Eliminado',
+      observacion: `Novedad eliminada: "${removed.titulo}"`
+    });
+
+    return true;
+  }
+
+  // ==========================================
+  // MENSAJERÍA DIRECTA / BUZÓN DE INQUILINOS
+  // ==========================================
+  async getMensajesByUser(email, userId) {
+    if (!this.db.MENSAJES) this.db.MENSAJES = [];
+    const cleanEmail = email ? email.trim().toLowerCase() : '';
+
+    return this.db.MENSAJES.filter(m => {
+      if (cleanEmail && m.email && m.email.trim().toLowerCase() === cleanEmail) return true;
+      if (userId && m.user_id && m.user_id === userId) return true;
+      return false;
+    }).slice().reverse();
+  }
+
+  async getAllMensajesAdmin() {
+    if (!this.db.MENSAJES) this.db.MENSAJES = [];
+    return this.db.MENSAJES.slice().reverse();
+  }
+
+  async createMensaje({ user_id, email, cubiculo, asunto, contenido, autor = 'Administración', enviado_email = false }) {
+    if (!this.db.MENSAJES) this.db.MENSAJES = [];
+
+    const now = new Date();
+    const fecha = now.toLocaleDateString('es-DO', {
+      day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Santo_Domingo'
+    });
+    const hora = now.toLocaleTimeString('es-DO', {
+      hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'America/Santo_Domingo'
+    });
+
+    const newMensaje = {
+      id: `MSG-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      user_id: user_id || '',
+      email: email ? email.trim().toLowerCase() : '',
+      cubiculo: cubiculo || '',
+      asunto: asunto.trim(),
+      contenido: contenido.trim(),
+      autor: autor || 'Consejo de Administración',
+      fecha,
+      hora,
+      leido: false,
+      fecha_leido: null,
+      enviado_email: Boolean(enviado_email),
+      fecha_iso: now.toISOString()
+    };
+
+    this.db.MENSAJES.push(newMensaje);
+    this.persist();
+
+    await this.addHistorial({
+      tipo_documento: 'MENSAJE',
+      codigo_documento: newMensaje.id,
+      usuario: autor,
+      accion: 'Envío de Mensaje a Inquilino',
+      estado_anterior: '',
+      estado_nuevo: 'Enviado',
+      observacion: `Para: ${newMensaje.email} (${newMensaje.cubiculo || 'General'}) | Asunto: "${newMensaje.asunto}"`
+    });
+
+    return newMensaje;
+  }
+
+  async markMensajeLeido(id) {
+    if (!this.db.MENSAJES) return null;
+    const msg = this.db.MENSAJES.find(m => m.id === id);
+    if (!msg) return null;
+
+    msg.leido = true;
+    msg.fecha_leido = new Date().toISOString();
+    this.persist();
+    return msg;
   }
 }
 

@@ -8,7 +8,9 @@ let adminData = {
   reclamaciones: [],
   pagos: [],
   historial: [],
-  config: []
+  config: [],
+  novedades: [],
+  mensajes: []
 };
 
 // Helper para cargar catálogo en entornos estáticos (GitHub Pages / demo)
@@ -166,7 +168,7 @@ function switchAdminTab(tabName) {
     btn.classList.toggle('active', btn.dataset.tab === tabName);
   });
 
-  const sections = ['kpis', 'locales', 'presupuesto', 'usuarios', 'reclamaciones', 'pagos', 'roles', 'historial', 'config'];
+  const sections = ['kpis', 'locales', 'presupuesto', 'usuarios', 'reclamaciones', 'pagos', 'comunicaciones', 'roles', 'historial', 'config'];
   sections.forEach(s => {
     const el = document.getElementById(`tab-section-${s}`);
     if (el) el.style.display = (s === tabName) ? 'block' : 'none';
@@ -178,6 +180,7 @@ function switchAdminTab(tabName) {
   if (tabName === 'usuarios') loadUsuarios();
   if (tabName === 'reclamaciones') loadReclamaciones();
   if (tabName === 'pagos') loadPagos();
+  if (tabName === 'comunicaciones') loadAdminComunicaciones();
   if (tabName === 'historial' && role === 'MASTER') loadHistorial();
   if (tabName === 'config' && role === 'MASTER') loadConfig();
 }
@@ -189,6 +192,7 @@ async function loadAllAdminData() {
   loadUsuarios();
   loadReclamaciones();
   loadPagos();
+  loadAdminComunicaciones();
 }
 
 // ==========================================
@@ -1440,6 +1444,391 @@ async function syncAllToGoogle() {
     }
   } catch (err) {
     resultDiv.innerHTML = `<span style="color:#DC2626;">Error: ${err.message}</span>`;
+  }
+}
+
+// ==========================================
+// 4b. NOVEDADES COMUNITARIAS Y MENSAJERÍA DIRECTA
+// ==========================================
+async function loadAdminComunicaciones() {
+  populateMessageRecipientDropdown();
+  await Promise.all([
+    loadAdminNovedades(),
+    loadAdminMensajes()
+  ]);
+}
+
+function populateMessageRecipientDropdown() {
+  const select = document.getElementById('msg-select-destinatario');
+  if (!select) return;
+
+  const currentVal = select.value;
+  select.innerHTML = '';
+
+  const defaultOpt = document.createElement('option');
+  defaultOpt.value = '';
+  defaultOpt.textContent = '-- Seleccionar Cubículo u Ocupante --';
+  select.appendChild(defaultOpt);
+
+  const allOpt = document.createElement('option');
+  allOpt.value = 'ALL';
+  allOpt.dataset.email = 'todos@plazamegaton.com';
+  allOpt.dataset.cub = 'Todos los cubículos';
+  allOpt.dataset.name = 'Todos los Ocupantes';
+  allOpt.textContent = '📢 Todos los Inquilinos Registrados (Difusión General)';
+  select.appendChild(allOpt);
+
+  // Group for Official 33 Cubicles
+  const cubGroup = document.createElement('optgroup');
+  cubGroup.label = '🏢 Catálogo Oficial de 33 Cubículos';
+
+  const locales = (adminData.locales && adminData.locales.length > 0) 
+    ? adminData.locales 
+    : [
+        { codigo: 'A-101' }, { codigo: 'A-102' }, { codigo: 'A-103' }, { codigo: 'A-104' }, { codigo: 'A-105' }, { codigo: 'A-105-A' },
+        { codigo: 'A-201' }, { codigo: 'A-202' }, { codigo: 'A-203' }, { codigo: 'A-204' }, { codigo: 'A-205' }, { codigo: 'A-206' },
+        { codigo: 'A-207' }, { codigo: 'A-208' }, { codigo: 'A-209' }, { codigo: 'A-210' }, { codigo: 'A-301-A' }, { codigo: 'A-301-B' },
+        { codigo: 'A-301-C' }, { codigo: 'A-301-D' }, { codigo: 'A-302' }, { codigo: 'A-303' }, { codigo: 'A-304' }, { codigo: 'A-305' },
+        { codigo: 'A-306' }, { codigo: 'A-307' }, { codigo: 'A-307-ANT' }, { codigo: 'A-307-COF' }, { codigo: 'A-308' }, { codigo: 'A-309' },
+        { codigo: 'A-310' }, { codigo: 'A-311' }, { codigo: 'A-312' }
+      ];
+
+  const usuarios = adminData.usuarios || [];
+
+  locales.forEach(loc => {
+    const cubCode = loc.codigo;
+    const assignedUser = usuarios.find(u => u.cubiculos && u.cubiculos.includes(cubCode));
+    const opt = document.createElement('option');
+    opt.value = cubCode;
+    opt.dataset.cub = cubCode;
+
+    if (assignedUser) {
+      opt.dataset.email = assignedUser.email;
+      opt.dataset.name = assignedUser.nombre;
+      opt.dataset.userId = assignedUser.user_id;
+      opt.textContent = `Cubículo ${cubCode} — ${assignedUser.nombre} (${assignedUser.email})`;
+    } else {
+      opt.dataset.email = '';
+      opt.dataset.name = '';
+      opt.dataset.userId = '';
+      opt.textContent = `Cubículo ${cubCode} — Sin usuario registrado`;
+    }
+    cubGroup.appendChild(opt);
+  });
+  select.appendChild(cubGroup);
+
+  // Group for Individual Registered Users
+  if (usuarios.length > 0) {
+    const userGroup = document.createElement('optgroup');
+    userGroup.label = '👥 Inquilinos Registrados Activos';
+    usuarios.forEach(u => {
+      const opt = document.createElement('option');
+      opt.value = `USR_${u.user_id}`;
+      opt.dataset.userId = u.user_id;
+      opt.dataset.email = u.email;
+      opt.dataset.name = u.nombre;
+      opt.dataset.cub = (u.cubiculos && u.cubiculos.length > 0) ? u.cubiculos.join(', ') : 'S/C';
+      opt.textContent = `👤 ${u.nombre} (${u.email}) [Cub: ${(u.cubiculos || []).join(', ')}]`;
+      userGroup.appendChild(opt);
+    });
+    select.appendChild(userGroup);
+  }
+
+  if (currentVal) select.value = currentVal;
+}
+
+function onMessageRecipientChange() {
+  const select = document.getElementById('msg-select-destinatario');
+  const emailInput = document.getElementById('msg-input-email');
+  const cubInput = document.getElementById('msg-input-cubiculo');
+  if (!select || !emailInput || !cubInput) return;
+
+  const selectedOpt = select.options[select.selectedIndex];
+  if (!selectedOpt || !selectedOpt.value) {
+    return;
+  }
+
+  if (selectedOpt.value === 'ALL') {
+    emailInput.value = 'inquilinos@plazamegaton.com';
+    cubInput.value = 'Todos los cubículos';
+    return;
+  }
+
+  emailInput.value = selectedOpt.dataset.email || '';
+  cubInput.value = selectedOpt.dataset.cub || '';
+}
+
+async function loadAdminNovedades() {
+  try {
+    const res = await fetch('/api/novedades');
+    const data = await res.json();
+    if (data.success && Array.isArray(data.novedades)) {
+      adminData.novedades = data.novedades;
+      renderAdminNovedades();
+    }
+  } catch (err) {
+    console.error('Error al cargar novedades en admin:', err);
+  }
+}
+
+function renderAdminNovedades() {
+  const container = document.getElementById('admin-novedades-list');
+  const countBadge = document.getElementById('nov-badge-count');
+  if (!container) return;
+
+  const list = adminData.novedades || [];
+  if (countBadge) countBadge.innerText = `${list.length} ${list.length === 1 ? 'aviso' : 'avisos'}`;
+
+  if (list.length === 0) {
+    container.innerHTML = `
+      <div style="text-align:center; padding:30px; color:#94A3B8;">
+        <span style="font-size:32px;">📢</span>
+        <p style="margin-top:8px; font-size:13px;">No hay novedades publicadas actualmente en el muro comunitario.</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = list.map(item => {
+    let catBg = '#E0F2FE';
+    let catColor = '#0369A1';
+    let catIcon = '📢';
+
+    if (item.categoria === 'Mantenimiento') {
+      catBg = '#FEF3C7'; catColor = '#B45309'; catIcon = '🛠️';
+    } else if (item.categoria === 'Asamblea') {
+      catBg = '#EDE9FE'; catColor = '#6D28D9'; catIcon = '👥';
+    } else if (item.categoria === 'Aviso Urgente') {
+      catBg = '#FEE2E2'; catColor = '#B91C1C'; catIcon = '⚠️';
+    } else if (item.categoria === 'Proyecto Plaza') {
+      catBg = '#DCFCE7'; catColor = '#15803D'; catIcon = '🏢';
+    } else if (item.categoria === 'Convivencia') {
+      catBg = '#FCE7F3'; catColor = '#BE185D'; catIcon = '🤝';
+    }
+
+    const fechaFmt = item.fecha_creacion ? new Date(item.fecha_creacion).toLocaleDateString('es-DO', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+    const autor = item.autor || 'Consejo de Administración';
+
+    return `
+      <div style="border:1px solid #E2E8F0; border-radius:10px; padding:14px; background:#FFFFFF; position:relative; box-shadow:0 1px 2px rgba(0,0,0,0.03);">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:6px;">
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span style="background:${catBg}; color:${catColor}; font-weight:800; font-size:11px; padding:2px 8px; border-radius:999px;">
+              ${catIcon} ${item.categoria}
+            </span>
+            ${item.destacado ? '<span style="background:#FEF3C7; color:#B45309; font-weight:800; font-size:10px; padding:2px 6px; border-radius:4px;">⭐ DESTACADO</span>' : ''}
+            <span style="font-size:11px; color:#94A3B8;">${fechaFmt}</span>
+          </div>
+          <button class="btn-sm btn-sm-danger" onclick="deleteNovedadAdmin('${item.id}')" style="padding:4px 8px; font-size:11px;" title="Eliminar del muro">
+            🗑️ Eliminar
+          </button>
+        </div>
+        <h4 style="font-size:14px; font-weight:800; color:#0F172A; margin:0 0 6px 0;">${item.titulo}</h4>
+        <p style="font-size:12px; color:#475569; margin:0 0 8px 0; line-height:1.5;">${item.contenido}</p>
+        <div style="font-size:11px; color:#64748B; border-top:1px dashed #F1F5F9; padding-top:6px;">
+          ✍️ Publicado por: <strong>${autor}</strong>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function submitPublishNovedad(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btn-publish-nov');
+  const titulo = document.getElementById('nov-input-titulo').value.trim();
+  const categoria = document.getElementById('nov-input-categoria').value;
+  const fecha = document.getElementById('nov-input-fecha').value;
+  const contenido = document.getElementById('nov-input-contenido').value.trim();
+  const destacado = document.getElementById('nov-input-destacado').checked;
+
+  if (!titulo || !contenido) {
+    App.showToast('Por favor complete el título y contenido del comunicado.', 'error');
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = 'Publicando en el portal...';
+  }
+
+  try {
+    const res = await fetch('/api/admin/novedades', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-pin': getAdminPin()
+      },
+      body: JSON.stringify({
+        titulo,
+        categoria,
+        fecha_evento: fecha,
+        contenido,
+        destacado
+      })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      App.showToast('¡Novedad publicada exitosamente en el portal comunitario!', 'success');
+      document.getElementById('form-publish-novedad').reset();
+      await loadAdminNovedades();
+    } else {
+      App.showToast(data.error || 'Error al publicar la novedad.', 'error');
+    }
+  } catch (err) {
+    App.showToast('Error de conexión al publicar novedad.', 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = '📢 Publicar Novedad en el Portal';
+    }
+  }
+}
+
+async function deleteNovedadAdmin(id) {
+  if (!confirm('¿Confirma que desea eliminar esta novedad del muro comunitario? Dejará de ser visible para los inquilinos.')) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/admin/novedades/${id}`, {
+      method: 'DELETE',
+      headers: { 'x-admin-pin': getAdminPin() }
+    });
+    const data = await res.json();
+    if (data.success) {
+      App.showToast('Novedad eliminada correctamente.', 'info');
+      await loadAdminNovedades();
+    } else {
+      App.showToast(data.error || 'Error al eliminar.', 'error');
+    }
+  } catch (err) {
+    App.showToast('Error de conexión al eliminar novedad.', 'error');
+  }
+}
+
+async function loadAdminMensajes() {
+  try {
+    const res = await fetch('/api/mensajes', {
+      headers: { 'x-admin-pin': getAdminPin() }
+    });
+    const data = await res.json();
+    if (data.success && Array.isArray(data.mensajes)) {
+      adminData.mensajes = data.mensajes;
+      renderAdminMensajes();
+    }
+  } catch (err) {
+    console.error('Error al cargar mensajes admin:', err);
+  }
+}
+
+function renderAdminMensajes() {
+  const container = document.getElementById('admin-mensajes-list');
+  const countBadge = document.getElementById('msg-badge-count');
+  if (!container) return;
+
+  const list = adminData.mensajes || [];
+  if (countBadge) countBadge.innerText = `${list.length} ${list.length === 1 ? 'mensaje' : 'mensajes'}`;
+
+  if (list.length === 0) {
+    container.innerHTML = `
+      <div style="text-align:center; padding:30px; color:#94A3B8;">
+        <span style="font-size:32px;">📬</span>
+        <p style="margin-top:8px; font-size:13px;">No se han emitido comunicaciones directas a inquilinos aún.</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = list.map(item => {
+    const fechaFmt = item.fecha_creacion ? new Date(item.fecha_creacion).toLocaleString('es-DO', { dateStyle: 'short', timeStyle: 'short' }) : '';
+    const estadoLectura = item.leido
+      ? '<span style="color:#15803D; font-weight:700; font-size:11px;">✓ Leído en portal</span>'
+      : '<span style="color:#D97706; font-weight:700; font-size:11px;">⏳ No leído aún</span>';
+    const estadoEmail = item.enviado_email
+      ? '<span style="color:#2563EB; font-size:11px; font-weight:600;">📧 Copia Gmail despachada</span>'
+      : '<span style="color:#64748B; font-size:11px;">🌐 Solo en portal</span>';
+
+    return `
+      <div style="border:1px solid #E2E8F0; border-radius:10px; padding:14px; background:#FFFFFF; box-shadow:0 1px 2px rgba(0,0,0,0.03);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <div style="font-size:12px; font-weight:800; color:#1E293B;">
+            📍 Cubículo: <strong>${item.cubiculo || 'General'}</strong> · <span style="font-weight:400; color:#475569;">${item.email || 'N/A'}</span>
+          </div>
+          <span style="font-size:11px; color:#94A3B8;">${fechaFmt}</span>
+        </div>
+        <h4 style="font-size:14px; font-weight:800; color:#0F172A; margin:0 0 4px 0;">${item.asunto}</h4>
+        <p style="font-size:12px; color:#475569; margin:0 0 10px 0; line-height:1.5;">${item.contenido}</p>
+        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed #F1F5F9; padding-top:6px; font-size:11px;">
+          <div>${estadoLectura} · ${estadoEmail}</div>
+          <div style="color:#64748B;">Por: <strong>${item.autor || 'Administración'}</strong></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function submitSendDirectMessage(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btn-send-direct-msg');
+  const select = document.getElementById('msg-select-destinatario');
+  const email = document.getElementById('msg-input-email').value.trim();
+  const cubiculo = document.getElementById('msg-input-cubiculo').value.trim();
+  const asunto = document.getElementById('msg-input-asunto').value.trim();
+  const contenido = document.getElementById('msg-input-contenido').value.trim();
+  const enviar_email = document.getElementById('msg-input-enviar-email').checked;
+
+  if (!email && !cubiculo) {
+    App.showToast('Debe ingresar un correo o cubículo de destino.', 'error');
+    return;
+  }
+
+  if (!asunto || !contenido) {
+    App.showToast('Por favor ingrese el asunto y contenido del mensaje.', 'error');
+    return;
+  }
+
+  if (select && select.value === 'ALL') {
+    if (!confirm('¿Confirma que desea enviar este comunicado a TODOS los inquilinos registrados en la plataforma?')) {
+      return;
+    }
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = 'Enviando notificación...';
+  }
+
+  try {
+    const res = await fetch('/api/admin/mensajes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-pin': getAdminPin()
+      },
+      body: JSON.stringify({
+        email,
+        cubiculo,
+        asunto,
+        contenido,
+        enviar_email
+      })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      App.showToast(data.message || 'Mensaje enviado exitosamente.', 'success');
+      document.getElementById('form-send-direct-msg').reset();
+      await loadAdminMensajes();
+    } else {
+      App.showToast(data.error || 'Error al enviar el mensaje.', 'error');
+    }
+  } catch (err) {
+    App.showToast('Error de conexión al enviar mensaje.', 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = '✉️ Enviar Mensaje Oficial';
+    }
   }
 }
 

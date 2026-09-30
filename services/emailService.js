@@ -491,6 +491,60 @@ class EmailService {
       text
     });
   }
+
+  /**
+   * 9. Correo de Mensaje Directo de la Administración al Inquilino
+   */
+  async sendDirectMessageEmail({ nombre, email, cubiculo, asunto, contenido, adminName, portalUrl }) {
+    const finalPortalUrl = portalUrl || 'https://megaton1026.vercel.app/';
+    const subject = `📬 Mensaje de la Administración — Plaza Megatón [${asunto}]`;
+
+    const htmlBody = `
+      <div style="text-align: center; margin-bottom: 20px;">
+        <span style="background: #EFF6FF; color: #1D4ED8; font-weight: 800; font-size: 11px; padding: 4px 14px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.5px;">
+          Comunicación Directa
+        </span>
+        <h2 style="font-size: 20px; font-weight: 900; color: #0F172A; margin: 12px 0 4px;">Mensaje de la Administración</h2>
+        <p style="font-size: 14px; color: #475569; margin: 0;">
+          Estimado(a) <strong>${nombre || 'Ocupante'}</strong>${cubiculo ? ' · Cubículo <strong>' + cubiculo + '</strong>' : ''}:
+        </p>
+      </div>
+
+      <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; padding: 18px; margin: 20px 0;">
+        <div style="font-size: 12px; color: #64748B; text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">Asunto:</div>
+        <div style="font-size: 16px; font-weight: 800; color: #0F172A; margin-bottom: 14px;">${asunto}</div>
+
+        <div style="font-size: 12px; color: #64748B; text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">Mensaje:</div>
+        <div style="font-size: 14px; color: #334155; line-height: 1.6; white-space: pre-line; background: #FFFFFF; border: 1px solid #CBD5E1; padding: 14px; border-radius: 8px;">
+          ${contenido}
+        </div>
+      </div>
+
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="${finalPortalUrl}novedades.html?tab=mensajes" target="_blank" style="background: #D32F2F; color: #FFFFFF; font-weight: 800; font-size: 14px; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
+          📬 Abrir Buzón en la Plataforma
+        </a>
+      </div>
+
+      <div style="background: #F1F5F9; border-radius: 6px; padding: 10px 14px; font-size: 12px; color: #64748B; line-height: 1.5; text-align: center;">
+        💡 Este mensaje queda registrado permanentemente en tu buzón digital dentro de la app para tu tranquilidad y consulta 24/7.
+      </div>
+
+      <p style="margin-top: 24px; font-size: 13px; color: #475569;">
+        Atentamente,<br>
+        <strong>${adminName || 'Consejo de Administración'} — Plaza Megatón</strong>
+      </p>
+    `;
+
+    const text = `Hola, ${nombre || 'Ocupante'}:\n\nHas recibido un mensaje directo de la Administración de Plaza Megatón.\n\nAsunto: ${asunto}\n\nMensaje:\n${contenido}\n\nPuedes consultar tu buzón digital en:\n${finalPortalUrl}novedades.html?tab=mensajes\n\nAtentamente,\n${adminName || 'Consejo de Administración'} Plaza Megatón`;
+
+    return this.sendMail({
+      to: email,
+      subject,
+      html: this.wrapTemplate('Mensaje Administrativo', htmlBody),
+      text
+    });
+  }
 }
 
 module.exports = EmailService;

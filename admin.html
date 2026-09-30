@@ -69,6 +69,7 @@
         <button class="admin-tab-btn" id="tab-btn-usuarios" data-tab="usuarios" onclick="switchAdminTab('usuarios')">👥 Usuarios</button>
         <button class="admin-tab-btn" id="tab-btn-reclamaciones" data-tab="reclamaciones" onclick="switchAdminTab('reclamaciones')">🛠️ Reclamaciones</button>
         <button class="admin-tab-btn" id="tab-btn-pagos" data-tab="pagos" onclick="switchAdminTab('pagos')">💳 Pagos</button>
+        <button class="admin-tab-btn" id="tab-btn-comunicaciones" data-tab="comunicaciones" onclick="switchAdminTab('comunicaciones')">📢 Novedades & Mensajes</button>
         <button class="admin-tab-btn" id="tab-btn-roles" data-tab="roles" onclick="switchAdminTab('roles')">📋 Roles & Criterios</button>
         <button class="admin-tab-btn" id="tab-btn-historial" data-tab="historial" onclick="switchAdminTab('historial')">📜 Historial</button>
         <button class="admin-tab-btn" id="tab-btn-config" data-tab="config" onclick="switchAdminTab('config')">⚙️ Configuración</button>
@@ -381,6 +382,154 @@
             </thead>
             <tbody id="table-pagos-body"></tbody>
           </table>
+        </div>
+      </section>
+
+      <!-- 4b. PESTAÑA: NOVEDADES & MENSAJERÍA DIRECTA -->
+      <section id="tab-section-comunicaciones" style="display:none;">
+        <div style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-lg); padding:24px; margin-bottom:24px; box-shadow:var(--shadow-sm);">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; border-bottom:1px solid var(--border-light); padding-bottom:16px;">
+            <div>
+              <span style="background:#EEF2FF; color:#4338CA; font-weight:800; font-size:11px; padding:3px 10px; border-radius:999px; text-transform:uppercase;">Centro de Comunicaciones</span>
+              <h2 style="font-size:22px; font-weight:900; margin:6px 0 2px; color:#0F172A;">📢 Novedades de la Plaza y Mensajería a Ocupantes</h2>
+              <p style="font-size:13px; color:#64748B; margin:0;">Publica avisos comunitarios en el muro y envía mensajes oficiales directos al buzón de cada cubículo.</p>
+            </div>
+            <div>
+              <button type="button" class="btn-sm btn-sm-outline" onclick="loadAdminComunicaciones()">🔄 Actualizar Datos</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap:24px; margin-bottom:24px;">
+          <!-- BLOQUE 1: PUBLICAR EN EL MURO COMUNITARIO -->
+          <div style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-lg); padding:20px; box-shadow:var(--shadow-sm);">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px; border-bottom:1.5px solid #F1F5F9; padding-bottom:10px;">
+              <span style="font-size:20px;">📢</span>
+              <h3 style="font-size:16px; font-weight:800; color:#0F172A; margin:0;">Publicar Novedad en el Muro</h3>
+            </div>
+            <p style="font-size:12px; color:#64748B; margin-top:-6px; margin-bottom:16px;">
+              Visible en la pantalla principal para todos los propietarios, inquilinos y visitantes (asambleas, bombas de agua, obras, comunicados).
+            </p>
+
+            <form id="form-publish-novedad" onsubmit="submitPublishNovedad(event)">
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label" style="font-size:13px; font-weight:700;">Título del Comunicado *</label>
+                <input type="text" id="nov-input-titulo" class="form-input" placeholder="Ej: Convocatoria a Asamblea General o Mantenimiento de Bombas" required>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+                <div class="form-group">
+                  <label class="form-label" style="font-size:13px; font-weight:700;">Categoría *</label>
+                  <select id="nov-input-categoria" class="form-select" required>
+                    <option value="Mantenimiento">🛠️ Mantenimiento</option>
+                    <option value="Asamblea">👥 Asamblea / Reunión</option>
+                    <option value="Aviso Urgente">⚠️ Aviso Urgente</option>
+                    <option value="Proyecto Plaza">🏢 Proyecto Plaza</option>
+                    <option value="Convivencia">🤝 Convivencia & Normas</option>
+                    <option value="General">📢 Comunicado General</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" style="font-size:13px; font-weight:700;">Fecha Relevante (Opcional)</label>
+                  <input type="date" id="nov-input-fecha" class="form-input">
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label" style="font-size:13px; font-weight:700;">Contenido Completo del Aviso *</label>
+                <textarea id="nov-input-contenido" class="form-textarea" rows="4" placeholder="Escriba los detalles, horarios y recomendaciones de la novedad..." required></textarea>
+              </div>
+
+              <div style="margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="nov-input-destacado" style="width:18px; height:18px; cursor:pointer;">
+                <label for="nov-input-destacado" style="font-size:13px; color:#334155; cursor:pointer; font-weight:600;">
+                  ⭐ Fijar como aviso destacado principal
+                </label>
+              </div>
+
+              <button type="submit" id="btn-publish-nov" class="btn-primary" style="width:100%; min-height:44px; font-weight:700;">
+                📢 Publicar Novedad en el Portal
+              </button>
+            </form>
+          </div>
+
+          <!-- BLOQUE 2: MENSAJE DIRECTO AL BUZÓN PRIVADO -->
+          <div style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-lg); padding:20px; box-shadow:var(--shadow-sm);">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px; border-bottom:1.5px solid #F1F5F9; padding-bottom:10px;">
+              <span style="font-size:20px;">✉️</span>
+              <h3 style="font-size:16px; font-weight:800; color:#0F172A; margin:0;">Enviar Mensaje Directo a Inquilino</h3>
+            </div>
+            <p style="font-size:12px; color:#64748B; margin-top:-6px; margin-bottom:16px;">
+              Queda guardado en su buzón privado dentro de la aplicación para consulta 24/7 y se despacha copia oficial por correo.
+            </p>
+
+            <form id="form-send-direct-msg" onsubmit="submitSendDirectMessage(event)">
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label" style="font-size:13px; font-weight:700;">Seleccionar Destinatario (Cubículo / Ocupante) *</label>
+                <select id="msg-select-destinatario" class="form-select" onchange="onMessageRecipientChange()" required>
+                  <option value="">-- Seleccionar Cubículo u Ocupante --</option>
+                  <!-- Poblado dinámicamente con los 33 cubículos y usuarios -->
+                </select>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+                <div class="form-group">
+                  <label class="form-label" style="font-size:13px; font-weight:700;">Correo Destinatario *</label>
+                  <input type="email" id="msg-input-email" class="form-input" placeholder="correo@ejemplo.com" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" style="font-size:13px; font-weight:700;">Cubículo Asignado</label>
+                  <input type="text" id="msg-input-cubiculo" class="form-input" placeholder="Ej: A-101">
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label" style="font-size:13px; font-weight:700;">Asunto de la Notificación *</label>
+                <input type="text" id="msg-input-asunto" class="form-input" placeholder="Ej: Notificación de mantenimiento preventivo particular" required>
+              </div>
+
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label" style="font-size:13px; font-weight:700;">Mensaje / Detalle Oficial *</label>
+                <textarea id="msg-input-contenido" class="form-textarea" rows="4" placeholder="Escriba el comunicado que leerá el inquilino en su buzón..." required></textarea>
+              </div>
+
+              <div style="margin-bottom:16px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:10px; display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="msg-input-enviar-email" checked style="width:18px; height:18px; cursor:pointer;">
+                <label for="msg-input-enviar-email" style="font-size:12px; color:#1E293B; cursor:pointer; font-weight:600;">
+                  📧 Enviar simultáneamente copia oficial por correo electrónico (Gmail)
+                </label>
+              </div>
+
+              <button type="submit" id="btn-send-direct-msg" class="btn-primary" style="width:100%; min-height:44px; font-weight:700; background:#2563EB;">
+                ✉️ Enviar Mensaje Oficial
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- TABLAS DE REGISTROS HISTÓRICOS Y ACTIVOS -->
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap:24px;">
+          <!-- LISTA DE NOVEDADES PUBLICADAS -->
+          <div style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-lg); padding:20px; box-shadow:var(--shadow-sm);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:1.5px solid #F1F5F9; padding-bottom:10px;">
+              <h3 style="font-size:16px; font-weight:800; color:#0F172A; margin:0;">Muro Comunitario Activo</h3>
+              <span id="nov-badge-count" style="font-size:12px; font-weight:700; color:#4338CA; background:#EEF2FF; padding:3px 8px; border-radius:6px;">0 avisos</span>
+            </div>
+            <div id="admin-novedades-list" style="display:flex; flex-direction:column; gap:12px; max-height:450px; overflow-y:auto; padding-right:4px;">
+              <!-- Tarjetas dinámicas -->
+            </div>
+          </div>
+
+          <!-- LISTA DE MENSAJES DIRECTOS ENVIADOS -->
+          <div style="background:#FFFFFF; border:1px solid var(--border-light); border-radius:var(--radius-lg); padding:20px; box-shadow:var(--shadow-sm);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:1.5px solid #F1F5F9; padding-bottom:10px;">
+              <h3 style="font-size:16px; font-weight:800; color:#0F172A; margin:0;">Buzón de Comunicaciones Enviadas</h3>
+              <span id="msg-badge-count" style="font-size:12px; font-weight:700; color:#047857; background:#D1FAE5; padding:3px 8px; border-radius:6px;">0 mensajes</span>
+            </div>
+            <div id="admin-mensajes-list" style="display:flex; flex-direction:column; gap:12px; max-height:450px; overflow-y:auto; padding-right:4px;">
+              <!-- Tarjetas dinámicas -->
+            </div>
+          </div>
         </div>
       </section>
 
