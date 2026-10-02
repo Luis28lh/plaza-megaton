@@ -384,7 +384,7 @@ app.post('/api/auth/login', async (req, res) => {
       if (!masterUser) {
         masterUser = await dataService.createUsuario({
           user_id: 'US-MASTER',
-          nombre: 'Ing. Luis Manuel López H.',
+          nombre: 'Ing. Luis Miguel Lizardo Hernández',
           email: MASTER_EMAIL,
           telefono: '809-555-0100',
           password: MASTER_PASSWORD,

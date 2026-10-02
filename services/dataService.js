@@ -68,7 +68,7 @@ class DataService {
           fecha_publicacion: '25/09/2026',
           fecha_evento: 'Permanente',
           contenido: 'Estimados ocupantes: Ya se encuentra en funcionamiento la plataforma web para crear solicitudes con fotos, reportar pagos con comprobante y consultar comunicados directos desde su teléfono.',
-          autor: 'Ing. Luis Manuel López H.',
+          autor: 'Ing. Luis Miguel Lizardo Hernández',
           destacado: true
         }
       ];
