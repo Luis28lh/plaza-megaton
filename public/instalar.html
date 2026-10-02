@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Instalar Plaza Megatón en tu Teléfono</title>
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Metas y Enlaces PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#D32F2F">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Plaza Megatón">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
+
+  <style>
+    .install-container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px 16px 80px;
+      text-align: center;
+    }
+    .app-icon-preview {
+      width: 88px;
+      height: 88px;
+      border-radius: 22px;
+      box-shadow: 0 10px 25px -5px rgba(220, 38, 38, 0.35), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      margin: 10px auto 16px;
+      display: block;
+      border: 2px solid #FFFFFF;
+    }
+    .install-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 24px 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+    }
+    .step-box {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 10px;
+      text-align: left;
+    }
+    .step-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #DC2626;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .pulse-btn {
+      animation: pulseGlow 2s infinite;
+    }
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
+      70% { box-shadow: 0 0 0 14px rgba(220, 38, 38, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Encabezado Corporativo Simple -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="index.html" class="brand-logo-wrap">
+        <img src="assets/logo-megaton.svg" alt="Plaza Megatón Logo" class="brand-logo-img">
+      </a>
+      <a href="index.html" class="btn-sm btn-sm-outline" style="text-decoration:none;">
+        ← Volver
+      </a>
+    </div>
+  </header>
+
+  <main class="install-container">
+
+    <!-- Tarjeta Principal con Logo e Instalador -->
+    <div class="install-card">
+      <img src="assets/icon-192.png" alt="Plaza Megatón App" class="app-icon-preview">
+      <span style="background: #FEE2E2; color: #DC2626; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 9999px; text-transform: uppercase;">
+        Aplicación Móvil Oficial
+      </span>
+      <h1 style="font-size: 22px; font-weight: 900; color: #0F172A; margin: 10px 0 4px;">Plaza Megatón</h1>
+      <p style="font-size: 13px; color: #64748B; margin: 0 0 20px; line-height: 1.4;">
+        Instala la aplicación oficial en tu teléfono celular para consultar solicitudes, subir pagos y ver alertas de novedades y mensajes directos.
+      </p>
+
+      <!-- Botón de Acción Principal -->
+      <button id="btn-install-action" onclick="handleInstallClick()" class="btn-primary pulse-btn" style="width: 100%; min-height: 50px; font-size: 15px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; background: #DC2626; border-radius: 14px;">
+        <span style="font-size: 20px;">📲</span>
+        <span id="btn-install-text">Instalar Aplicación Ahora</span>
+      </button>
+
+      <div id="install-status-msg" style="font-size: 12px; color: #64748B; line-height: 1.4;">
+        Compatible con Android (Chrome), iPhone (Safari) y computadoras.
+      </div>
+    </div>
+
+    <!-- Alerta Especial: Navegadores dentro de Apps (WhatsApp / Instagram / Facebook) -->
+    <div id="inapp-warning" style="display: none; background: #FEF3C7; border: 1.5px solid #F59E0B; border-radius: 16px; padding: 16px; margin-bottom: 20px; text-align: left;">
+      <div style="display: flex; align-items: flex-start; gap: 10px;">
+        <span style="font-size: 24px;">⚠️</span>
+        <div>
+          <div style="font-weight: 800; font-size: 14px; color: #92400E; margin-bottom: 4px;">
+            Estás navegando dentro de WhatsApp / Red Social
+          </div>
+          <div style="font-size: 12px; color: #78350F; line-height: 1.5; margin-bottom: 10px;">
+            Para poder guardar la aplicación en la pantalla de tu celular, debes abrir este enlace en tu navegador principal (Chrome o Safari).
+          </div>
+          <button onclick="openExternalBrowser()" class="btn-sm btn-sm-primary" style="background:#B45309; border:none; padding:8px 14px; font-size:12px; font-weight:700;">
+            🌐 Abrir en el Navegador de mi Teléfono
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Guía Específica para Android / Chrome -->
+    <div id="guide-android" class="install-card" style="display: none; text-align: left;">
+      <h3 style="font-size: 16px; font-weight: 800; color: #0F172A; margin: 0 0 12px; display:flex; align-items:center; gap:8px;">
+        <span>🤖</span> Pasos para instalar en Android
+      </h3>
+      <div class="step-box">
+        <div class="step-num">1</div>
+        <div style="font-size: 13px; color: #1E293B;">
+          Toca el menú de <strong>tres puntos (⋮)</strong> en la esquina superior derecha de Chrome.
+        </div>
+      </div>
+      <div class="step-box">
+        <div class="step-num">2</div>
+        <div style="font-size: 13px; color: #1E293B;">
+          Selecciona la opción <strong>"Instalar aplicación"</strong> o <strong>"Agregar a la pantalla principal"</strong>.
+        </div>
+      </div>
+      <div class="step-box">
+        <div class="step-num">3</div>
+        <div style="font-size: 13px; color: #1E293B;">
+          Confirma tocando <strong>"Instalar"</strong>. El icono aparecerá inmediatamente en tu teléfono.
+        </div>
+      </div>
+    </div>
+
+    <!-- Guía Específica para iPhone / iPad (Safari) -->
+    <div id="guide-ios" class="install-card" style="display: none; text-align: left;">
+      <h3 style="font-size: 16px; font-weight: 800; color: #0F172A; margin: 0 0 12px; display:flex; align-items:center; gap:8px;">
+        <span>🍎</span> Pasos para instalar en iPhone / iPad
+      </h3>
+      <div class="step-box">
+        <div class="step-num">1</div>
+        <div style="font-size: 13px; color: #1E293B;">
+          Toca el botón <strong>Compartir</strong> <strong style="font-size:16px;">📤</strong> en la barra inferior de Safari.
+        </div>
+      </div>
+      <div class="step-box">
+        <div class="step-num">2</div>
+        <div style="font-size: 13px; color: #1E293B;">
+          Desliza hacia arriba y selecciona <strong>"Agregar a inicio"</strong> ➕.
+        </div>
+      </div>
+      <div class="step-box">
+        <div class="step-num">3</div>
+        <div style="font-size: 13px; color: #1E293B;">
+          Toca <strong>"Agregar"</strong> en la esquina superior derecha. ¡Listo!
+        </div>
+      </div>
+    </div>
+
+    <!-- Beneficios de la App -->
+    <div style="text-align: left; background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 18px; padding: 20px; box-shadow: var(--shadow-sm);">
+      <h3 style="font-size: 14px; font-weight: 800; color: #0F172A; margin: 0 0 12px;">Ventajas de la Aplicación Instalada:</h3>
+      <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #475569; line-height: 1.6;">
+        <li>⚡ <strong>Pantalla completa:</strong> Sin barras de direcciones ni botones de navegador que estorben.</li>
+        <li>📬 <strong>Insignia de mensajes:</strong> Muestra un aviso en el icono cuando la administración te escriba.</li>
+        <li>🚀 <strong>Acceso con 1 toque:</strong> Directo desde la pantalla de inicio de tu celular sin buscar el link.</li>
+      </ul>
+    </div>
+
+  </main>
+
+  <script src="js/app.js"></script>
+  <script>
+    // Detección del entorno de navegación
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+    const isAndroid = /android/i.test(ua);
+    const isInApp = (ua.indexOf('FBAN') > -1) || (ua.indexOf('FBAV') > -1) || (ua.indexOf('Instagram') > -1) || (ua.indexOf('WhatsApp') > -1) || (ua.indexOf('Line') > -1);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Si ya está instalada y abierta como app
+      if (isStandalone) {
+        document.getElementById('btn-install-text').innerText = '✓ Aplicación Instalada';
+        document.getElementById('btn-install-action').style.background = '#15803D';
+        document.getElementById('install-status-msg').innerHTML = '<span style="color:#15803D; font-weight:700;">¡Ya estás utilizando Plaza Megatón instalada en tu teléfono!</span>';
+        return;
+      }
+
+      // 2. Si está en navegador embebido (WhatsApp, etc.)
+      if (isInApp) {
+        document.getElementById('inapp-warning').style.display = 'block';
+      }
+
+      // 3. Mostrar guía según dispositivo
+      if (isIOS) {
+        document.getElementById('guide-ios').style.display = 'block';
+        document.getElementById('btn-install-text').innerText = 'Ver Instrucciones para iPhone';
+      } else {
+        document.getElementById('guide-android').style.display = 'block';
+      }
+
+      // 4. Si el evento beforeinstallprompt ya se disparó o se dispara
+      if (window.deferredPWAInstallPrompt) {
+        document.getElementById('btn-install-text').innerText = '📲 Instalar en este Celular';
+      }
+    });
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      const btnText = document.getElementById('btn-install-text');
+      if (btnText && !isStandalone) {
+        btnText.innerText = '📲 Instalar en este Celular';
+      }
+    });
+
+    async function handleInstallClick() {
+      // Si tenemos el prompt nativo
+      if (window.deferredPWAInstallPrompt) {
+        try {
+          window.deferredPWAInstallPrompt.prompt();
+          const choice = await window.deferredPWAInstallPrompt.userChoice;
+          if (choice.outcome === 'accepted') {
+            App.showToast('¡Instalando Plaza Megatón en su celular!', 'success');
+          }
+          window.deferredPWAInstallPrompt = null;
+          return;
+        } catch (err) {
+          console.warn('Error al activar instalación nativa:', err);
+        }
+      }
+
+      if (isIOS) {
+        // En iOS desplazarse suavemente a la guía visual
+        document.getElementById('guide-ios').scrollIntoView({ behavior: 'smooth' });
+        showIOSInstallModal();
+        return;
+      }
+
+      if (isAndroid) {
+        document.getElementById('guide-android').scrollIntoView({ behavior: 'smooth' });
+        App.showToast('Toca los tres puntos (⋮) de Chrome y presiona "Instalar aplicación" o "Agregar a pantalla".', 'info');
+        return;
+      }
+
+      // Caso general
+      App.showToast('Abre el menú de tu navegador y presiona "Instalar aplicación" o "Agregar a la pantalla principal".', 'info');
+    }
+
+    function openExternalBrowser() {
+      const currentUrl = window.location.href;
+      // Intento de apertura externa en Android
+      if (isAndroid) {
+        window.location.href = 'intent://' + window.location.host + window.location.pathname + '#Intent;scheme=https;package=com.android.chrome;end';
+      } else {
+        // En iOS copiar enlace al portapapeles y notificar
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(currentUrl);
+          App.showToast('Enlace copiado. Abre Safari y pégalo para instalar la aplicación.', 'success');
+        } else {
+          window.open(currentUrl, '_system');
+        }
+      }
+    }
+  </script>
+</body>
+</html>

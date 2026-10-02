@@ -25,6 +25,7 @@
     { "source": "/mis-solicitudes", "destination": "/mis-solicitudes.html" },
     { "source": "/mis-pagos", "destination": "/mis-pagos.html" },
     { "source": "/novedades", "destination": "/novedades.html" },
+    { "source": "/instalar", "destination": "/instalar.html" },
     { "source": "/login", "destination": "/login.html" },
     { "source": "/admin", "destination": "/admin.html" }
   ]

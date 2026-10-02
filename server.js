@@ -1215,6 +1215,7 @@ const routes = {
   '/mis-solicitudes': 'mis-solicitudes.html',
   '/mis-pagos': 'mis-pagos.html',
   '/novedades': 'novedades.html',
+  '/instalar': 'instalar.html',
   '/login': 'login.html',
   '/admin': 'admin.html'
 };
