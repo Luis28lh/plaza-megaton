@@ -1,5 +1,20 @@
 {
   "version": 2,
+  "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" },
+        { "key": "Service-Worker-Allowed", "value": "/" }
+      ]
+    },
+    {
+      "source": "/manifest.json",
+      "headers": [
+        { "key": "Content-Type", "value": "application/manifest+json" }
+      ]
+    }
+  ],
   "rewrites": [
     { "source": "/", "destination": "/index.html" },
     { "source": "/assets/uploads/(.*)", "destination": "/api/index.js" },
@@ -9,6 +24,7 @@
     { "source": "/pagos", "destination": "/pagos.html" },
     { "source": "/mis-solicitudes", "destination": "/mis-solicitudes.html" },
     { "source": "/mis-pagos", "destination": "/mis-pagos.html" },
+    { "source": "/novedades", "destination": "/novedades.html" },
     { "source": "/login", "destination": "/login.html" },
     { "source": "/admin", "destination": "/admin.html" }
   ]

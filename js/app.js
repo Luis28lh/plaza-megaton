@@ -152,6 +152,11 @@ const App = {
     if (this.isStaticHost()) {
       this.initLocalStore();
     }
+
+    // Comprobar mensajes e insignias
+    if (typeof checkUnreadMessagesBadge === 'function') {
+      checkUnreadMessagesBadge();
+    }
   },
 
   // Detecta si corre en GitHub Pages u otro host estático sin backend Node
@@ -232,3 +237,194 @@ const App = {
 };
 
 document.addEventListener('DOMContentLoaded', () => App.init());
+
+// ==========================================
+// CONTROLADOR PWA & INSTALACIÓN MÓVIL
+// ==========================================
+window.deferredPWAInstallPrompt = null;
+
+// Registrar Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+      reg.addEventListener('updatefound', () => {
+        const installingWorker = reg.installing;
+        if (installingWorker) {
+          installingWorker.addEventListener('statechange', () => {
+            if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('[PWA] Nueva versión lista para usar.');
+            }
+          });
+        }
+      });
+    }).catch(err => {
+      console.warn('[PWA] Registro de Service Worker omitido:', err);
+    });
+  });
+}
+
+// Capturar el evento de instalación nativa en Android y Navegadores compatibles
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  window.deferredPWAInstallPrompt = e;
+  const installBanner = document.getElementById('pwa-install-banner');
+  const installCard = document.getElementById('pwa-install-card');
+  const installBtn = document.getElementById('btn-pwa-install');
+  if (installBanner) installBanner.style.display = 'flex';
+  if (installCard) installCard.style.display = 'flex';
+  if (installBtn) installBtn.style.display = 'inline-flex';
+});
+
+// Evento cuando la app ya fue instalada
+window.addEventListener('appinstalled', () => {
+  window.deferredPWAInstallPrompt = null;
+  const installBanner = document.getElementById('pwa-install-banner');
+  const installCard = document.getElementById('pwa-install-card');
+  if (installBanner) installBanner.style.display = 'none';
+  if (installCard) installCard.style.display = 'none';
+  App.showToast('¡Plaza Megatón instalada con éxito en su teléfono!', 'success');
+});
+
+// Función global para disparar la instalación o mostrar guía para iPhone
+window.triggerPWAInstall = async function() {
+  // 1. Si tenemos el prompt nativo (Chrome / Android / Edge / Opera)
+  if (window.deferredPWAInstallPrompt) {
+    try {
+      window.deferredPWAInstallPrompt.prompt();
+      const choiceResult = await window.deferredPWAInstallPrompt.userChoice;
+      if (choiceResult.outcome === 'accepted') {
+        App.showToast('Instalando Plaza Megatón en su dispositivo...', 'info');
+      }
+      window.deferredPWAInstallPrompt = null;
+      return;
+    } catch (err) {
+      console.warn('Error al activar prompt de instalación:', err);
+    }
+  }
+
+  // 2. Detección de iOS (iPhone / iPad / Safari)
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+  if (isIOS) {
+    if (isStandalone) {
+      App.showToast('Ya estás usando Plaza Megatón como aplicación instalada.', 'success');
+      return;
+    }
+    showIOSInstallModal();
+    return;
+  }
+
+  // 3. Si ya está instalada o es navegador de escritorio
+  if (isStandalone) {
+    App.showToast('Plaza Megatón ya se encuentra instalada en este dispositivo.', 'info');
+  } else {
+    showGenericInstallModal();
+  }
+};
+
+function showIOSInstallModal() {
+  let modal = document.getElementById('ios-pwa-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'ios-pwa-modal';
+    modal.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.65); z-index:99999; display:flex; align-items:center; justify-content:center; padding:16px; backdrop-filter:blur(4px);';
+    modal.innerHTML = `
+      <div style="background:#FFFFFF; border-radius:20px; max-width:400px; width:100%; padding:24px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25); position:relative; text-align:center;">
+        <button onclick="document.getElementById('ios-pwa-modal').style.display='none'" style="position:absolute; top:12px; right:12px; background:none; border:none; font-size:22px; cursor:pointer; color:#64748B;">✕</button>
+        <img src="assets/icon-192.png" alt="Logo" style="width:68px; height:68px; border-radius:16px; margin-bottom:12px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.15);">
+        <h3 style="font-size:18px; font-weight:800; color:#0F172A; margin:0 0 6px;">Instalar en tu iPhone o iPad</h3>
+        <p style="font-size:13px; color:#475569; margin:0 0 16px; line-height:1.4;">Agrega Plaza Megatón a tu pantalla de inicio para usarla a pantalla completa y recibir avisos.</p>
+        
+        <div style="text-align:left; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:14px; padding:14px; font-size:13px; color:#1E293B; line-height:1.6; margin-bottom:18px;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+            <span style="font-size:22px;">1️⃣</span>
+            <span>Toca el botón <strong>Compartir</strong> <strong style="font-size:16px;">📤</strong> en la barra inferior de Safari.</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+            <span style="font-size:22px;">2️⃣</span>
+            <span>Desliza hacia arriba y selecciona <strong>"Agregar a inicio"</strong> ➕.</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:22px;">3️⃣</span>
+            <span>Toca <strong>"Agregar"</strong> en la esquina superior derecha.</span>
+          </div>
+        </div>
+
+        <button onclick="document.getElementById('ios-pwa-modal').style.display='none'" class="btn-primary" style="width:100%; min-height:44px; font-weight:700;">¡Listo, Entendido!</button>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  } else {
+    modal.style.display = 'flex';
+  }
+}
+
+function showGenericInstallModal() {
+  App.showToast('Para instalar: abre el menú de tu navegador (⋮ o Compartir) y elige "Instalar aplicación" o "Agregar a pantalla principal".', 'info');
+}
+
+// ==========================================
+// INSIGNIAS EN EL ICONO (APP BADGING API)
+// ==========================================
+window.updateAppBadge = function(count) {
+  const numericCount = parseInt(count, 10) || 0;
+  
+  // 1. App Badging API en la app instalada
+  if ('setAppBadge' in navigator) {
+    if (numericCount > 0) {
+      navigator.setAppBadge(numericCount).catch(() => {});
+    } else {
+      navigator.clearAppBadge().catch(() => {});
+    }
+  }
+
+  // 2. Notificar al Service Worker
+  if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({
+      type: numericCount > 0 ? 'SET_BADGE' : 'CLEAR_BADGE',
+      count: numericCount
+    });
+  }
+
+  // 3. Actualizar insignia visual en la barra inferior móvil
+  updateNavBadgeCount(numericCount);
+};
+
+function updateNavBadgeCount(count) {
+  const navItems = document.querySelectorAll('.bottom-nav a[href*="mensajes"]');
+  navItems.forEach(item => {
+    let badge = item.querySelector('.nav-badge-pill');
+    if (count > 0) {
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'nav-badge-pill';
+        badge.style.cssText = 'position:absolute; top:2px; right:20%; background:#DC2626; color:#FFF; font-size:10px; font-weight:900; border-radius:999px; padding:1px 5px; min-width:16px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,0.3);';
+        item.style.position = 'relative';
+        item.appendChild(badge);
+      }
+      badge.innerText = count > 9 ? '9+' : count;
+      badge.style.display = 'inline-block';
+    } else if (badge) {
+      badge.style.display = 'none';
+    }
+  });
+}
+
+// Consultar automáticamente mensajes no leídos al cargar
+async function checkUnreadMessagesBadge() {
+  try {
+    const session = App.getSession();
+    const storedEmail = session ? session.user.email : (localStorage.getItem('pm_user_email') || '');
+    if (!storedEmail) return;
+
+    const res = await fetch(`/api/mensajes?email=${encodeURIComponent(storedEmail)}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && Array.isArray(data.mensajes)) {
+        const unread = data.mensajes.filter(m => !m.leido).length;
+        window.updateAppBadge(unread);
+      }
+    }
+  } catch (_) {}
+}

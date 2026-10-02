@@ -1190,6 +1190,23 @@ app.patch('/api/mensajes/:id/leido', async (req, res) => {
   }
 });
 
+// Servir Service Worker con scope raíz
+app.get('/sw.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.setHeader('Service-Worker-Allowed', '/');
+  const swPath = path.join(__dirname, 'public', 'sw.js');
+  if (fs.existsSync(swPath)) return res.sendFile(swPath);
+  return res.sendFile(path.join(__dirname, 'sw.js'));
+});
+
+// Servir Manifest PWA
+app.get('/manifest.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/manifest+json');
+  const manifestPath = path.join(__dirname, 'public', 'manifest.json');
+  if (fs.existsSync(manifestPath)) return res.sendFile(manifestPath);
+  return res.sendFile(path.join(__dirname, 'manifest.json'));
+});
+
 // Fallback de navegación amigable SPA / Páginas directas
 const routes = {
   '/registro': 'registro.html',
