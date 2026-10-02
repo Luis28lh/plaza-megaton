@@ -23,109 +23,16 @@
   <main class="main-wrapper">
 
     <!-- Formulario de Registro -->
-    <div id="form-registro-box" class="card-box">
-      <div class="card-box-header">
-        <div style="font-size: 12px; font-weight: 800; color: var(--primary-red); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">
-          Formulario de Acceso Directo por QR
-        </div>
-        <h1 class="card-title">REGISTRO PLAZA MEGATÓN</h1>
-        <p class="card-subtitle">Registra o confirma tus datos de propietario, inquilino u ocupante de cubículos.</p>
-      </div>
-
-      <form id="form-registro">
-
-        <!-- Nombre Completo -->
-        <div class="form-group">
-          <label class="form-label" for="reg-nombre">Nombre completo <span class="req">*</span></label>
-          <input 
-            type="text" 
-            id="reg-nombre" 
-            class="form-input" 
-            placeholder="Ej: Juan Pérez" 
-            required 
-            autocomplete="name"
-          >
-        </div>
-
-        <!-- Correo Electrónico -->
-        <div class="form-group">
-          <label class="form-label" for="reg-email">Correo electrónico <span class="req">*</span></label>
-          <input 
-            type="email" 
-            id="reg-email" 
-            class="form-input" 
-            placeholder="Ej: juan.perez@correo.com" 
-            required 
-            inputmode="email"
-            autocomplete="email"
-          >
-          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
-            Enviaremos tu confirmación y enlaces de acceso a esta cuenta.
-          </div>
-        </div>
-
-        <!-- Teléfono -->
-        <div class="form-group">
-          <label class="form-label" for="reg-telefono">Teléfono / WhatsApp <span class="opt">(Opcional)</span></label>
-          <input 
-            type="tel" 
-            id="reg-telefono" 
-            class="form-input" 
-            placeholder="Ej: 809-555-1234" 
-            inputmode="tel"
-            autocomplete="tel"
-          >
-        </div>
-
-        <!-- Cubículos o Locales Dinámicos (Uno debajo del otro) -->
-        <div class="form-group">
-          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
-            <label class="form-label" style="margin-bottom: 0;">
-              Cubículo(s) o Local(es) <span class="req">* (Obligatorio)</span>
-            </label>
-            <span style="font-size: 11px; background:#FEE2E2; color:#991B1B; font-weight: 700; padding:2px 8px; border-radius:4px;">Catálogo Oficial (33)</span>
-          </div>
-
-          <!-- Banner de Validación de Titularidad y Cubículo Existente -->
-          <div style="background:#FFFBEB; border:1px solid #FCD34D; border-left:4px solid #F59E0B; border-radius:8px; padding:10px 12px; margin-bottom:12px; font-size:12px; color:#92400E; line-height:1.45;">
-            🔒 <strong>Validación de Titularidad:</strong> Selecciona el cubículo correspondiente del catálogo oficial. Cada cubículo está enlazado a su correo registrado. No se permite registrar cubículos inexistentes ni asociar locales ajenos.
-          </div>
-          
-          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.45;">
-            Selecciona tu número de cubículo de la lista oficial. Si administras varios locales, agrégalos <strong>uno debajo del otro</strong>.
-          </div>
-
-          <!-- Contenedor de Bloques Dinámicos de Cubículos -->
-          <div id="cubiculos-inputs-container" style="display: flex; flex-direction: column; gap: 14px;">
-            <!-- Renderizado dinámico desde registro.js -->
-          </div>
-
-          <!-- Botón para añadir más cubículos -->
-          <button type="button" id="btn-add-cubiculo" class="btn-secondary" style="margin-top: 12px; min-height: 46px; border: 1.5px dashed #CBD5E1; color: var(--text-main); font-weight: 700; width: 100%;">
-            ➕ Agregar otro cubículo (si tienes varios)
-          </button>
-
-          <!-- Datalists para sugerencias y autocompletado rápido -->
-          <datalist id="catalog-cubiculos-list"></datalist>
-          <datalist id="actividad-comercial-list">
-            <option value="Reparación de celulares y computadoras">
-            <option value="Venta de accesorios móviles y tecnología">
-            <option value="Venta de ropa y calzado">
-            <option value="Salón de belleza / Barbería / Uñas">
-            <option value="Cafetería / Comida rápida / Bebidas">
-            <option value="Oficina de servicios / Asesoría / Legal">
-            <option value="Electrónica y electrodomésticos">
-            <option value="Joyería y variedades">
-            <option value="Almacén / Depósito de mercancía">
-          </datalist>
-        </div>
-
-        <!-- Botón de Envío -->
-        <button type="submit" id="btn-submit-registro" class="btn-primary">
-          ✅ Confirmar mi Registro
-        </button>
-
-      </form>
+    <!-- Mensaje de Registro Restringido -->
+    <div id="form-registro-box" class="card-box" style="text-align: center; padding: 40px 20px; max-width: 480px; margin: 30px auto;">
+      <div style="font-size: 54px; margin-bottom: 16px;">🏢🔒</div>
+      <h1 class="card-title" style="justify-content: center; margin-bottom: 8px; font-size: 20px;">Registro Oficial Restringido</h1>
+      <p style="color: #64748B; font-size: 14px; line-height: 1.6; margin-bottom: 24px;">
+        El autoregistro público ha sido deshabilitado por motivos de control y seguridad. El alta y asignación oficial de cada uno de los 33 cubículos es gestionada exclusivamente por la <strong>Oficina de Administración de Plaza Megatón</strong>.
+      </p>
+      <a href="index.html" class="btn-primary" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; padding: 12px 24px; font-weight: 700;">
+        🏠 Volver a la Pantalla Principal
+      </a>
     </div>
 
     <!-- Pantalla de Éxito / Confirmación -->
