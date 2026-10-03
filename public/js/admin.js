@@ -556,9 +556,9 @@ function renderUsuariosTable(users) {
       `;
     } else {
       actionsHtml = `
-        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
           <button class="btn-sm btn-sm-outline" onclick="openEditUserModal('${u.user_id}')">⚙️ Gestionar</button>
-          <button class="btn-sm btn-sm-primary" style="padding:6px 10px;" onclick="openEditUserModal('${u.user_id}')" title="Asignar o cambiar contraseña">🔑 Clave</button>
+          <button class="btn-sm" style="background:#2563EB; color:#fff; font-weight:700; border:none; padding:6px 10px; border-radius:6px; cursor:pointer;" onclick="quickEnableTemporalAccess('${u.user_id}', '${safeName}')" title="Habilitar clave temporal 123456 con validación PIN obligatoria">⚡ 123456</button>
         </div>
       `;
     }
@@ -681,8 +681,9 @@ function openEditUserModal(userId) {
     ` : ''}
 
     <div class="form-group">
-      <label class="form-label">Correo:</label>
-      <input type="text" class="form-input" value="${user.email}" readonly style="background:#F1F5F9;">
+      <label class="form-label">Correo electrónico / Usuario de acceso:</label>
+      <input type="text" id="edit-user-email" class="form-input" value="${user.email || ''}">
+      <span style="font-size:11px; color:#64748B;">Correo con el que este usuario iniciará sesión y recibirá su código PIN de seguridad.</span>
     </div>
     <div class="form-group">
       <label class="form-label">Teléfono:</label>
@@ -696,6 +697,17 @@ function openEditUserModal(userId) {
         <option value="Inactivo" ${user.estado === 'Inactivo' ? 'selected' : ''}>Inactivo</option>
         <option value="Rechazado" ${user.estado === 'Rechazado' ? 'selected' : ''}>Rechazado</option>
       </select>
+    </div>
+
+    <!-- ACCESO TEMPORAL 123456 INMEDIATO -->
+    <div style="background:#EFF6FF; border:1.5px solid #93C5FD; border-radius:10px; padding:12px 14px; margin-top:14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div>
+        <div style="font-weight:800; color:#1E40AF; font-size:13px;">⚡ Acceso Rápido Temporal (123456)</div>
+        <div style="font-size:12px; color:#2563EB; margin-top:2px;">Asigna clave temporal <strong>123456</strong>. Al iniciar sesión, el sistema le pedirá el PIN de 6 dígitos enviado a su correo para establecer su nueva clave definitiva.</div>
+      </div>
+      <button type="button" class="btn-sm" style="background:#2563EB; color:#FFFFFF; font-weight:800; border:none; padding:8px 14px; border-radius:6px; cursor:pointer;" onclick="quickEnableTemporalAccess('${user.user_id}', '${safeName}')">
+        ⚡ Habilitar Clave 123456
+      </button>
     </div>
 
     <!-- SECCIÓN: CAMBIO DE CONTRASEÑA / PIN DEL USUARIO -->
@@ -746,6 +758,48 @@ function openEditUserModal(userId) {
   modal.classList.add('open');
 }
 
+async function quickEnableTemporalAccess(userId, userName) {
+  try {
+    const emailInput = document.getElementById('edit-user-email');
+    const emailToSave = emailInput ? emailInput.value.trim().toLowerCase() : undefined;
+
+    const payload = {
+      password: '123456',
+      debe_cambiar_password: true,
+      password_temporal: true,
+      estado: 'Activo'
+    };
+    if (emailToSave) {
+      payload.email = emailToSave;
+    }
+
+    const res = await fetch(`/api/admin/usuarios/${userId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-pin': getAdminPin()
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    if (res.ok && data.success) {
+      App.showToast(`✅ Acceso temporal habilitado con clave 123456 para ${userName || userId}.`, 'success');
+      const msgEl = document.getElementById('pwd-change-msg');
+      if (msgEl) {
+        msgEl.style.display = 'block';
+        msgEl.style.color = '#15803D';
+        msgEl.innerHTML = `⚡ <strong>Acceso Temporal Habilitado:</strong> Clave asignada a <code>123456</code>. Al iniciar sesión, el inquilino recibirá el PIN a su correo para fijar su clave definitiva.`;
+      }
+      loadUsuarios();
+    } else {
+      App.showToast(data.error || 'Error al habilitar acceso temporal.', 'error');
+    }
+  } catch (err) {
+    App.showToast('Error de conexión al habilitar acceso temporal.', 'error');
+  }
+}
+
 async function submitChangePassword(userId) {
   const pwdInput = document.getElementById('edit-user-new-password');
   const tempCheckbox = document.getElementById('edit-user-is-temp');
@@ -767,7 +821,8 @@ async function submitChangePassword(userId) {
       },
       body: JSON.stringify({ 
         password: newPwd,
-        debe_cambiar_password: isTemp
+        debe_cambiar_password: isTemp,
+        password_temporal: isTemp
       })
     });
 
@@ -791,8 +846,13 @@ async function submitChangePassword(userId) {
 }
 
 async function saveUserBasicInfo(userId) {
-  const tel = document.getElementById('edit-user-tel').value;
-  const estado = document.getElementById('edit-user-estado').value;
+  const emailInput = document.getElementById('edit-user-email');
+  const telInput = document.getElementById('edit-user-tel');
+  const estadoInput = document.getElementById('edit-user-estado');
+
+  const email = emailInput ? emailInput.value.trim().toLowerCase() : undefined;
+  const tel = telInput ? telInput.value.trim() : '';
+  const estado = estadoInput ? estadoInput.value : 'Activo';
 
   try {
     const res = await fetch(`/api/admin/usuarios/${userId}`, {
@@ -801,15 +861,20 @@ async function saveUserBasicInfo(userId) {
         'Content-Type': 'application/json',
         'x-admin-pin': getAdminPin()
       },
-      body: JSON.stringify({ telefono: tel, estado })
+      body: JSON.stringify({ email, telefono: tel, estado })
     });
 
-    if (res.ok) {
-      App.showToast('Información de usuario actualizada', 'success');
+    const data = await res.json();
+    if (res.ok && data.success) {
+      App.showToast('Información de usuario actualizada correctamente', 'success');
       closeEditUserModal();
       loadUsuarios();
+    } else {
+      App.showToast(data.error || 'Error al actualizar usuario', 'error');
     }
-  } catch (_) {}
+  } catch (_) {
+    App.showToast('Error de conexión al guardar cambios.', 'error');
+  }
 }
 
 async function submitAddCubiculo(userId) {

@@ -184,9 +184,25 @@ class DataService {
   async getUsuarioByEmail(email) {
     if (!email) return null;
     const cleanEmail = email.trim().toLowerCase();
+    const emailWithoutDomainExt = cleanEmail.replace(/\.[a-z0-9]+$/i, '');
+
     const user = (this.db.USUARIOS || []).find(u => {
       const uEmail = (u.email || '').trim().toLowerCase();
+      const uWithoutExt = uEmail.replace(/\.[a-z0-9]+$/i, '');
+
+      // 1. Coincidencia exacta
       if (uEmail === cleanEmail) return true;
+
+      // 2. Coincidencia con lista de alias de correos
+      if (Array.isArray(u.alias_emails) && u.alias_emails.some(a => (a || '').trim().toLowerCase() === cleanEmail)) {
+        return true;
+      }
+
+      // 3. Coincidencia si se omitió o agregó extensión de dominio (ej. b.souri@souriindustrial <-> b.souri@souriindustrial.com)
+      if (uEmail === cleanEmail + '.com' || cleanEmail === uEmail + '.com') return true;
+      if (cleanEmail.includes('@') && emailWithoutDomainExt === uWithoutExt) return true;
+
+      // 4. Casos especiales conocidos
       if (cleanEmail === 'wes.inform@gmail.com' && (uEmail.includes('warn.electrical') || u.user_id === 'US-004')) return true;
       return false;
     });
@@ -227,6 +243,18 @@ class DataService {
     if (!user) return null;
 
     const changedFields = [];
+    if (updates.email && updates.email.trim().toLowerCase() !== (user.email || '').toLowerCase()) {
+      changedFields.push(`correo (${user.email} -> ${updates.email})`);
+      if (!Array.isArray(user.alias_emails)) {
+        user.alias_emails = [];
+      }
+      if (user.email && !user.alias_emails.includes(user.email)) {
+        user.alias_emails.push(user.email);
+      }
+    }
+    if (updates.nombre && updates.nombre !== user.nombre) {
+      changedFields.push(`nombre (${user.nombre} -> ${updates.nombre})`);
+    }
     if (updates.password && updates.password !== user.password) {
       changedFields.push('contraseña');
     }

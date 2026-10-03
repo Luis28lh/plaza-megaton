@@ -37,10 +37,11 @@
           <div class="form-group">
             <label class="form-label" for="login-email">Tu correo electrónico registrado <span class="req">*</span></label>
             <input 
-              type="email" 
+              type="text" 
+              inputmode="email"
               id="login-email" 
               class="form-input" 
-              placeholder="ejemplo@correo.com" 
+              placeholder="ejemplo@correo.com o tu usuario" 
               required
               autocomplete="email"
             >
@@ -57,11 +58,11 @@
               type="password" 
               id="login-password" 
               class="form-input" 
-              placeholder="Ingresa tu contraseña o PIN" 
+              placeholder="Ingresa tu contraseña o 123456" 
               autocomplete="current-password"
             >
             <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
-              🔐 Acceso seguro para propietarios e inquilinos registrados.
+              ⚡ Clave temporal universal: <strong>123456</strong> (al ingresar, recibirás un PIN de 6 dígitos a tu correo para crear tu clave definitiva).
             </div>
           </div>
 
@@ -118,10 +119,11 @@
           <div class="form-group">
             <label class="form-label" for="reset-email">Correo electrónico registrado <span class="req">*</span></label>
             <input 
-              type="email" 
+              type="text" 
+              inputmode="email"
               id="reset-email" 
               class="form-input" 
-              placeholder="ejemplo@correo.com" 
+              placeholder="ejemplo@correo.com o tu usuario" 
               required
               autocomplete="email"
             >

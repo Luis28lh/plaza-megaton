@@ -711,9 +711,16 @@
       "user_id": "US-017",
       "nombre": "BERTHA SOURY",
       "rnc": "",
-      "email": "bertha.soury@plazamegaton.com",
-      "telefono": "809-555-1016",
+      "email": "b.souri@souriindustrial.com",
+      "alias_emails": [
+        "b.souri@souriindustrial",
+        "bertha.soury@plazamegaton.com"
+      ],
+      "telefono": "809-578-2793",
       "tipo": "Propietario / Inquilino",
+      "password": "123456",
+      "password_temporal": true,
+      "debe_cambiar_password": true,
       "cubiculos": [
         "A-308",
         "A-309"

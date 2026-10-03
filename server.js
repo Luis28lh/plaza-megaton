@@ -469,15 +469,57 @@ app.post('/api/auth/login', async (req, res) => {
     const userPwd = String(user.password || '').trim();
 
     // Protocolo de Acceso Oficial:
-    // Tu propia dirección de correo sirve como contraseña temporal para primer ingreso
+    // 1) Clave universal temporal '123456'
+    const isUsingDefault123456 = (enteredPwd === '123456');
+    // 2) Correo electrónico como contraseña de primer acceso
     const isUsingEmailAsPassword = (enteredPwd.toLowerCase() === cleanEmail);
+    // 3) Contraseña definitiva configurada por el usuario
     const isMatchingPermanentPwd = userPwd ? (userPwd === enteredPwd) : false;
 
-    const isValid = isUsingEmailAsPassword || isMatchingPermanentPwd;
+    const isValid = isUsingDefault123456 || isUsingEmailAsPassword || isMatchingPermanentPwd;
     if (!isValid) {
       return res.status(401).json({ 
         success: false, 
-        error: 'Contraseña o PIN incorrecto. Si no recuerdas tu clave, pulsa "¿Olvidaste o quieres cambiarla?" para recibir un código de seguridad en tu correo registrado.' 
+        error: 'Contraseña o PIN incorrecto. Si eres nuevo o tienes clave temporal, ingresa 123456. O pulsa "¿Olvidaste o quieres cambiarla?" para recibir un código PIN en tu correo registrado.' 
+      });
+    }
+
+    // Detectar si requiere cambio obligatorio de contraseña vía PIN enviado al correo
+    const isTemp = Boolean(
+      isUsingDefault123456 || 
+      isUsingEmailAsPassword || 
+      user.debe_cambiar_password || 
+      user.password_temporal ||
+      userPwd === '123456'
+    );
+
+    if (isTemp) {
+      // Despachar automáticamente el código de 6 dígitos a su correo electrónico
+      const resetRes = await authService.requestPasswordResetCode(user.email);
+
+      const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '';
+      const cubiculos = await dataService.getCubiculosByUser(user.user_id);
+      await dataService.addHistorial({
+        tipo_movimiento: 'ACCESO_TEMPORAL_SOLICITUD_PIN',
+        tipo_documento: 'SEGURIDAD',
+        codigo_documento: user.user_id,
+        usuario: `${user.nombre} (${user.email})`,
+        cubiculo: (cubiculos || []).map(c => c.codigo || c).join(', ') || 'N/A',
+        archivo: '',
+        accion: 'Acceso con Clave Temporal 123456 - PIN Enviado',
+        estado_anterior: 'Clave Temporal',
+        estado_nuevo: 'Pendiente de Cambio de Clave',
+        observacion: `Ingreso con clave temporal (123456) para ${user.email}. Se generó y envió código PIN de 6 dígitos al correo para validación obligatoria. IP: ${clientIp}`,
+        ip: clientIp
+      });
+
+      return res.json({
+        success: true,
+        mustChangePassword: true,
+        targetEmail: user.email,
+        pinSent: resetRes.success,
+        previewUrl: resetRes.previewUrl || null,
+        message: 'Acceso temporal autorizado (123456). Hemos enviado un código PIN de 6 dígitos a su correo electrónico para que defina su nueva contraseña definitiva.'
       });
     }
 
@@ -486,9 +528,6 @@ app.post('/api/auth/login', async (req, res) => {
       ...user,
       cubiculos
     });
-
-    // Detectar si es contraseña temporal que requiere cambio obligatorio
-    const isTemp = Boolean(isUsingEmailAsPassword || user.debe_cambiar_password || user.password_temporal);
 
     const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '';
     await dataService.addHistorial({
@@ -501,17 +540,14 @@ app.post('/api/auth/login', async (req, res) => {
       accion: 'Inicio de Sesión de Inquilino',
       estado_anterior: 'Desconectado',
       estado_nuevo: 'Conectado',
-      observacion: `Ingreso exitoso ${isUsingEmailAsPassword ? 'con clave temporal de primer acceso' : 'con clave definitiva'}. IP: ${clientIp}`,
+      observacion: `Ingreso exitoso con clave definitiva. IP: ${clientIp}`,
       ip: clientIp
     });
 
     res.json({
       success: true,
-      message: isTemp 
-        ? 'Acceso concedido con tu clave temporal. Ahora genera tu propio PIN o contraseña definitiva.' 
-        : 'Inicio de sesión exitoso.',
-      mustChangePassword: isTemp,
-      isEmailAsPassword: isUsingEmailAsPassword,
+      message: 'Inicio de sesión exitoso.',
+      mustChangePassword: false,
       sessionToken: session.sessionToken,
       user: session.user
     });
@@ -889,23 +925,29 @@ app.get('/api/admin/usuarios', requireAdmin, async (req, res) => {
   }
 });
 
-// 14. Panel Administrativo: Modificar Usuario (cambiar contraseña, asignar/quitar cubículos o activar/desactivar)
+// 14. Panel Administrativo: Modificar Usuario (cambiar correo, contraseña, asignar/quitar cubículos o activar/desactivar)
 app.patch('/api/admin/usuarios/:userId', requireAdmin, async (req, res) => {
   try {
     const { userId } = req.params;
-    const { estado, nombre, telefono, password, agregarCubiculo, quitarCubiculo } = req.body;
+    const { estado, nombre, email, telefono, password, debe_cambiar_password, password_temporal, agregarCubiculo, quitarCubiculo } = req.body;
     const adminName = req.adminAuth ? req.adminAuth.nombre : 'Administración';
 
     const updates = {};
     if (estado !== undefined) updates.estado = estado;
     if (nombre !== undefined) updates.nombre = nombre;
+    if (email !== undefined && String(email).trim()) {
+      updates.email = String(email).trim().toLowerCase();
+    }
     if (telefono !== undefined) updates.telefono = telefono;
     if (password !== undefined && String(password).trim()) {
       updates.password = String(password).trim();
-      if (req.body.debe_cambiar_password !== undefined) {
-        updates.debe_cambiar_password = Boolean(req.body.debe_cambiar_password);
-        updates.password_temporal = Boolean(req.body.debe_cambiar_password);
-      }
+    }
+    if (debe_cambiar_password !== undefined) {
+      updates.debe_cambiar_password = Boolean(debe_cambiar_password);
+      updates.password_temporal = Boolean(debe_cambiar_password);
+    }
+    if (password_temporal !== undefined) {
+      updates.password_temporal = Boolean(password_temporal);
     }
 
     if (Object.keys(updates).length > 0) {
@@ -922,6 +964,46 @@ app.patch('/api/admin/usuarios/:userId', requireAdmin, async (req, res) => {
 
     const updatedUser = await dataService.getUsuarioById(userId);
     res.json({ success: true, usuario: updatedUser, message: 'Usuario actualizado correctamente.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 14a. Panel Administrativo: Registrar / Habilitar Nuevo Usuario Inquilino Directo
+app.post('/api/admin/usuarios', requireAdmin, async (req, res) => {
+  try {
+    const { nombre, email, telefono, cubiculos, password = '123456' } = req.body;
+    if (!email || !nombre) {
+      return res.status(400).json({ success: false, error: 'Nombre y correo son requeridos.' });
+    }
+    const cleanEmail = email.trim().toLowerCase();
+    const existing = await dataService.getUsuarioByEmail(cleanEmail);
+    if (existing) {
+      return res.status(400).json({ success: false, error: `Ya existe un usuario con este correo (${existing.user_id} - ${existing.nombre}).` });
+    }
+
+    const count = (await dataService.getUsuarios()).length + 1;
+    const userId = `US-${String(count).padStart(3, '0')}`;
+    const newUser = await dataService.createUsuario({
+      user_id: userId,
+      nombre: nombre.trim(),
+      email: cleanEmail,
+      telefono: telefono || '',
+      password: String(password).trim(),
+      estado: 'Activo'
+    });
+
+    await dataService.updateUsuario(userId, {
+      password_temporal: true,
+      debe_cambiar_password: true
+    }, req.adminAuth ? req.adminAuth.nombre : 'Administración');
+
+    if (Array.isArray(cubiculos) && cubiculos.length > 0) {
+      await dataService.assignCubiculosToUser(userId, cubiculos);
+    }
+
+    const created = await dataService.getUsuarioById(userId);
+    res.json({ success: true, usuario: created, message: 'Nuevo usuario registrado con clave temporal 123456.' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

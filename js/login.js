@@ -76,8 +76,8 @@ async function handleLoginSubmit(event) {
   const email = emailInput ? emailInput.value.trim() : '';
   const password = passwordInput ? passwordInput.value.trim() : '';
 
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    App.showToast('Ingresa un correo electrónico válido.', 'error');
+  if (!email || !email.includes('@') || email.length < 5) {
+    App.showToast('Ingresa un correo electrónico registrado válido.', 'error');
     return;
   }
 
@@ -98,22 +98,24 @@ async function handleLoginSubmit(event) {
 
     const data = await res.json();
 
-    if (res.ok && data.success && data.user) {
-      // Si el usuario ingresó con su correo o clave temporal, guiarlo a crear su propio PIN o contraseña
+    if (res.ok && data.success) {
+      // Si ingresó con clave temporal (ej. 123456), guiarlo a validar con el PIN de 6 dígitos enviado al correo
       if (data.mustChangePassword) {
-        App.showToast(data.message || 'Clave temporal aceptada. Por favor crea tu propio PIN o contraseña definitiva.', 'info');
+        App.showToast(data.message || 'Código PIN enviado a tu correo. Ingresa el PIN y tu nueva clave.', 'info');
         submitBtn.disabled = false;
         submitBtn.innerHTML = '🔑 Iniciar Sesión';
-        showTempPasswordStep(data.user, data.sessionToken, data.isEmailAsPassword);
+        showVerifyStep(data.targetEmail || email, data.previewUrl);
         return;
       }
 
-      App.setSession(data.user, data.sessionToken);
-      App.showToast(`¡Bienvenido de vuelta, ${data.user.nombre}!`, 'success');
-      setTimeout(() => {
-        window.location.href = 'mis-solicitudes.html';
-      }, 700);
-      return;
+      if (data.user) {
+        App.setSession(data.user, data.sessionToken);
+        App.showToast(`¡Bienvenido de vuelta, ${data.user.nombre}!`, 'success');
+        setTimeout(() => {
+          window.location.href = 'mis-solicitudes.html';
+        }, 700);
+        return;
+      }
     } else {
       App.showToast(data.error || 'Contraseña o correo incorrecto.', 'error');
       submitBtn.disabled = false;
@@ -134,8 +136,8 @@ async function handleRequestResetCode(event) {
   const email = emailInput ? emailInput.value.trim() : '';
   const submitBtn = document.getElementById('btn-send-reset-code');
 
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    App.showToast('Ingresa un correo electrónico válido.', 'error');
+  if (!email || !email.includes('@') || email.length < 5) {
+    App.showToast('Ingresa un correo electrónico registrado.', 'error');
     return;
   }
 
