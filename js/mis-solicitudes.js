@@ -56,10 +56,10 @@ function renderSolicitudesList(items) {
   if (items.length === 0) {
     container.innerHTML = `
       <div style="text-align:center; padding:40px 16px;">
-        <div style="font-size:36px; margin-bottom:8px;">📭</div>
+        <div style="font-size:36px; margin-bottom:8px;">📋</div>
         <h3 style="font-size:17px; font-weight:800; color:var(--text-main);">No tienes solicitudes registradas</h3>
-        <p style="font-size:13px; color:var(--text-muted); margin:6px 0 16px;">¿Tienes algún problema eléctrico, de agua o mantenimiento en tu cubículo?</p>
-        <a href="/solicitudes.html" class="btn-primary" style="display:inline-flex; width:auto; padding:10px 20px;">+ Crear Solicitud</a>
+        <p style="font-size:13px; color:var(--text-muted); margin:6px 0 16px;">Esta casilla es exclusivamente para consultar el avance de tus solicitudes. Si necesitas reportar una avería o mantenimiento, hazlo desde la opción principal de inicio.</p>
+        <a href="index.html" class="btn-secondary" style="display:inline-flex; width:auto; padding:8px 18px; font-size:13px; font-weight:700;">🏠 Volver al Inicio</a>
       </div>
     `;
     return;
