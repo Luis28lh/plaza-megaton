@@ -913,9 +913,28 @@ class DataService {
     const msg = this.db.MENSAJES.find(m => m.id === id);
     if (!msg) return null;
 
-    msg.leido = true;
-    msg.fecha_leido = new Date().toISOString();
-    this.persist();
+    if (!msg.leido) {
+      const now = new Date();
+      msg.leido = true;
+      msg.fecha_leido = now.toISOString();
+      msg.fecha_leido_fmt = now.toLocaleDateString('es-DO', {
+        day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Santo_Domingo'
+      }) + ' ' + now.toLocaleTimeString('es-DO', {
+        hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'America/Santo_Domingo'
+      });
+      this.persist();
+
+      await this.addHistorial({
+        tipo_documento: 'MENSAJE',
+        codigo_documento: msg.id,
+        usuario: msg.email || 'Propietario / Ocupante',
+        accion: 'Acuse de Lectura de Constancia',
+        estado_anterior: 'No leído',
+        estado_nuevo: 'Leído',
+        observacion: `El destinatario abrió y leyó la constancia oficial el ${msg.fecha_leido_fmt}`
+      });
+    }
+
     return msg;
   }
 }

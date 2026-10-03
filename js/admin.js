@@ -45,6 +45,7 @@ function setAdminRole(role) {
 
 function applyRolePermissions(role) {
   const badge = document.getElementById('admin-user-badge');
+  const tabRoles = document.getElementById('tab-btn-roles');
   const tabHistorial = document.getElementById('tab-btn-historial');
   const tabConfig = document.getElementById('tab-btn-config');
 
@@ -55,22 +56,24 @@ function applyRolePermissions(role) {
       badge.style.color = '#78350F';
       badge.title = 'Super Administrador con Control Total y Código';
     }
+    if (tabRoles) tabRoles.style.display = 'inline-flex';
     if (tabHistorial) tabHistorial.style.display = 'inline-flex';
     if (tabConfig) tabConfig.style.display = 'inline-flex';
   } else {
-    // GESTOR OPERATIVO
+    // GESTOR OPERATIVO (Solo administración de clientes, solicitudes y pagos; sin acceso a Roles, Historial ni Configuración)
     if (badge) {
       badge.innerHTML = '💼 GESTOR';
       badge.style.background = '#10B981';
       badge.style.color = '#064E3B';
       badge.title = 'Administrador Operativo de Plaza Megatón';
     }
-    // Ocultar Historial y Configuración para el Usuario Gestor
+    // Ocultar Roles & Criterios, Historial y Configuración para el Usuario Gestor
+    if (tabRoles) tabRoles.style.display = 'none';
     if (tabHistorial) tabHistorial.style.display = 'none';
     if (tabConfig) tabConfig.style.display = 'none';
 
     // Si estaba posicionado en una de las pestañas restringidas, volver a KPIs
-    if (currentTab === 'historial' || currentTab === 'config') {
+    if (currentTab === 'roles' || currentTab === 'historial' || currentTab === 'config') {
       switchAdminTab('kpis');
     }
   }
@@ -157,8 +160,8 @@ function adminLogout() {
 function switchAdminTab(tabName) {
   const role = getAdminRole();
 
-  // Si es Usuario Gestor e intenta acceder a Historial o Configuración, bloquear
-  if (role === 'GESTOR' && (tabName === 'historial' || tabName === 'config')) {
+  // Si es Usuario Gestor e intenta acceder a Roles & Criterios, Historial o Configuración, bloquear
+  if (role === 'GESTOR' && (tabName === 'roles' || tabName === 'historial' || tabName === 'config')) {
     App.showToast('Acceso restringido: Esta sección está reservada exclusivamente para el Usuario Master.', 'error');
     tabName = 'kpis';
   }
@@ -1740,27 +1743,30 @@ function renderAdminMensajes() {
   }
 
   container.innerHTML = list.map(item => {
-    const fechaFmt = item.fecha_creacion ? new Date(item.fecha_creacion).toLocaleString('es-DO', { dateStyle: 'short', timeStyle: 'short' }) : '';
+    const fechaFmt = item.fecha_creacion ? new Date(item.fecha_creacion).toLocaleString('es-DO', { dateStyle: 'short', timeStyle: 'short' }) : (item.fecha ? `${item.fecha} ${item.hora || ''}` : '');
+    const readReceipt = item.fecha_leido_fmt || (item.fecha_leido ? new Date(item.fecha_leido).toLocaleString('es-DO', { dateStyle: 'short', timeStyle: 'short' }) : '');
     const estadoLectura = item.leido
-      ? '<span style="color:#15803D; font-weight:700; font-size:11px;">✓ Leído en portal</span>'
+      ? `<span style="color:#15803D; font-weight:700; font-size:11px;">✓ Leído en portal ${readReceipt ? `(${readReceipt})` : ''}</span>`
       : '<span style="color:#D97706; font-weight:700; font-size:11px;">⏳ No leído aún</span>';
     const estadoEmail = item.enviado_email
-      ? '<span style="color:#2563EB; font-size:11px; font-weight:600;">📧 Copia Gmail despachada</span>'
+      ? '<span style="color:#2563EB; font-size:11px; font-weight:600;">📧 Copia despachada a correo</span>'
       : '<span style="color:#64748B; font-size:11px;">🌐 Solo en portal</span>';
 
     return `
       <div style="border:1px solid #E2E8F0; border-radius:10px; padding:14px; background:#FFFFFF; box-shadow:0 1px 2px rgba(0,0,0,0.03);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <div style="font-size:12px; font-weight:800; color:#1E293B;">
-            📍 Cubículo: <strong>${item.cubiculo || 'General'}</strong> · <span style="font-weight:400; color:#475569;">${item.email || 'N/A'}</span>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:6px;">
+          <div style="font-size:12px; font-weight:800; color:#1E293B; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            <span>📍 Cubículo: <strong>${item.cubiculo || 'General'}</strong></span>
+            <span style="font-weight:400; color:#475569;">· ${item.email || 'N/A'}</span>
+            <span style="font-size:10px; background:#EFF6FF; color:#1D4ED8; font-weight:800; padding:1px 6px; border-radius:4px;">🔒 CONSTANCIA INMUTABLE</span>
           </div>
           <span style="font-size:11px; color:#94A3B8;">${fechaFmt}</span>
         </div>
         <h4 style="font-size:14px; font-weight:800; color:#0F172A; margin:0 0 4px 0;">${item.asunto}</h4>
         <p style="font-size:12px; color:#475569; margin:0 0 10px 0; line-height:1.5;">${item.contenido}</p>
-        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed #F1F5F9; padding-top:6px; font-size:11px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed #F1F5F9; padding-top:6px; font-size:11px; flex-wrap:wrap; gap:6px;">
           <div>${estadoLectura} · ${estadoEmail}</div>
-          <div style="color:#64748B;">Por: <strong>${item.autor || 'Administración'}</strong></div>
+          <div style="color:#64748B;">Emitido por: <strong>${item.autor || 'Administración'}</strong></div>
         </div>
       </div>
     `;

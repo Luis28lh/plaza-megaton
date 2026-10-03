@@ -206,16 +206,24 @@ function renderMensajes(mensajes, userEmail) {
 
   container.innerHTML = mensajes.map(msg => {
     const isUnread = !msg.leido;
+    const readFmt = msg.fecha_leido_fmt || (msg.fecha_leido ? new Date(msg.fecha_leido).toLocaleString('es-DO', { dateStyle: 'short', timeStyle: 'short' }) : '');
     return `
       <div class="mensaje-card ${isUnread ? 'unread' : ''}">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; gap:8px;">
-          <div>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; gap:8px; flex-wrap:wrap;">
+          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
             <span class="mensaje-indicator ${isUnread ? 'indicator-unread' : 'indicator-read'}">
-              ${isUnread ? '🔴 Nuevo' : '🟢 Leído'}
+              ${isUnread ? '🔴 Pendiente de Lectura' : '🟢 Leído'}
             </span>
-            ${msg.cubiculo ? `<span style="font-size:11px; background:#FEE2E2; color:#B71C1C; padding:2px 8px; border-radius:6px; font-weight:700; margin-left:4px;">Cubículo ${msg.cubiculo}</span>` : ''}
+            <span style="font-size:10px; background:#EFF6FF; color:#1D4ED8; font-weight:800; padding:2px 8px; border-radius:6px; text-transform:uppercase;">
+              📜 Constancia Oficial Inmutable
+            </span>
+            ${msg.cubiculo ? `<span style="font-size:11px; background:#FEE2E2; color:#B71C1C; padding:2px 8px; border-radius:6px; font-weight:700;">Cubículo ${msg.cubiculo}</span>` : ''}
           </div>
-          <span style="font-size:11px; color:#94A3B8; font-weight:600;">${msg.fecha || ''} ${msg.hora || ''}</span>
+          <span style="font-size:11px; color:#64748B; font-weight:600;">Emitido: ${msg.fecha || ''} ${msg.hora || ''}</span>
+        </div>
+
+        <div style="font-size:11px; color:#94A3B8; font-family:monospace; margin-bottom:6px;">
+          Registro Oficial ID: <strong>${msg.id}</strong>
         </div>
 
         <h4 style="font-size:16px; font-weight:900; color:#0F172A; margin:0 0 6px;">
@@ -226,15 +234,18 @@ function renderMensajes(mensajes, userEmail) {
           ${msg.contenido}
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; font-size:12px; color:#64748B;">
-          <span>Remitente: <strong>${msg.autor || 'Administración Plaza Megatón'}</strong></span>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; font-size:12px; color:#64748B; border-top:1px dashed #E2E8F0; padding-top:8px;">
+          <div>
+            <span>Emitido por: <strong>${msg.autor || 'Consejo de Administración'}</strong></span>
+            ${readFmt ? `<span style="margin-left:8px; color:#15803D; font-size:11px; font-weight:600;">· Leído el ${readFmt}</span>` : ''}
+          </div>
           <div style="display:flex; gap:8px; align-items:center;">
             ${msg.enviado_email ? `<span style="color:#2563EB; font-weight:600; font-size:11px;">✉️ Copia enviada a tu correo</span>` : ''}
             ${isUnread ? `
-              <button type="button" class="btn-sm btn-sm-outline" style="padding:4px 10px; font-size:11px;" onclick="markMsgAsRead('${msg.id}')">
-                ✓ Marcar leído
+              <button type="button" class="btn-sm btn-sm-outline" style="padding:4px 10px; font-size:11px; font-weight:700;" onclick="markMsgAsRead('${msg.id}')">
+                ✓ Confirmar Lectura
               </button>
-            ` : ''}
+            ` : '<span style="font-size:11px; color:#15803D; font-weight:700;">✓ Constancia Verificada</span>'}
           </div>
         </div>
       </div>

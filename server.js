@@ -1190,6 +1190,14 @@ app.patch('/api/mensajes/:id/leido', async (req, res) => {
   }
 });
 
+// Inmutabilidad estricta: Los mensajes y comunicados a propietarios son constancias oficiales y NO pueden eliminarse
+app.delete('/api/mensajes/:id', (req, res) => {
+  return res.status(403).json({
+    success: false,
+    error: 'Operación no permitida: Los comunicados y notificaciones a propietarios son constancias oficiales inmutables y no pueden eliminarse.'
+  });
+});
+
 // Servir Service Worker con scope raíz
 app.get('/sw.js', (req, res) => {
   res.setHeader('Content-Type', 'application/javascript');
