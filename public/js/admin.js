@@ -1168,47 +1168,248 @@ function closeAdminPagoModal() {
 }
 
 // ==========================================
-// 5. HISTORIAL Y AUDITORÍA
+// 5. HISTORIAL Y AUDITORÍA MASTER
 // ==========================================
+let currentHistorialFilter = 'TODOS';
+let currentHistorialSearch = '';
+
 async function loadHistorial() {
   const tbody = document.getElementById('table-historial-body');
   if (!tbody) return;
 
   try {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">Cargando historial de movimientos...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:24px; color:#64748B;">Cargando bitácora de movimientos y auditoría...</td></tr>';
     const res = await fetch('/api/admin/historial', { headers: { 'x-admin-pin': getAdminPin() } });
     const data = await res.json();
 
     if (data.success && data.historial) {
       adminData.historial = data.historial;
-      renderHistorialTable(data.historial);
+      updateHistorialKPIs(data.historial);
+      applyHistorialFilterAndRender();
+      
+      const refreshEl = document.getElementById('historial-last-refresh');
+      if (refreshEl) {
+        const now = new Date();
+        const horaFmt = now.toLocaleTimeString('es-DO', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+        refreshEl.innerHTML = `🕒 <strong>Sincronizado:</strong> ${horaFmt}`;
+      }
+    } else {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:24px; color:#EF4444;">No se pudo cargar la bitácora de auditoría. Verifique privilegios de Usuario Master.</td></tr>';
     }
-  } catch (_) {}
+  } catch (err) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:24px; color:#EF4444;">Error al conectar con la base de datos de auditoría.</td></tr>';
+  }
+}
+
+function updateHistorialKPIs(items = []) {
+  const totalEl = document.getElementById('kpi-historial-total');
+  const loginsEl = document.getElementById('kpi-historial-logins');
+  const archivosEl = document.getElementById('kpi-historial-archivos');
+  const registrosEl = document.getElementById('kpi-historial-registros');
+
+  const total = items.length;
+  const logins = items.filter(h => (h.tipo_movimiento || '').includes('SESION') || (h.tipo_documento === 'SESION')).length;
+  const archivos = items.filter(h => Boolean(h.archivo) || (h.tipo_movimiento || '').includes('SUBIR_ARCHIVO') || (h.tipo_movimiento || '').includes('VOUCHER')).length;
+  const registros = items.filter(h => (h.tipo_movimiento || '').includes('REGISTRO') || (h.tipo_movimiento || '').includes('ACCESO') || (h.tipo_documento === 'USUARIO')).length;
+
+  if (totalEl) totalEl.textContent = total;
+  if (loginsEl) loginsEl.textContent = logins;
+  if (archivosEl) archivosEl.textContent = archivos;
+  if (registrosEl) registrosEl.textContent = registros;
+}
+
+function setHistorialFilter(type, btnElement) {
+  currentHistorialFilter = type;
+  document.querySelectorAll('#historial-filter-chips .historial-chip').forEach(btn => {
+    btn.classList.remove('active');
+    btn.style.background = '#FFFFFF';
+    btn.style.color = '#334155';
+  });
+  if (btnElement) {
+    btnElement.classList.add('active');
+    btnElement.style.background = '#0F172A';
+    btnElement.style.color = '#FFFFFF';
+  }
+  applyHistorialFilterAndRender();
+}
+
+function handleHistorialSearch() {
+  const input = document.getElementById('historial-search-input');
+  currentHistorialSearch = input ? input.value.trim().toLowerCase() : '';
+  applyHistorialFilterAndRender();
+}
+
+function applyHistorialFilterAndRender() {
+  const allItems = adminData.historial || [];
+  let filtered = allItems;
+
+  if (currentHistorialFilter === 'ARCHIVOS') {
+    filtered = filtered.filter(h => Boolean(h.archivo) || (h.tipo_movimiento || '').includes('SUBIR_ARCHIVO'));
+  } else if (currentHistorialFilter === 'SESIONES') {
+    filtered = filtered.filter(h => (h.tipo_movimiento || '').includes('SESION') || h.tipo_documento === 'SESION');
+  } else if (currentHistorialFilter === 'REGISTROS') {
+    filtered = filtered.filter(h => (h.tipo_movimiento || '').includes('REGISTRO') || (h.tipo_movimiento || '').includes('ACCESO') || h.tipo_documento === 'USUARIO');
+  } else if (currentHistorialFilter === 'PAGOS') {
+    filtered = filtered.filter(h => (h.tipo_movimiento || '').includes('PAGO') || h.tipo_documento === 'PAGO');
+  } else if (currentHistorialFilter === 'SOLICITUDES') {
+    filtered = filtered.filter(h => (h.tipo_movimiento || '').includes('SOLICITUD') || h.tipo_documento === 'RECLAMACION');
+  } else if (currentHistorialFilter === 'SEGURIDAD') {
+    filtered = filtered.filter(h => (h.tipo_movimiento || '').includes('CONTRASENA') || h.tipo_documento === 'SEGURIDAD');
+  }
+
+  if (currentHistorialSearch) {
+    const q = currentHistorialSearch;
+    filtered = filtered.filter(h =>
+      (h.usuario || '').toLowerCase().includes(q) ||
+      (h.codigo_documento || '').toLowerCase().includes(q) ||
+      (h.cubiculo || '').toLowerCase().includes(q) ||
+      (h.tipo_movimiento || '').toLowerCase().includes(q) ||
+      (h.tipo_documento || '').toLowerCase().includes(q) ||
+      (h.archivo || '').toLowerCase().includes(q) ||
+      (h.accion || '').toLowerCase().includes(q) ||
+      (h.observacion || '').toLowerCase().includes(q) ||
+      (h.ip || '').toLowerCase().includes(q)
+    );
+  }
+
+  renderHistorialTable(filtered);
 }
 
 function renderHistorialTable(items) {
   const tbody = document.getElementById('table-historial-body');
   if (!tbody) return;
 
-  if (items.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:30px; color:#64748B;">No hay registros en el historial.</td></tr>';
+  if (!items || items.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:36px; color:#64748B;">No se encontraron movimientos registrados con los filtros aplicados.</td></tr>';
     return;
   }
 
   tbody.innerHTML = '';
   items.forEach(h => {
     const tr = document.createElement('tr');
+    tr.style.borderBottom = '1px solid #F1F5F9';
+
+    // Determinar badge para tipo_movimiento
+    let badgeColor = '#E2E8F0';
+    let badgeTextColor = '#334155';
+    let icon = '📝';
+    const tipo = (h.tipo_movimiento || h.tipo_documento || '').toUpperCase();
+
+    if (tipo.includes('SESION') || tipo.includes('MAGIC')) {
+      badgeColor = '#DBEAFE';
+      badgeTextColor = '#1E40AF';
+      icon = '🔐';
+    } else if (tipo.includes('PAGO')) {
+      badgeColor = '#D1FAE5';
+      badgeTextColor = '#065F46';
+      icon = '💰';
+    } else if (tipo.includes('ARCHIVO') || h.archivo) {
+      badgeColor = '#FEF3C7';
+      badgeTextColor = '#92400E';
+      icon = '📎';
+    } else if (tipo.includes('SOLICITUD') || tipo.includes('RECLAMACION')) {
+      badgeColor = '#FEE2E2';
+      badgeTextColor = '#991B1B';
+      icon = '🛠️';
+    } else if (tipo.includes('ACCESO') || tipo.includes('HABILITACION')) {
+      badgeColor = '#EDE9FE';
+      badgeTextColor = '#5B21B6';
+      icon = '⭐';
+    } else if (tipo.includes('REGISTRO')) {
+      badgeColor = '#E0E7FF';
+      badgeTextColor = '#3730A3';
+      icon = '👥';
+    } else if (tipo.includes('CONTRASENA') || tipo.includes('SEGURIDAD')) {
+      badgeColor = '#FCE7F3';
+      badgeTextColor = '#9D174D';
+      icon = '🔒';
+    }
+
+    const archivoHtml = h.archivo 
+      ? `<span style="display:inline-flex; align-items:center; gap:4px; font-size:11px; background:#FEF3C7; color:#92400E; padding:3px 7px; border-radius:6px; font-weight:700; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${h.archivo}">📎 ${h.archivo}</span>`
+      : `<span style="color:#94A3B8; font-size:12px;">—</span>`;
+
+    const cubiculoHtml = h.cubiculo 
+      ? `<span style="font-weight:700; color:#0F172A; background:#F1F5F9; padding:2px 6px; border-radius:4px; font-size:11px;">${h.cubiculo}</span>`
+      : `<span style="color:#94A3B8; font-size:12px;">—</span>`;
+
+    const ipHtml = h.ip ? `<div style="font-size:10px; color:#94A3B8; margin-top:2px;">IP: ${h.ip}</div>` : '';
+
+    const transicionHtml = (h.estado_anterior || h.estado_nuevo)
+      ? `<div style="font-size:11px; margin-top:4px;">${h.estado_anterior ? `<span style="color:#64748B;">${h.estado_anterior}</span> → ` : ''}<strong style="color:#0F172A;">${h.estado_nuevo || ''}</strong></div>`
+      : '';
+
     tr.innerHTML = `
-      <td>${h.fecha} <small>${h.hora || ''}</small></td>
-      <td><span style="font-weight:700; color:var(--primary-red);">${h.tipo_documento}</span></td>
-      <td><strong>${h.codigo_documento}</strong></td>
-      <td>${h.usuario}</td>
-      <td>${h.accion}</td>
-      <td><small>${h.estado_anterior ? `${h.estado_anterior} → ` : ''}<strong>${h.estado_nuevo}</strong></small></td>
-      <td><small>${h.observacion || ''}</small></td>
+      <td style="padding:12px 14px; white-space:nowrap;">
+        <div style="font-weight:700; color:#0F172A; font-size:12px;">${h.fecha}</div>
+        <div style="font-size:11px; color:#64748B;">${h.hora || ''}</div>
+      </td>
+      <td style="padding:12px 14px; white-space:nowrap;">
+        <span style="display:inline-flex; align-items:center; gap:5px; background:${badgeColor}; color:${badgeTextColor}; font-size:11px; font-weight:800; padding:4px 8px; border-radius:6px; letter-spacing:0.3px;">
+          <span>${icon}</span>
+          <span>${h.tipo_movimiento || h.tipo_documento}</span>
+        </span>
+      </td>
+      <td style="padding:12px 14px; white-space:nowrap;">
+        <strong style="color:#0F172A; font-size:12px;">${h.codigo_documento || 'N/A'}</strong>
+      </td>
+      <td style="padding:12px 14px;">
+        <div style="font-weight:700; color:#0F172A; font-size:12px;">${h.usuario || 'Sistema'}</div>
+        ${ipHtml}
+      </td>
+      <td style="padding:12px 14px; white-space:nowrap;">
+        ${cubiculoHtml}
+      </td>
+      <td style="padding:12px 14px;">
+        ${archivoHtml}
+      </td>
+      <td style="padding:12px 14px; font-size:12px; font-weight:600; color:#334155;">
+        ${h.accion || 'Modificación'}
+      </td>
+      <td style="padding:12px 14px; font-size:12px; color:#475569; max-width:320px;">
+        <div>${h.observacion || ''}</div>
+        ${transicionHtml}
+      </td>
     `;
     tbody.appendChild(tr);
   });
+}
+
+function exportHistorialCSV() {
+  const items = adminData.historial || [];
+  if (items.length === 0) {
+    App.showToast('No hay datos en la bitácora para exportar.', 'warning');
+    return;
+  }
+
+  const headers = ['ID', 'Fecha', 'Hora', 'Tipo Movimiento', 'Documento', 'Usuario', 'Cubículo', 'Archivo Subido', 'Acción', 'Estado Anterior', 'Estado Nuevo', 'Observación', 'IP'];
+  const rows = items.map(h => [
+    `"${h.id || ''}"`,
+    `"${h.fecha || ''}"`,
+    `"${h.hora || ''}"`,
+    `"${h.tipo_movimiento || h.tipo_documento || ''}"`,
+    `"${h.codigo_documento || ''}"`,
+    `"${(h.usuario || '').replace(/"/g, '""')}"`,
+    `"${(h.cubiculo || '').replace(/"/g, '""')}"`,
+    `"${(h.archivo || '').replace(/"/g, '""')}"`,
+    `"${(h.accion || '').replace(/"/g, '""')}"`,
+    `"${(h.estado_anterior || '').replace(/"/g, '""')}"`,
+    `"${(h.estado_nuevo || '').replace(/"/g, '""')}"`,
+    `"${(h.observacion || '').replace(/"/g, '""')}"`,
+    `"${h.ip || ''}"`
+  ]);
+
+  const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `BITACORA_AUDITORIA_PLAZA_MEGATON_${Date.now()}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  App.showToast('Bitácora oficial exportada en formato CSV.', 'success');
 }
 
 // ==========================================
@@ -1218,7 +1419,7 @@ async function loadQRInfo() {
   try {
     let targetUrl = '';
     if (App.isStaticHost()) {
-      // Si está en GitHub Pages u hosting estático
+      // Si está en hosting estático
       const base = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
       targetUrl = `${base}/registro.html`;
     } else {

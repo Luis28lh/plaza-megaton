@@ -316,14 +316,19 @@ app.post('/api/usuarios/registro', async (req, res) => {
     }
 
     // Registrar en auditoría
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '';
     await dataService.addHistorial({
+      tipo_movimiento: 'REGISTRO_SOLICITUD',
       tipo_documento: 'USUARIO',
       codigo_documento: user.user_id,
-      usuario: user.nombre,
+      usuario: `${user.nombre} (${user.email})`,
+      cubiculo: assignedCodes.join(', ') || 'N/A',
+      archivo: '',
       accion: 'Solicitud de Registro Web',
-      estado_anterior: 'N/A',
+      estado_anterior: 'No Registrado',
       estado_nuevo: 'Pendiente de Aprobación',
-      observacion: `El usuario ${user.nombre} (${user.email}) solicitó registro para el local: ${assignedCodes.join(', ') || 'N/A'}. En espera de validación y aprobación por la administración.`
+      observacion: `El usuario ${user.nombre} (${user.email}) solicitó registro para el local: ${assignedCodes.join(', ') || 'N/A'}. En espera de validación y aprobación por la administración.`,
+      ip: clientIp
     });
 
     res.json({
@@ -361,6 +366,24 @@ app.get('/api/auth/verify', async (req, res) => {
     if (!session) {
       return res.status(400).json({ success: false, error: 'Enlace inválido o expirado. Solicita uno nuevo.' });
     }
+
+    if (session && session.user) {
+      const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '';
+      await dataService.addHistorial({
+        tipo_movimiento: 'INICIO_SESION_MAGIC_LINK',
+        tipo_documento: 'SESION',
+        codigo_documento: session.user.userId,
+        usuario: `${session.user.nombre} (${session.user.email})`,
+        cubiculo: (session.user.cubiculos || []).map(c => c.codigo || c).join(', ') || 'N/A',
+        archivo: '',
+        accion: 'Acceso mediante Magic Link Directo',
+        estado_anterior: 'Desconectado',
+        estado_nuevo: 'Conectado',
+        observacion: `Inicio de sesión exitoso validando enlace criptográfico único de acceso. IP: ${clientIp}`,
+        ip: clientIp
+      });
+    }
+
     res.json({ success: true, ...session });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -397,6 +420,22 @@ app.post('/api/auth/login', async (req, res) => {
         rol: 'MASTER',
         cubiculos
       });
+
+      const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '';
+      await dataService.addHistorial({
+        tipo_movimiento: 'INICIO_SESION_MASTER',
+        tipo_documento: 'SESION',
+        codigo_documento: 'US-MASTER',
+        usuario: 'Ing. Luis Miguel Lizardo Hernández (Master)',
+        cubiculo: 'Todos',
+        archivo: '',
+        accion: 'Inicio de Sesión de Usuario Master',
+        estado_anterior: 'Desconectado',
+        estado_nuevo: 'Super Admin Activo',
+        observacion: `Acceso concedido a Usuario Master con privilegios de Auditoría Total y Control. IP: ${clientIp}`,
+        ip: clientIp
+      });
+
       return res.json({
         success: true,
         message: '¡Bienvenido, Usuario Master!',
@@ -451,6 +490,21 @@ app.post('/api/auth/login', async (req, res) => {
     // Detectar si es contraseña temporal que requiere cambio obligatorio
     const isTemp = Boolean(isUsingEmailAsPassword || user.debe_cambiar_password || user.password_temporal);
 
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '';
+    await dataService.addHistorial({
+      tipo_movimiento: 'INICIO_SESION',
+      tipo_documento: 'SESION',
+      codigo_documento: user.user_id,
+      usuario: `${user.nombre} (${user.email})`,
+      cubiculo: (cubiculos || []).map(c => c.codigo || c).join(', ') || 'N/A',
+      archivo: '',
+      accion: 'Inicio de Sesión de Inquilino',
+      estado_anterior: 'Desconectado',
+      estado_nuevo: 'Conectado',
+      observacion: `Ingreso exitoso ${isUsingEmailAsPassword ? 'con clave temporal de primer acceso' : 'con clave definitiva'}. IP: ${clientIp}`,
+      ip: clientIp
+    });
+
     res.json({
       success: true,
       message: isTemp 
@@ -482,6 +536,24 @@ app.post('/api/auth/reset-password', async (req, res) => {
   try {
     const { email, code, newPassword } = req.body;
     const result = await authService.verifyAndResetPassword(email, code, newPassword);
+
+    if (result.success && result.user) {
+      const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '';
+      await dataService.addHistorial({
+        tipo_movimiento: 'CAMBIO_CONTRASENA',
+        tipo_documento: 'SEGURIDAD',
+        codigo_documento: result.user.userId,
+        usuario: `${result.user.nombre} (${result.user.email})`,
+        cubiculo: (result.user.cubiculos || []).map(c => c.codigo || c).join(', ') || 'N/A',
+        archivo: '',
+        accion: 'Restablecimiento de Contraseña con Código de Seguridad',
+        estado_anterior: 'Clave Anterior',
+        estado_nuevo: 'Clave Actualizada',
+        observacion: `Código de 6 dígitos validado exitosamente e inicio de sesión automático concedido. IP: ${clientIp}`,
+        ip: clientIp
+      });
+    }
+
     res.json(result);
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -493,6 +565,25 @@ app.post('/api/auth/change-temp-password', async (req, res) => {
   try {
     const { userId, newPassword } = req.body;
     const result = await authService.changeTemporaryPassword(userId, newPassword);
+
+    if (result.success) {
+      const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '';
+      const user = await dataService.getUsuarioById(userId);
+      await dataService.addHistorial({
+        tipo_movimiento: 'CAMBIO_CONTRASENA',
+        tipo_documento: 'SEGURIDAD',
+        codigo_documento: userId,
+        usuario: user ? `${user.nombre} (${user.email})` : userId,
+        cubiculo: user && user.cubiculos ? user.cubiculos.join(', ') : 'N/A',
+        archivo: '',
+        accion: 'Configuración de Contraseña Definitiva',
+        estado_anterior: 'Clave Temporal',
+        estado_nuevo: 'Clave Permanente',
+        observacion: `El inquilino configuró su contraseña definitiva tras el primer ingreso a la plataforma. IP: ${clientIp}`,
+        ip: clientIp
+      });
+    }
+
     res.json(result);
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -565,6 +656,7 @@ app.post('/api/reclamaciones', upload.array('fotos', 6), async (req, res) => {
 
     // Buscar si existe usuario para ligar user_id
     const user = await dataService.getUsuarioByEmail(email.trim().toLowerCase());
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '';
 
     // 3. Crear registro
     const reclamacion = await dataService.createReclamacion({
@@ -576,9 +668,11 @@ app.post('/api/reclamaciones', upload.array('fotos', 6), async (req, res) => {
       asunto: asunto.trim(),
       detalle: detalle.trim(),
       archivos: fileUrls,
+      archivos_nombres: req.files ? req.files.map(f => f.originalname) : [],
       evidencias_base64: evidenciasBase64,
       estado: 'Recibida',
-      responsable: 'Administración'
+      responsable: 'Administración',
+      ip: clientIp
     });
 
     // 4. Enviar correo automático de confirmación
@@ -608,12 +702,14 @@ app.patch('/api/reclamaciones/:codigo', requireAdmin, async (req, res) => {
   try {
     const { codigo } = req.params;
     const { estado, responsable, observacion, adminUser } = req.body;
+    const adminName = adminUser || (req.adminAuth ? req.adminAuth.nombre : 'Administración');
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '';
 
     const updated = await dataService.updateReclamacion(codigo, {
       estado,
       responsable,
       observacion
-    }, adminUser || 'Administración');
+    }, adminName, clientIp);
 
     if (!updated) {
       return res.status(404).json({ success: false, error: 'Reclamación no encontrada.' });
@@ -687,6 +783,7 @@ app.post('/api/pagos', upload.single('voucher'), async (req, res) => {
     }
 
     const user = await dataService.getUsuarioByEmail(email.trim().toLowerCase());
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '';
 
     // 3. Crear registro
     const pago = await dataService.createPago({
@@ -701,9 +798,11 @@ app.post('/api/pagos', upload.single('voucher'), async (req, res) => {
       fecha_pago: fecha_pago ? fecha_pago.trim() : '',
       referencia: referencia ? referencia.trim() : '',
       voucher: voucherUrl,
+      archivo_nombre: req.file ? req.file.originalname : '',
       voucher_base64: voucherBase64,
       voucher_mime: voucherMime,
-      estado: 'Reportado'
+      estado: 'Reportado',
+      ip: clientIp
     });
 
     // 4. Enviar correo de confirmación
@@ -735,11 +834,13 @@ app.patch('/api/pagos/:codigo', requireAdmin, async (req, res) => {
   try {
     const { codigo } = req.params;
     const { estado, observaciones, adminUser } = req.body;
+    const adminName = adminUser || (req.adminAuth ? req.adminAuth.nombre : 'Administración');
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '';
 
     const updated = await dataService.updatePago(codigo, {
       estado,
       observaciones
-    }, adminUser || 'Administración');
+    }, adminName, clientIp);
 
     if (!updated) {
       return res.status(404).json({ success: false, error: 'Pago no encontrado.' });
@@ -893,8 +994,12 @@ app.post('/api/admin/usuarios/:userId/rechazar', requireAdmin, async (req, res) 
 app.get('/api/admin/historial', requireMaster, async (req, res) => {
   try {
     const filter = {};
+    if (req.query.tipo_movimiento) filter.tipo_movimiento = req.query.tipo_movimiento;
     if (req.query.tipo) filter.tipo_documento = req.query.tipo;
     if (req.query.codigo) filter.codigo_documento = req.query.codigo;
+    if (req.query.usuario) filter.usuario = req.query.usuario;
+    if (req.query.cubiculo) filter.cubiculo = req.query.cubiculo;
+    if (req.query.search) filter.search = req.query.search;
 
     const historial = await dataService.getHistorial(filter);
     res.json({ success: true, historial });
@@ -918,7 +1023,25 @@ app.post('/api/admin/config', requireMaster, async (req, res) => {
     const { parametro, valor } = req.body;
     if (!parametro) return res.status(400).json({ success: false, error: 'Parámetro requerido.' });
 
+    const adminName = req.adminAuth ? req.adminAuth.nombre : 'Usuario Master';
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '';
+
     await dataService.setConfigValue(parametro, valor);
+
+    await dataService.addHistorial({
+      tipo_movimiento: 'CONFIGURACION_SISTEMA',
+      tipo_documento: 'CONFIG',
+      codigo_documento: parametro,
+      usuario: adminName,
+      cubiculo: 'General',
+      archivo: '',
+      accion: 'Modificación de Configuración del Sistema',
+      estado_anterior: '',
+      estado_nuevo: String(valor),
+      observacion: `Parámetro global "${parametro}" actualizado por ${adminName}.`,
+      ip: clientIp
+    });
+
     res.json({ success: true, message: 'Configuración actualizada.' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

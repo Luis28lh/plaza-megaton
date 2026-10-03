@@ -60,6 +60,10 @@ class GoogleAppsScriptBridge {
   async syncUpdatePago(pago) {
     return this.sendRequest('UPDATE_PAGO', pago);
   }
+
+  async syncHistorial(entry) {
+    return this.sendRequest('SYNC_HISTORIAL', entry);
+  }
 }
 
 module.exports = GoogleAppsScriptBridge;

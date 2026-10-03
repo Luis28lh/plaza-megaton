@@ -247,9 +247,11 @@ class DataService {
 
     if (changedFields.length > 0) {
       await this.addHistorial({
+        tipo_movimiento: 'ACTUALIZACION_USUARIO',
         tipo_documento: 'USUARIO',
         codigo_documento: user.user_id,
         usuario: adminUser,
+        cubiculo: (user.cubiculos || []).join(', ') || '',
         accion: 'Actualización de Usuario',
         estado_anterior: 'ACTIVO',
         estado_nuevo: user.estado || 'ACTIVO',
@@ -387,9 +389,11 @@ class DataService {
     }
 
     await this.addHistorial({
+      tipo_movimiento: 'HABILITACION_ACCESO',
       tipo_documento: 'USUARIO',
       codigo_documento: user.user_id,
       usuario: adminName,
+      cubiculo: assignedCodes.join(', ') || 'N/A',
       accion: 'Aprobación de Registro y Concesión de Acceso',
       estado_anterior: oldEstado || 'Pendiente de Aprobación',
       estado_nuevo: 'Activo',
@@ -421,9 +425,11 @@ class DataService {
     }
 
     await this.addHistorial({
+      tipo_movimiento: 'RECHAZO_ACCESO',
       tipo_documento: 'USUARIO',
       codigo_documento: user.user_id,
       usuario: adminName,
+      cubiculo: relations.map(r => r.cubiculo_codigo).join(', ') || 'N/A',
       accion: 'Rechazo de Registro',
       estado_anterior: oldEstado || 'Pendiente de Aprobación',
       estado_nuevo: 'Rechazado',
@@ -513,14 +519,24 @@ class DataService {
     this.db.RECLAMACIONES.push(newRec);
 
     // Registrar en Historial
+    const archivosEvidencia = (data.archivos_nombres && data.archivos_nombres.length > 0)
+      ? data.archivos_nombres.join(', ')
+      : (Array.isArray(newRec.archivos) && newRec.archivos.length > 0)
+        ? newRec.archivos.map(a => typeof a === 'string' ? a.split('/').pop() : (a.name || 'foto')).join(', ')
+        : '';
+
     await this.addHistorial({
+      tipo_movimiento: archivosEvidencia ? 'SUBIR_ARCHIVO_SOLICITUD' : 'REGISTRO_SOLICITUD',
       tipo_documento: 'RECLAMACION',
       codigo_documento: newRec.codigo,
-      usuario: newRec.nombre || newRec.email,
-      accion: 'Creación de Reclamación',
+      usuario: `${newRec.nombre} (${newRec.email})`,
+      cubiculo: newRec.cubiculo,
+      archivo: archivosEvidencia,
+      accion: archivosEvidencia ? 'Creación de Solicitud con Evidencias Adjuntas' : 'Creación de Solicitud',
       estado_anterior: '',
       estado_nuevo: newRec.estado,
-      observacion: `Asunto: ${newRec.asunto} | Cubículo: ${newRec.cubiculo}`
+      observacion: `Asunto: ${newRec.asunto} | Cubículo: ${newRec.cubiculo}${archivosEvidencia ? ' | Archivos: ' + archivosEvidencia : ''}`,
+      ip: data.ip || ''
     });
 
     this.persist();
@@ -532,7 +548,7 @@ class DataService {
     return newRec;
   }
 
-  async updateReclamacion(codigo, updates, adminUser = 'Administración') {
+  async updateReclamacion(codigo, updates, adminUser = 'Administración', ip = '') {
     const rec = (this.db.RECLAMACIONES || []).find(r => r.codigo.toUpperCase() === codigo.toUpperCase());
     if (!rec) return null;
 
@@ -547,23 +563,31 @@ class DataService {
     // Registrar en Historial si cambió de estado o se agregó observación
     if (updates.estado && updates.estado !== oldEstado) {
       await this.addHistorial({
+        tipo_movimiento: 'ACTUALIZACION_SOLICITUD',
         tipo_documento: 'RECLAMACION',
         codigo_documento: rec.codigo,
         usuario: adminUser,
-        accion: 'Cambio de Estado',
+        cubiculo: rec.cubiculo,
+        archivo: Array.isArray(rec.archivos) ? rec.archivos.map(a => typeof a === 'string' ? a.split('/').pop() : (a.name || 'foto')).join(', ') : '',
+        accion: 'Cambio de Estado de Solicitud',
         estado_anterior: oldEstado,
         estado_nuevo: updates.estado,
-        observacion: updates.observacion || `Actualizado por ${adminUser}`
+        observacion: updates.observacion || `Actualizado por ${adminUser}`,
+        ip
       });
     } else if (updates.observacion) {
       await this.addHistorial({
+        tipo_movimiento: 'ACTUALIZACION_SOLICITUD',
         tipo_documento: 'RECLAMACION',
         codigo_documento: rec.codigo,
         usuario: adminUser,
-        accion: 'Nota Administrativa',
+        cubiculo: rec.cubiculo,
+        archivo: '',
+        accion: 'Nota Administrativa en Solicitud',
         estado_anterior: oldEstado,
         estado_nuevo: rec.estado,
-        observacion: updates.observacion
+        observacion: updates.observacion,
+        ip
       });
     }
 
@@ -637,14 +661,19 @@ class DataService {
     this.db.PAGOS.push(newPago);
 
     // Historial
+    const archivoVoucher = data.archivo_nombre || (newPago.voucher ? newPago.voucher.split('/').pop() : '');
     await this.addHistorial({
+      tipo_movimiento: archivoVoucher ? 'SUBIR_ARCHIVO_PAGO' : 'REGISTRO_PAGO',
       tipo_documento: 'PAGO',
       codigo_documento: newPago.codigo,
-      usuario: newPago.nombre || newPago.email,
-      accion: 'Reporte de Pago',
+      usuario: `${newPago.nombre} (${newPago.email})`,
+      cubiculo: newPago.cubiculo,
+      archivo: archivoVoucher,
+      accion: archivoVoucher ? 'Reporte de Pago con Comprobante Adjunto' : 'Reporte de Pago',
       estado_anterior: '',
       estado_nuevo: newPago.estado,
-      observacion: `Monto: ${newPago.monto} | Período: ${newPago.periodo} | Cubículo: ${newPago.cubiculo}`
+      observacion: `Monto: RD$ ${newPago.monto} | Período: ${newPago.periodo} | Cubículo: ${newPago.cubiculo}${archivoVoucher ? ' | Archivo: ' + archivoVoucher : ''}`,
+      ip: data.ip || ''
     });
 
     this.persist();
@@ -656,7 +685,7 @@ class DataService {
     return newPago;
   }
 
-  async updatePago(codigo, updates, adminUser = 'Administración') {
+  async updatePago(codigo, updates, adminUser = 'Administración', ip = '') {
     const pago = (this.db.PAGOS || []).find(p => p.codigo.toUpperCase() === codigo.toUpperCase());
     if (!pago) return null;
 
@@ -665,13 +694,17 @@ class DataService {
 
     if (updates.estado && updates.estado !== oldEstado) {
       await this.addHistorial({
+        tipo_movimiento: 'EVALUACION_PAGO',
         tipo_documento: 'PAGO',
         codigo_documento: pago.codigo,
         usuario: adminUser,
-        accion: 'Evaluación de Pago',
+        cubiculo: pago.cubiculo,
+        archivo: pago.voucher ? pago.voucher.split('/').pop() : '',
+        accion: 'Evaluación y Cambio de Estado de Pago',
         estado_anterior: oldEstado,
         estado_nuevo: updates.estado,
-        observacion: updates.observaciones || `Estado modificado a ${updates.estado} por ${adminUser}`
+        observacion: updates.observaciones || `Estado modificado a ${updates.estado} por ${adminUser}`,
+        ip
       });
     }
 
@@ -690,17 +723,38 @@ class DataService {
   async getHistorial(filter = {}) {
     let items = this.db.HISTORIAL || [];
 
+    if (filter.tipo_movimiento) {
+      items = items.filter(h => h.tipo_movimiento === filter.tipo_movimiento);
+    }
     if (filter.tipo_documento) {
       items = items.filter(h => h.tipo_documento === filter.tipo_documento);
     }
     if (filter.codigo_documento) {
-      items = items.filter(h => h.codigo_documento.toUpperCase() === filter.codigo_documento.toUpperCase());
+      items = items.filter(h => (h.codigo_documento || '').toUpperCase() === filter.codigo_documento.toUpperCase());
+    }
+    if (filter.usuario) {
+      items = items.filter(h => (h.usuario || '').toLowerCase().includes(filter.usuario.toLowerCase()));
+    }
+    if (filter.cubiculo) {
+      items = items.filter(h => (h.cubiculo || '').toUpperCase().includes(filter.cubiculo.toUpperCase()));
+    }
+    if (filter.search) {
+      const q = filter.search.toLowerCase();
+      items = items.filter(h => 
+        (h.usuario || '').toLowerCase().includes(q) ||
+        (h.codigo_documento || '').toLowerCase().includes(q) ||
+        (h.cubiculo || '').toLowerCase().includes(q) ||
+        (h.tipo_movimiento || '').toLowerCase().includes(q) ||
+        (h.archivo || '').toLowerCase().includes(q) ||
+        (h.accion || '').toLowerCase().includes(q) ||
+        (h.observacion || '').toLowerCase().includes(q)
+      );
     }
 
     return items.slice().reverse();
   }
 
-  async addHistorial({ tipo_documento, codigo_documento, usuario, accion, estado_anterior, estado_nuevo, observacion }) {
+  async addHistorial({ tipo_movimiento, tipo_documento, codigo_documento, usuario, cubiculo, archivo, accion, estado_anterior, estado_nuevo, observacion, ip }) {
     if (!this.db.HISTORIAL) this.db.HISTORIAL = [];
 
     const now = new Date();
@@ -708,24 +762,47 @@ class DataService {
       day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Santo_Domingo'
     });
     const hora = now.toLocaleTimeString('es-DO', {
-      hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'America/Santo_Domingo'
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: 'America/Santo_Domingo'
     });
 
+    // Determinar categoría normalizada de movimiento si no se especifica
+    let finalTipoMov = tipo_movimiento;
+    if (!finalTipoMov) {
+      if (archivo) {
+        finalTipoMov = 'SUBIR_ARCHIVO';
+      } else if (tipo_documento) {
+        finalTipoMov = `${tipo_documento}_${(accion || 'ACCION').toUpperCase().replace(/\s+/g, '_')}`;
+      } else {
+        finalTipoMov = 'MOVIMIENTO_GENERAL';
+      }
+    }
+
     const entry = {
-      id: `H-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-      tipo_documento,
-      codigo_documento,
+      id: `MOV-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      tipo_movimiento: finalTipoMov,
+      tipo_documento: tipo_documento || 'SISTEMA',
+      codigo_documento: codigo_documento || 'N/A',
       fecha,
       hora,
+      timestamp_iso: now.toISOString(),
       usuario: usuario || 'Sistema',
+      cubiculo: cubiculo || '',
+      archivo: archivo || '',
       accion: accion || 'Modificación',
       estado_anterior: estado_anterior || '',
       estado_nuevo: estado_nuevo || '',
-      observacion: observacion || ''
+      observacion: observacion || '',
+      ip: ip || ''
     };
 
     this.db.HISTORIAL.push(entry);
     this.persist();
+
+    // Sincronizar bitácora a Google Apps Script Bridge si está conectado
+    if (this.googleBridge && typeof this.googleBridge.syncHistorial === 'function') {
+      this.googleBridge.syncHistorial(entry).catch(err => console.error('[GoogleBridge Bitácora Error]', err));
+    }
+
     return entry;
   }
 
