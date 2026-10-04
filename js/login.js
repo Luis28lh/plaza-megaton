@@ -76,8 +76,8 @@ async function handleLoginSubmit(event) {
   const email = emailInput ? emailInput.value.trim() : '';
   const password = passwordInput ? passwordInput.value.trim() : '';
 
-  if (!email || !email.includes('@') || email.length < 5) {
-    App.showToast('Ingresa un correo electrónico registrado válido.', 'error');
+  if (!email || email.length < 3) {
+    App.showToast('Ingresa tu correo electrónico registrado o identificador.', 'error');
     return;
   }
 
@@ -136,8 +136,8 @@ async function handleRequestResetCode(event) {
   const email = emailInput ? emailInput.value.trim() : '';
   const submitBtn = document.getElementById('btn-send-reset-code');
 
-  if (!email || !email.includes('@') || email.length < 5) {
-    App.showToast('Ingresa un correo electrónico registrado.', 'error');
+  if (!email || email.length < 3) {
+    App.showToast('Ingresa tu correo electrónico registrado.', 'error');
     return;
   }
 

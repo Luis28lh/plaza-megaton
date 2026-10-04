@@ -183,18 +183,23 @@ class DataService {
 
   async getUsuarioByEmail(email) {
     if (!email) return null;
-    const cleanEmail = email.trim().toLowerCase();
+    const cleanEmail = String(email).trim().toLowerCase();
     const emailWithoutDomainExt = cleanEmail.replace(/\.[a-z0-9]+$/i, '');
+    const cleanWithoutSymbols = cleanEmail.replace(/[^a-z0-9]/g, '');
 
     const user = (this.db.USUARIOS || []).find(u => {
       const uEmail = (u.email || '').trim().toLowerCase();
       const uWithoutExt = uEmail.replace(/\.[a-z0-9]+$/i, '');
+      const uWithoutSymbols = uEmail.replace(/[^a-z0-9]/g, '');
 
       // 1. Coincidencia exacta
       if (uEmail === cleanEmail) return true;
 
       // 2. Coincidencia con lista de alias de correos
-      if (Array.isArray(u.alias_emails) && u.alias_emails.some(a => (a || '').trim().toLowerCase() === cleanEmail)) {
+      if (Array.isArray(u.alias_emails) && u.alias_emails.some(a => {
+        const cleanA = (a || '').trim().toLowerCase();
+        return cleanA === cleanEmail || cleanA.replace(/\.[a-z0-9]+$/i, '') === emailWithoutDomainExt;
+      })) {
         return true;
       }
 
@@ -202,7 +207,26 @@ class DataService {
       if (uEmail === cleanEmail + '.com' || cleanEmail === uEmail + '.com') return true;
       if (cleanEmail.includes('@') && emailWithoutDomainExt === uWithoutExt) return true;
 
-      // 4. Casos especiales conocidos
+      // 4. Tolerancia ortográfica 'i' vs 'y' (ej. souri vs soury)
+      if (cleanEmail.replace(/y/g, 'i') === uEmail.replace(/y/g, 'i') || 
+          emailWithoutDomainExt.replace(/y/g, 'i') === uWithoutExt.replace(/y/g, 'i')) {
+        return true;
+      }
+
+      // 5. Coincidencia por código de cubículo (ej. "A-308", "A-309", "308", "309")
+      if (Array.isArray(u.cubiculos)) {
+        for (const c of u.cubiculos) {
+          const cCode = (typeof c === 'object' ? c.codigo : String(c)).trim().toLowerCase();
+          if (cCode === cleanEmail || cCode.replace(/[^a-z0-9]/g, '') === cleanWithoutSymbols) {
+            return true;
+          }
+        }
+      }
+
+      // 6. Coincidencia por user_id (ej. "US-017")
+      if ((u.user_id || '').toLowerCase() === cleanEmail) return true;
+
+      // 7. Casos especiales conocidos
       if (cleanEmail === 'wes.inform@gmail.com' && (uEmail.includes('warn.electrical') || u.user_id === 'US-004')) return true;
       return false;
     });
