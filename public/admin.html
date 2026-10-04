@@ -53,7 +53,10 @@
           </a>
           <span id="admin-user-badge" class="admin-badge">ADMIN</span>
         </div>
-        <div style="display:flex; align-items:center; gap:12px;">
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <button id="btn-header-reset-provisional" onclick="openMasterResetModal()" class="btn-sm" style="background:#D97706; color:#FFFFFF; font-weight:800; border:none; display:flex; align-items:center; gap:6px; cursor:pointer; padding:6px 12px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.25);" title="Reiniciar cuenta de prueba a clave provisional 123456 y borrar PIN">
+            🔄 Reiniciar Proceso (123456)
+          </button>
           <a href="index.html" class="btn-sm btn-sm-outline" style="background:#1E293B; border-color:#334155; color:#F8FAFC;">🌐 Ver Web</a>
           <button onclick="adminLogout()" class="btn-sm btn-sm-danger">Salir</button>
         </div>
@@ -81,6 +84,26 @@
 
       <!-- 1. PESTAÑA: KPIS -->
       <section id="tab-section-kpis">
+        <!-- BOTÓN / CARD MAESTRO PRINCIPAL: REINICIAR PROCESO DE ACCESO Y PIN -->
+        <div id="dashboard-master-reset-card" style="background:#FFFBEB; border:2px solid #F59E0B; border-left:6px solid #D97706; border-radius:12px; padding:18px 22px; margin-bottom:20px; box-shadow:0 2px 8px rgba(217,119,6,0.12); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+          <div style="flex:1; min-width:300px;">
+            <div style="font-weight:900; font-size:16px; color:#92400E; display:flex; align-items:center; gap:8px;">
+              <span>🔄</span> Reiniciar Proceso de Acceso y PIN (Modo Pruebas / Bienvenida)
+            </div>
+            <div style="font-size:13px; color:#78350F; margin-top:5px; line-height:1.5;">
+              ¿Terminaste de hacer tus pruebas entrando con la clave temporal y fijando el PIN? Pulsa este botón para <strong>restaurar la cuenta a 123456 y borrar el PIN</strong>, de modo que cuando el inquilino ingrese por primera vez, reciba la ventana modal para configurar sus <strong>4 pines</strong> personales.
+            </div>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <select id="dashboard-select-reset-user" class="form-select" style="min-width:260px; font-weight:700; font-size:13px; border:2px solid #D97706; background:#FFFFFF;">
+              <option value="">Cargando usuarios...</option>
+            </select>
+            <button type="button" class="btn-primary" style="background:#D97706; border-color:#B45309; padding:10px 18px; font-weight:900; font-size:14px; display:flex; align-items:center; gap:8px; box-shadow:0 2px 4px rgba(217,119,6,0.3); cursor:pointer;" onclick="triggerDashboardMasterReset()">
+              🔄 Reiniciar Proceso (123456)
+            </button>
+          </div>
+        </div>
+
         <div class="kpis-grid">
           <!-- Cubículos -->
           <div class="kpi-card">
@@ -962,6 +985,48 @@
         <button id="btn-pago-pedir-info" class="btn-sm btn-sm-outline" style="padding:10px 14px;">Solicitar Info</button>
         <button id="btn-pago-rechazar" class="btn-sm btn-sm-danger" style="padding:10px 14px;">Rechazar</button>
         <button id="btn-pago-confirmar" class="btn-sm btn-sm-success" style="padding:10px 18px;">✓ Confirmar Pago</button>
+      </div>
+  <!-- MODAL RÁPIDO MASTER: REINICIAR PROCESO DE ACCESO Y PIN -->
+  <div id="master-reset-modal" class="modal-backdrop">
+    <div class="modal-box" style="max-width:520px;">
+      <div class="modal-header">
+        <h3 style="font-size:16px; font-weight:900; color:#B45309; display:flex; align-items:center; gap:8px;">
+          <span>🔄</span> Reiniciar Proceso de Acceso (Modo Pruebas)
+        </h3>
+        <button onclick="closeMasterResetModal()" style="background:none; border:none; font-size:20px; cursor:pointer;">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px; color:#475569; line-height:1.5; margin-bottom:16px;">
+          Esta función exclusiva para el <strong>Usuario Master</strong> restaura la cuenta seleccionada a la clave provisional <strong>123456</strong> y borra cualquier PIN configurado, permitiendo que el inquilino ingrese por primera vez y establezca sus propios <strong>4 dígitos de PIN</strong>.
+        </p>
+
+        <!-- Acceso directo prioritario a Bertha Soury -->
+        <div style="background:#FFFBEB; border:1.5px solid #F59E0B; border-radius:10px; padding:16px; margin-bottom:16px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+          <div style="font-weight:900; color:#92400E; font-size:14px; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+            <span>⭐</span> Acceso Rápido: Bertha Soury (Cubículos 308 y 309)
+          </div>
+          <div style="font-size:12px; color:#78350F; margin-bottom:12px;">
+            Correo: <code>b.souri@souriindustrial.com</code>
+          </div>
+          <button type="button" class="btn-primary" style="background:#D97706; border-color:#B45309; width:100%; padding:10px; font-weight:900; font-size:13px; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;" onclick="resetProvisionalAccess('US-017', 'Bertha Soury')">
+            🔄 Reiniciar Cuenta de Bertha Soury (123456 y Borrar PIN)
+          </button>
+        </div>
+
+        <div style="border-top:1px solid #E2E8F0; padding-top:14px;">
+          <label class="form-label" style="font-size:13px; font-weight:700; color:#334155; margin-bottom:6px;">O selecciona cualquier otro inquilino para reiniciar:</label>
+          <div style="display:flex; gap:8px;">
+            <select id="modal-select-reset-user" class="form-select" style="font-weight:600; font-size:13px;">
+              <option value="">Cargando usuarios...</option>
+            </select>
+            <button type="button" class="btn-sm" style="background:#D97706; color:#FFF; font-weight:800; border:none; padding:8px 14px; border-radius:6px; white-space:nowrap; cursor:pointer;" onclick="triggerModalMasterReset()">
+              Reiniciar
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeMasterResetModal()" class="btn-secondary" style="width:auto; min-height:38px; padding:0 16px;">Cerrar</button>
       </div>
     </div>
   </div>

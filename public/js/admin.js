@@ -517,15 +517,17 @@ function renderUsuariosTable(users) {
     return 0;
   });
 
-  const resetSelect = document.getElementById('select-reset-user');
-  if (resetSelect) {
-    const occupantUsers = sortedUsers.filter(u => u.user_id !== 'US-MASTER');
-    resetSelect.innerHTML = occupantUsers.map(u => {
-      const isBertha = (u.user_id === 'US-017' || (u.nombre || '').toUpperCase().includes('BERTHA'));
-      const statusLabel = u.pin ? `🔑 PIN: ${u.pin}` : (u.password === '123456' ? '⚠️ Clave Temp 123456' : '🔒 Clave Personal');
-      return `<option value="${u.user_id}" ${isBertha ? 'selected' : ''}>${u.nombre} (${u.email}) - ${statusLabel}</option>`;
-    }).join('');
-  }
+  const occupantUsers = sortedUsers.filter(u => u.user_id !== 'US-MASTER');
+  const userOptionsHtml = occupantUsers.map(u => {
+    const isBertha = (u.user_id === 'US-017' || (u.nombre || '').toUpperCase().includes('BERTHA'));
+    const statusLabel = u.pin ? `🔑 PIN: ${u.pin}` : (u.password === '123456' ? '⚠️ Clave Temp 123456' : '🔒 Clave Personal');
+    return `<option value="${u.user_id}" ${isBertha ? 'selected' : ''}>${u.nombre} (${u.email}) - ${statusLabel}</option>`;
+  }).join('');
+
+  ['select-reset-user', 'dashboard-select-reset-user', 'modal-select-reset-user'].forEach(selectId => {
+    const el = document.getElementById(selectId);
+    if (el) el.innerHTML = userOptionsHtml;
+  });
 
   tbody.innerHTML = '';
   sortedUsers.forEach(u => {
@@ -844,6 +846,38 @@ async function triggerMasterQuickReset() {
   await resetProvisionalAccess(userId, userName);
 }
 
+async function triggerDashboardMasterReset() {
+  const select = document.getElementById('dashboard-select-reset-user');
+  const userId = select ? select.value : '';
+  if (!userId) {
+    App.showToast('Selecciona un usuario para reiniciar.', 'error');
+    return;
+  }
+  const userName = select.options[select.selectedIndex]?.text || userId;
+  await resetProvisionalAccess(userId, userName);
+}
+
+async function triggerModalMasterReset() {
+  const select = document.getElementById('modal-select-reset-user');
+  const userId = select ? select.value : '';
+  if (!userId) {
+    App.showToast('Selecciona un usuario para reiniciar.', 'error');
+    return;
+  }
+  const userName = select.options[select.selectedIndex]?.text || userId;
+  await resetProvisionalAccess(userId, userName);
+}
+
+function openMasterResetModal() {
+  const modal = document.getElementById('master-reset-modal');
+  if (modal) modal.classList.add('open');
+}
+
+function closeMasterResetModal() {
+  const modal = document.getElementById('master-reset-modal');
+  if (modal) modal.classList.remove('open');
+}
+
 async function resetProvisionalAccess(userId, userName) {
   const cleanName = (userName || userId).replace(/\s*\(.*?\)\s*/g, ' ').replace(/\s*\[.*?\]\s*/g, ' ').trim();
   if (!confirm(`¿Deseas reiniciar la cuenta de "${cleanName}" a la clave provisional (123456) y borrar su PIN?\n\nAl confirmar:\n1. La contraseña volverá a ser "123456".\n2. Se borrará su PIN actual para que quede en blanco.\n3. Al entrar por primera vez con 123456, el sistema le pedirá automáticamente registrar su nuevo PIN personal de 4 dígitos.`)) {
@@ -872,6 +906,10 @@ async function resetProvisionalAccess(userId, userName) {
       const modal = document.getElementById('edit-user-modal');
       if (modal && modal.classList.contains('open')) {
         setTimeout(() => modal.classList.remove('open'), 600);
+      }
+      const masterModal = document.getElementById('master-reset-modal');
+      if (masterModal && masterModal.classList.contains('open')) {
+        setTimeout(() => masterModal.classList.remove('open'), 600);
       }
     } else {
       App.showToast(data.error || 'Error al reiniciar el proceso provisional.', 'error');
