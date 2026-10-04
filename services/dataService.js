@@ -27,16 +27,24 @@ class DataService {
         const raw = fs.readFileSync(DB_PATH, 'utf8');
         this.db = JSON.parse(raw);
       } else {
-        // Inicializar desde catálogo inicial usando require para empaquetado automático en Vercel
-        this.db = JSON.parse(JSON.stringify(require('../database/initial_catalog.json')));
+        // Inicializar desde local_db.json (o initial_catalog.json si no existe) para conservar usuarios y estados registrados
+        try {
+          this.db = JSON.parse(JSON.stringify(require('../database/local_db.json')));
+        } catch (_) {
+          this.db = JSON.parse(JSON.stringify(require('../database/initial_catalog.json')));
+        }
         this.persist();
       }
     } catch (err) {
       try {
-        this.db = JSON.parse(JSON.stringify(require('../database/initial_catalog.json')));
+        this.db = JSON.parse(JSON.stringify(require('../database/local_db.json')));
       } catch (_) {
-        if (!this.db) {
-          this.db = { CUBICULOS: [], USUARIOS: [], USUARIO_CUBICULO: [], PRESUPUESTO_2026: null, RECLAMACIONES: [], PAGOS: [], CONFIGURACION: [], HISTORIAL: [], NOVEDADES: [], MENSAJES: [] };
+        try {
+          this.db = JSON.parse(JSON.stringify(require('../database/initial_catalog.json')));
+        } catch (__) {
+          if (!this.db) {
+            this.db = { CUBICULOS: [], USUARIOS: [], USUARIO_CUBICULO: [], PRESUPUESTO_2026: null, RECLAMACIONES: [], PAGOS: [], CONFIGURACION: [], HISTORIAL: [], NOVEDADES: [], MENSAJES: [] };
+          }
         }
       }
     }

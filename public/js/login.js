@@ -399,8 +399,69 @@ async function checkUrlToken() {
   }
 }
 
+function checkExistingSession() {
+  const urlParams = new URLSearchParams(window.location.search);
+  // Si viene con un token específico en URL o forzar cambio, no autoredirigir
+  if (urlParams.get('token') || urlParams.get('action') === 'logout') return;
+
+  const session = App.getSession();
+  if (session && session.user) {
+    const firstName = (session.user.nombre || 'Inquilino').split(' ')[0];
+    const cubs = Array.isArray(session.user.cubiculos)
+      ? session.user.cubiculos.map(c => typeof c === 'object' ? c.codigo : c).join(', ')
+      : (session.user.cubiculos || '');
+
+    hideAllSteps();
+    const container = document.querySelector('.login-card') || document.querySelector('.card-box') || document.body;
+    let activeBox = document.getElementById('already-logged-in-box');
+    if (!activeBox) {
+      activeBox = document.createElement('div');
+      activeBox.id = 'already-logged-in-box';
+      activeBox.style.cssText = 'text-align:center; padding:32px 18px;';
+      activeBox.innerHTML = `
+        <div style="font-size:46px; margin-bottom:12px;">👤</div>
+        <div style="display:inline-flex; align-items:center; gap:6px; background:#DCFCE7; color:#15803D; font-size:12px; font-weight:800; padding:4px 12px; border-radius:999px; margin-bottom:10px;">
+          <span style="display:inline-block; width:8px; height:8px; background:#16A34A; border-radius:50%;"></span>
+          Sesión Activa Permanente
+        </div>
+        <h3 style="font-size:19px; font-weight:900; color:#0F172A; margin:0 0 6px;">¡Hola, ${firstName}!</h3>
+        <p style="font-size:13px; color:#475569; margin:0 0 18px; line-height:1.5;">
+          Ya te encuentras registrado(a) y conectado(a) en este dispositivo como <strong>${session.user.nombre}</strong> ${cubs ? `(Cubículo ${cubs})` : ''}.
+        </p>
+        <div style="display:flex; flex-direction:column; gap:10px; max-width:320px; margin:0 auto 16px;">
+          <a href="mis-solicitudes.html" class="btn-primary" style="padding:12px; font-size:15px; font-weight:800; text-decoration:none; display:block;">
+            📋 Continuar a Mis Solicitudes
+          </a>
+          <a href="index.html" class="btn-secondary" style="padding:10px; font-size:14px; font-weight:700; text-decoration:none; display:block;">
+            🏠 Volver al Inicio
+          </a>
+        </div>
+        <div style="margin-top:14px;">
+          <button type="button" onclick="App.clearSession()" style="background:none; border:none; color:#DC2626; font-size:12px; cursor:pointer; text-decoration:underline; font-weight:700;">
+            ¿Deseas cerrar sesión o cambiar de cuenta?
+          </button>
+        </div>
+      `;
+      const formStep = document.getElementById('login-form-step');
+      if (formStep && formStep.parentNode) {
+        formStep.parentNode.insertBefore(activeBox, formStep);
+      } else {
+        container.appendChild(activeBox);
+      }
+    }
+
+    // Redirigir suavemente tras 1.2 segundos si el usuario no pulsa nada
+    setTimeout(() => {
+      if (window.location.pathname.includes('login') && !window.location.search.includes('action=logout')) {
+        window.location.href = 'mis-solicitudes.html';
+      }
+    }, 1200);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   checkUrlToken();
+  checkExistingSession();
 
   const form = document.getElementById('login-form');
   if (form) {

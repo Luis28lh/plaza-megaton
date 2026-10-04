@@ -2,11 +2,37 @@
 // Compatible con Servidor Local Node.js y Plataforma Web
 
 const App = {
-  // Manejo de sesión local
+  // Manejo de sesión local persistente y tolerante a fallos / actualizaciones
   getSession() {
     try {
-      const token = localStorage.getItem('megaton_token');
-      const userRaw = localStorage.getItem('megaton_user');
+      let token = localStorage.getItem('megaton_token');
+      let userRaw = localStorage.getItem('megaton_user');
+
+      // Si localStorage está vacío o fue limpiado durante actualización, recuperar de respaldo
+      if (!token || !userRaw) {
+        // Respaldo 1: sessionStorage
+        token = sessionStorage.getItem('megaton_token');
+        userRaw = sessionStorage.getItem('megaton_user');
+
+        // Respaldo 2: Cookie persistente (1 año)
+        if (!token || !userRaw) {
+          const cookieMatchToken = document.cookie.match(/(?:^|;\s*)megaton_token=([^;]+)/);
+          const cookieMatchUser = document.cookie.match(/(?:^|;\s*)megaton_user=([^;]+)/);
+          if (cookieMatchToken && cookieMatchUser) {
+            token = decodeURIComponent(cookieMatchToken[1]);
+            userRaw = decodeURIComponent(cookieMatchUser[1]);
+          }
+        }
+
+        // Si se recuperó de respaldo, restaurar en localStorage
+        if (token && userRaw) {
+          try {
+            localStorage.setItem('megaton_token', token);
+            localStorage.setItem('megaton_user', userRaw);
+          } catch (_) {}
+        }
+      }
+
       if (!token || !userRaw) return null;
       return { token, user: JSON.parse(userRaw) };
     } catch (_) {
@@ -15,14 +41,38 @@ const App = {
   },
 
   setSession(user, token) {
-    if (token) localStorage.setItem('megaton_token', token);
-    if (user) localStorage.setItem('megaton_user', JSON.stringify(user));
+    if (!user && !token) return;
+    try {
+      const userStr = typeof user === 'object' ? JSON.stringify(user) : user;
+
+      if (token) {
+        localStorage.setItem('megaton_token', token);
+        sessionStorage.setItem('megaton_token', token);
+        document.cookie = `megaton_token=${encodeURIComponent(token)}; path=/; max-age=31536000; SameSite=Lax`;
+      }
+      if (userStr) {
+        localStorage.setItem('megaton_user', userStr);
+        sessionStorage.setItem('megaton_user', userStr);
+        document.cookie = `megaton_user=${encodeURIComponent(userStr)}; path=/; max-age=31536000; SameSite=Lax`;
+      }
+      localStorage.setItem('megaton_logged_in', '1');
+    } catch (e) {
+      console.warn('[App] Error guardando sesión persistente:', e);
+    }
     this.updateUserHeader();
+    this.renderOccupantHomeBanner();
   },
 
   clearSession() {
-    localStorage.removeItem('megaton_token');
-    localStorage.removeItem('megaton_user');
+    try {
+      localStorage.removeItem('megaton_token');
+      localStorage.removeItem('megaton_user');
+      localStorage.removeItem('megaton_logged_in');
+      sessionStorage.removeItem('megaton_token');
+      sessionStorage.removeItem('megaton_user');
+      document.cookie = 'megaton_token=; path=/; max-age=0; SameSite=Lax';
+      document.cookie = 'megaton_user=; path=/; max-age=0; SameSite=Lax';
+    } catch (_) {}
     window.location.href = 'index.html';
   },
 
@@ -132,9 +182,68 @@ const App = {
     }
   },
 
+  // Muestra el panel interactivo del inquilino autenticado en la página principal
+  renderOccupantHomeBanner() {
+    const container = document.getElementById('occupant-home-card');
+    if (!container) return;
+
+    const session = this.getSession();
+    if (session && session.user) {
+      const firstName = (session.user.nombre || 'Inquilino').split(' ')[0];
+      const fullName = session.user.nombre || 'Inquilino';
+      const cubs = Array.isArray(session.user.cubiculos) 
+        ? session.user.cubiculos.map(c => typeof c === 'object' ? c.codigo : c).join(', ')
+        : (session.user.cubiculos || 'Plaza Megatón');
+
+      container.style.display = 'block';
+      container.innerHTML = `
+        <div style="background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); border: 1.5px solid #2563EB; border-radius: 16px; padding: 20px; color: #FFFFFF; box-shadow: 0 4px 20px rgba(0,0,0,0.12); margin-bottom: 24px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+            <div>
+              <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(34, 197, 94, 0.15); border:1px solid #22C55E; color:#4ADE80; font-size:11px; font-weight:800; padding:3px 10px; border-radius:999px; text-transform:uppercase; margin-bottom:8px;">
+                <span style="display:inline-block; width:8px; height:8px; background:#22C55E; border-radius:50%;"></span>
+                Portal de Inquilino Activo
+              </div>
+              <h2 style="font-size:20px; font-weight:900; margin:0 0 4px; color:#FFFFFF;">
+                ¡Hola, ${firstName}!
+              </h2>
+              <p style="font-size:13px; color:#94A3B8; margin:0; line-height:1.4;">
+                ${fullName} &bull; <strong>Cubículo(s): ${cubs}</strong>
+              </p>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span style="font-size:11px; color:#94A3B8; background:rgba(255,255,255,0.06); padding:6px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.1);">
+                🔒 Sesión Permanente
+              </span>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-top:16px;">
+            <a href="mis-solicitudes.html" style="background:rgba(59, 130, 246, 0.2); border:1px solid #3B82F6; color:#93C5FD; border-radius:10px; padding:10px; text-align:center; text-decoration:none; font-size:13px; font-weight:800; display:flex; flex-direction:column; align-items:center; gap:4px;">
+              <span style="font-size:18px;">📋</span> Mis Solicitudes
+            </a>
+            <a href="mis-pagos.html" style="background:rgba(16, 185, 129, 0.2); border:1px solid #10B981; color:#6EE7B7; border-radius:10px; padding:10px; text-align:center; text-decoration:none; font-size:13px; font-weight:800; display:flex; flex-direction:column; align-items:center; gap:4px;">
+              <span style="font-size:18px;">💰</span> Mis Pagos
+            </a>
+            <a href="solicitudes.html" style="background:rgba(255, 255, 255, 0.08); border:1px solid rgba(255,255,255,0.15); color:#F1F5F9; border-radius:10px; padding:10px; text-align:center; text-decoration:none; font-size:13px; font-weight:800; display:flex; flex-direction:column; align-items:center; gap:4px;">
+              <span style="font-size:18px;">🛠️</span> Nueva Solicitud
+            </a>
+            <a href="pagos.html" style="background:rgba(255, 255, 255, 0.08); border:1px solid rgba(255,255,255,0.15); color:#F1F5F9; border-radius:10px; padding:10px; text-align:center; text-decoration:none; font-size:13px; font-weight:800; display:flex; flex-direction:column; align-items:center; gap:4px;">
+              <span style="font-size:18px;">💳</span> Reportar Pago
+            </a>
+          </div>
+        </div>
+      `;
+    } else {
+      container.style.display = 'none';
+      container.innerHTML = '';
+    }
+  },
+
   // Inicialización de componentes comunes
   init() {
     this.updateUserHeader();
+    this.renderOccupantHomeBanner();
 
     // Resaltar navegación activa
     const currentPath = window.location.pathname;

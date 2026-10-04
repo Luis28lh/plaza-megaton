@@ -26,21 +26,27 @@ async function fetchCatalogFallback() {
   return null;
 }
 
-// Autenticación por PIN y Roles (MASTER vs GESTOR)
+// Autenticación por PIN y Roles (MASTER vs GESTOR) - Persistente ante recargas y actualizaciones
 function getAdminPin() {
-  return sessionStorage.getItem('megaton_admin_pin') || '';
+  return sessionStorage.getItem('megaton_admin_pin') || localStorage.getItem('megaton_admin_pin') || '';
 }
 
 function setAdminPin(pin) {
-  sessionStorage.setItem('megaton_admin_pin', pin);
+  if (pin) {
+    sessionStorage.setItem('megaton_admin_pin', pin);
+    localStorage.setItem('megaton_admin_pin', pin);
+  }
 }
 
 function getAdminRole() {
-  return sessionStorage.getItem('megaton_admin_role') || 'GESTOR';
+  return sessionStorage.getItem('megaton_admin_role') || localStorage.getItem('megaton_admin_role') || 'GESTOR';
 }
 
 function setAdminRole(role) {
-  sessionStorage.setItem('megaton_admin_role', role);
+  if (role) {
+    sessionStorage.setItem('megaton_admin_role', role);
+    localStorage.setItem('megaton_admin_role', role);
+  }
 }
 
 function applyRolePermissions(role) {
@@ -151,6 +157,8 @@ function handlePinSubmit(e) {
 function adminLogout() {
   sessionStorage.removeItem('megaton_admin_pin');
   sessionStorage.removeItem('megaton_admin_role');
+  localStorage.removeItem('megaton_admin_pin');
+  localStorage.removeItem('megaton_admin_role');
   window.location.reload();
 }
 

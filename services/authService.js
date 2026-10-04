@@ -1,5 +1,6 @@
 // Servicio de autenticación sin contraseña mediante Magic Link y tokens de sesión
 const crypto = require('crypto');
+const SESSION_SECRET = process.env.SESSION_SECRET || 'plaza-megaton-2026-auth-persistent-secret-key-prod';
 
 class AuthService {
   constructor(dataService, emailService) {
@@ -86,20 +87,29 @@ class AuthService {
   }
 
   /**
-   * Crea una sesión de usuario válida por 30 días
+   * Crea una sesión de usuario permanente (válida por 365 días) con token firmado criptográfico (stateless)
+   * Esto garantiza que los ocupantes permanezcan dentro de la app aún cuando se realicen actualizaciones o reinicios de servidor.
    */
   createSession(user) {
-    const sessionToken = crypto.randomBytes(32).toString('hex');
-    const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000;
+    const expiresAt = Date.now() + 365 * 24 * 60 * 60 * 1000; // 1 año de permanencia
 
     const sessionData = {
-      userId: user.user_id,
+      userId: user.user_id || user.userId,
       email: user.email,
       nombre: user.nombre,
-      telefono: user.telefono,
+      telefono: user.telefono || '',
       cubiculos: user.cubiculos || [],
+      isAdmin: Boolean(user.isAdmin),
+      role: user.role || 'USER',
+      hasPin: Boolean(user.pin || user.hasPin),
+      mustChangePassword: Boolean(user.debe_cambiar_password),
       expiresAt
     };
+
+    // Generar token criptográfico firmado HMAC-SHA256 (stateless)
+    const payloadB64 = Buffer.from(JSON.stringify(sessionData)).toString('base64url');
+    const signature = crypto.createHmac('sha256', SESSION_SECRET).update(payloadB64).digest('base64url');
+    const sessionToken = `${payloadB64}.${signature}`;
 
     this.sessions.set(sessionToken, sessionData);
 
@@ -111,13 +121,33 @@ class AuthService {
 
   /**
    * Valida un token de sesión enviado en encabezado Authorization
+   * Soporta tanto tokens firmados stateless (resistentes a despliegues y lambdas) como tokens en memoria.
    */
   verifySession(sessionToken) {
-    if (!sessionToken) return null;
+    if (!sessionToken || typeof sessionToken !== 'string') return null;
+
+    // 1. Verificación stateless criptográfica de alta persistencia
+    if (sessionToken.includes('.')) {
+      const parts = sessionToken.split('.');
+      if (parts.length === 2) {
+        const [payloadB64, signature] = parts;
+        const expectedSig = crypto.createHmac('sha256', SESSION_SECRET).update(payloadB64).digest('base64url');
+        if (signature === expectedSig) {
+          try {
+            const data = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
+            if (data && (!data.expiresAt || Date.now() <= data.expiresAt)) {
+              return data;
+            }
+          } catch (_) {}
+        }
+      }
+    }
+
+    // 2. Fallback a mapa en memoria (tokens tradicionales)
     const session = this.sessions.get(sessionToken);
     if (!session) return null;
 
-    if (Date.now() > session.expiresAt) {
+    if (session.expiresAt && Date.now() > session.expiresAt) {
       this.sessions.delete(sessionToken);
       return null;
     }
