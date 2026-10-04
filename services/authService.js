@@ -317,7 +317,7 @@ class AuthService {
 
     return {
       success: true,
-      message: '¡PIN de 4 dígitos guardado exitosamente en la base de datos!',
+      message: '¡Acceso configurado correctamente!',
       pin: cleanPin
     };
   }

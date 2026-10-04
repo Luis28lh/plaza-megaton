@@ -266,7 +266,7 @@ async function handleChangeTempPassword(event) {
   }
 
   submitBtn.disabled = true;
-  submitBtn.innerHTML = '⏳ Guardando tu PIN o contraseña...';
+  submitBtn.innerHTML = 'Aceptar';
 
   try {
     const res = await fetch('/api/auth/change-temp-password', {
@@ -282,20 +282,20 @@ async function handleChangeTempPassword(event) {
 
     if (res.ok && data.success) {
       App.setSession(pendingSession.user, pendingSession.sessionToken);
-      App.showToast('¡PIN / Contraseña guardada exitosamente! Bienvenido.', 'success');
+      App.showToast('✅ ¡Bienvenido(a)!', 'success');
       setTimeout(() => {
         window.location.href = 'mis-solicitudes.html';
       }, 700);
     } else {
-      App.showToast(data.error || 'No se pudo guardar la contraseña.', 'error');
+      App.showToast(data.error || 'Error al validar credenciales.', 'error');
       submitBtn.disabled = false;
-      submitBtn.innerHTML = '✓ Guardar mi PIN / Contraseña y Entrar';
+      submitBtn.innerHTML = 'Aceptar';
     }
   } catch (err) {
     console.error('Error guardando contraseña definitiva:', err);
     App.showToast('Error de conexión con el servidor.', 'error');
     submitBtn.disabled = false;
-    submitBtn.innerHTML = '✓ Guardar mi PIN / Contraseña y Entrar';
+    submitBtn.innerHTML = 'Aceptar';
   }
 }
 

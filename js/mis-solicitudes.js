@@ -196,9 +196,9 @@ function openSetPinModal() {
     modal.innerHTML = `
       <div class="modal-box" style="max-width:440px; text-align:center; padding:24px 22px;">
         <div style="font-size:42px; margin-bottom:10px;">🔑</div>
-        <h3 style="font-size:18px; font-weight:900; margin:0 0 8px; color:#0F172A;">Configura tus 4 Pines de Acceso</h3>
+        <h3 style="font-size:18px; font-weight:900; margin:0 0 8px; color:#0F172A;">Configura tu PIN de Acceso</h3>
         <p style="font-size:13px; color:#64748B; margin:0 0 18px; line-height:1.5;">
-          Has ingresado con la clave provisional <strong>(123456)</strong>. Introduce tus <strong>4 dígitos de PIN personal</strong> para guardarlos en la base de datos y utilizarlos en tus futuros accesos.
+          Por tu seguridad, introduce tus <strong>4 dígitos de PIN personal</strong> para tus próximos accesos al portal.
         </p>
 
         <div style="margin-bottom:14px; text-align:left;">
@@ -237,13 +237,13 @@ function openSetPinModal() {
 
         <div id="modal-pin-err" style="color:#DC2626; font-size:12px; font-weight:700; margin-bottom:12px; display:none;"></div>
 
-        <button type="button" id="btn-save-modal-pin" class="btn-primary" style="width:100%; padding:12px; font-size:15px; font-weight:800;" onclick="submitSetPinFromModal()">
-          💾 Guardar PIN en la Base de Datos
+        <button type="button" id="btn-save-modal-pin" class="btn-primary" style="width:100%; padding:14px; font-size:16px; font-weight:800; cursor:pointer;" onclick="submitSetPinFromModal()">
+          Aceptar
         </button>
 
         <div style="margin-top:12px;">
           <button type="button" onclick="closeSetPinModal()" style="background:none; border:none; color:#64748B; font-size:12px; cursor:pointer; text-decoration:underline;">
-            Configurar en otro momento
+            Cerrar
           </button>
         </div>
       </div>
@@ -281,7 +281,7 @@ async function submitSetPinFromModal() {
   if (!session || !session.user) return;
 
   btn.disabled = true;
-  btn.innerText = 'Guardando PIN en base de datos...';
+  btn.innerText = 'Aceptar';
 
   try {
     const res = await fetch('/api/auth/set-pin', {
@@ -291,7 +291,7 @@ async function submitSetPinFromModal() {
     });
     const data = await res.json();
     if (res.ok && data.success) {
-      App.showToast('✅ ¡PIN de 4 dígitos guardado exitosamente en la base de datos!', 'success');
+      App.showToast('✅ ¡Bienvenido(a)! Tu acceso ha sido configurado.', 'success');
       closeSetPinModal();
       const banner = document.getElementById('temp-password-banner');
       if (banner) banner.remove();
@@ -304,12 +304,12 @@ async function submitSetPinFromModal() {
     } else {
       if (errEl) { errEl.innerText = data.error || 'Error al guardar PIN.'; errEl.style.display = 'block'; }
       btn.disabled = false;
-      btn.innerText = '💾 Guardar PIN en la Base de Datos';
+      btn.innerText = 'Aceptar';
     }
   } catch (e) {
     if (errEl) { errEl.innerText = 'Error de conexión con el servidor.'; errEl.style.display = 'block'; }
     btn.disabled = false;
-    btn.innerText = '💾 Guardar PIN en la Base de Datos';
+    btn.innerText = 'Aceptar';
   }
 }
 
