@@ -1,5 +1,5 @@
 // Controlador Global y Utilidades de Frontend - Plaza Megatón
-// Compatible con Servidor Local Node.js y Despliegue Remoto en GitHub Pages
+// Compatible con Servidor Local Node.js y Plataforma Web
 
 const App = {
   // Manejo de sesión local
@@ -157,11 +157,71 @@ const App = {
     if (typeof checkUnreadMessagesBadge === 'function') {
       checkUnreadMessagesBadge();
     }
+
+    // Cuantificar cargas y accesos (móviles y web)
+    this.trackAppLoad();
   },
 
-  // Detecta si corre en GitHub Pages u otro host estático sin backend Node
+  // Telemetría y cuantificación de cargas / accesos en teléfonos y web
+  trackAppLoad() {
+    try {
+      const lastTrack = sessionStorage.getItem('pm_last_track');
+      if (lastTrack && (Date.now() - parseInt(lastTrack, 10) < 5000)) {
+        return;
+      }
+      sessionStorage.setItem('pm_last_track', String(Date.now()));
+
+      let deviceId = localStorage.getItem('pm_device_id');
+      if (!deviceId) {
+        deviceId = 'DEV-' + Math.random().toString(36).substring(2, 10).toUpperCase() + '-' + Date.now().toString(36).toUpperCase();
+        localStorage.setItem('pm_device_id', deviceId);
+      }
+
+      const isStandalonePWA = Boolean(
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone ||
+        document.referrer.includes('android-app://')
+      );
+
+      const ua = navigator.userAgent || '';
+      const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+      const isIOS = /iPhone|iPad|iPod/i.test(ua);
+      const isAndroid = /Android/i.test(ua);
+
+      let tipoDispositivo = 'Escritorio / Navegador';
+      if (isStandalonePWA) {
+        tipoDispositivo = isIOS ? '📱 iPhone (App PWA Instalada)' : (isAndroid ? '📱 Android (App PWA Instalada)' : '📱 PWA Móvil Instalada');
+      } else if (isMobile) {
+        tipoDispositivo = isIOS ? '📱 iPhone / Safari Móvil' : (isAndroid ? '📱 Android / Chrome Móvil' : '📱 Smartphone Móvil');
+      }
+
+      const session = this.getSession();
+      const payload = {
+        deviceId,
+        isMobile,
+        isPWA: isStandalonePWA,
+        tipoDispositivo,
+        pantalla: window.location.pathname.split('/').pop() || 'index.html',
+        usuario: session && session.user ? `${session.user.nombre} (${session.user.email})` : 'Visitante / Inquilino Móvil',
+        cubiculo: session && session.user && session.user.cubiculos ? (Array.isArray(session.user.cubiculos) ? session.user.cubiculos.map(c => c.codigo || c).join(', ') : session.user.cubiculos) : 'N/A'
+      };
+
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon('/api/telemetria/carga', JSON.stringify(payload));
+      } else {
+        fetch('/api/telemetria/carga', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          keepalive: true
+        }).catch(() => {});
+      }
+    } catch (_) {}
+  },
+
+  // Detecta si corre en entorno local estático sin backend Node
   isStaticHost() {
-    return window.location.hostname.includes('github.io') || window.location.protocol === 'file:';
+    return window.location.protocol === 'file:';
   },
 
   // Almacenamiento local persistente para funcionamiento en GitHub Pages (offline/remoto)

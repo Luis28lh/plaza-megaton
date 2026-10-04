@@ -510,7 +510,8 @@
         "A-312"
       ],
       "fecha_registro": "28/09/2026",
-      "estado": "Activo"
+      "estado": "Activo",
+      "pin": null
     },
     {
       "user_id": "US-001",
@@ -523,7 +524,8 @@
         "A-101"
       ],
       "fecha_registro": "28/09/2026",
-      "estado": "Activo"
+      "estado": "Activo",
+      "pin": null
     },
     {
       "user_id": "US-002",
@@ -536,7 +538,8 @@
         "A-102"
       ],
       "fecha_registro": "28/09/2026",
-      "estado": "Activo"
+      "estado": "Activo",
+      "pin": null
     },
     {
       "user_id": "US-003",
@@ -549,7 +552,8 @@
         "A-103"
       ],
       "fecha_registro": "28/09/2026",
-      "estado": "Activo"
+      "estado": "Activo",
+      "pin": null
     },
     {
       "user_id": "US-004",
@@ -562,7 +566,8 @@
         "A-104"
       ],
       "fecha_registro": "28/09/2026",
-      "estado": "Activo"
+      "estado": "Activo",
+      "pin": null
     },
     {
       "user_id": "US-005",
@@ -575,7 +580,8 @@
         "A-105"
       ],
       "fecha_registro": "28/09/2026",
-      "estado": "Activo"
+      "estado": "Activo",
+      "pin": null
     },
     {
       "user_id": "US-006",
@@ -588,7 +594,8 @@
         "A-105-A"
       ],
       "fecha_registro": "28/09/2026",
-      "estado": "Activo"
+      "estado": "Activo",
+      "pin": null
     },
     {
       "user_id": "US-007",
@@ -601,7 +608,8 @@
         "A-201"
       ],
       "fecha_registro": "28/09/2026",
-      "estado": "Activo"
+      "estado": "Activo",
+      "pin": null
     },
     {
       "user_id": "US-008",
@@ -614,7 +622,8 @@
         "A-202"
       ],
       "fecha_registro": "28/09/2026",
-      "estado": "Activo"
+      "estado": "Activo",
+      "pin": null
     },
     {
       "user_id": "US-009",
@@ -628,7 +637,8 @@
         "A-204"
       ],
       "fecha_registro": "28/09/2026",
-      "estado": "Activo"
+      "estado": "Activo",
+      "pin": null
     },
     {
       "user_id": "US-010",
@@ -642,7 +652,8 @@
         "A-311"
       ],
       "fecha_registro": "28/09/2026",
-      "estado": "Activo"
+      "estado": "Activo",
+      "pin": null
     },
     {
       "user_id": "US-011",
@@ -656,7 +667,8 @@
         "A-207"
       ],
       "fecha_registro": "28/09/2026",
-      "estado": "Activo"
+      "estado": "Activo",
+      "pin": null
     },
     {
       "user_id": "US-012",
@@ -670,7 +682,8 @@
         "A-307-COF"
       ],
       "fecha_registro": "28/09/2026",
-      "estado": "Activo"
+      "estado": "Activo",
+      "pin": null
     },
     {
       "user_id": "US-013",
@@ -684,7 +697,8 @@
         "A-210"
       ],
       "fecha_registro": "28/09/2026",
-      "estado": "Activo"
+      "estado": "Activo",
+      "pin": null
     },
     {
       "user_id": "US-014",
@@ -700,7 +714,8 @@
         "A-301-D"
       ],
       "fecha_registro": "28/09/2026",
-      "estado": "Activo"
+      "estado": "Activo",
+      "pin": null
     },
     {
       "user_id": "US-015",
@@ -719,7 +734,8 @@
         "A-312"
       ],
       "fecha_registro": "28/09/2026",
-      "estado": "Activo"
+      "estado": "Activo",
+      "pin": null
     },
     {
       "user_id": "US-016",
@@ -732,7 +748,8 @@
         "A-307-ANT"
       ],
       "fecha_registro": "28/09/2026",
-      "estado": "Activo"
+      "estado": "Activo",
+      "pin": null
     },
     {
       "user_id": "US-017",
@@ -778,7 +795,9 @@
       ],
       "fecha_registro": "28/09/2026",
       "estado": "Activo",
-      "password_modificado": "2026-10-03T15:48:04.605Z"
+      "password_modificado": "2026-10-04T15:45:02.600Z",
+      "pin": null,
+      "pin_configurado": false
     },
     {
       "user_id": "US-018",
@@ -791,7 +810,8 @@
         "A-310"
       ],
       "fecha_registro": "28/09/2026",
-      "estado": "Activo"
+      "estado": "Activo",
+      "pin": null
     }
   ],
   "USUARIO_CUBICULO": [
@@ -1745,6 +1765,57 @@
       "estado_nuevo": "Pendiente de Cambio de Clave",
       "observacion": "Ingreso con clave temporal (123456) para b.souri@souriindustrial.com. Se generó y envió código PIN de 6 dígitos al correo para validación obligatoria. IP: ::1",
       "ip": "::1"
+    },
+    {
+      "id": "MOV-1791128701907-124",
+      "tipo_movimiento": "ACTUALIZACION_USUARIO",
+      "tipo_documento": "USUARIO",
+      "codigo_documento": "US-017",
+      "fecha": "04/10/2026",
+      "hora": "11:45:01 a. m.",
+      "timestamp_iso": "2026-10-04T15:45:01.906Z",
+      "usuario": "Inquilino (Configuración PIN 4 Dígitos)",
+      "cubiculo": "A-308, A-309",
+      "archivo": "",
+      "accion": "Actualización de Usuario",
+      "estado_anterior": "ACTIVO",
+      "estado_nuevo": "Activo",
+      "observacion": "Modificación de contraseña para BERTHA SOURY (b.souri@souriindustrial.com) por Inquilino (Configuración PIN 4 Dígitos).",
+      "ip": ""
+    },
+    {
+      "id": "MOV-1791128702602-982",
+      "tipo_movimiento": "ACTUALIZACION_USUARIO",
+      "tipo_documento": "USUARIO",
+      "codigo_documento": "US-017",
+      "fecha": "04/10/2026",
+      "hora": "11:45:02 a. m.",
+      "timestamp_iso": "2026-10-04T15:45:02.601Z",
+      "usuario": "Validación Código Seguro [b.souri@souriindustrial.com]",
+      "cubiculo": "A-308, A-309",
+      "archivo": "",
+      "accion": "Actualización de Usuario",
+      "estado_anterior": "ACTIVO",
+      "estado_nuevo": "Activo",
+      "observacion": "Modificación de contraseña para BERTHA SOURY (b.souri@souriindustrial.com) por Validación Código Seguro [b.souri@souriindustrial.com].",
+      "ip": ""
+    },
+    {
+      "id": "MOV-1791128722885-877",
+      "tipo_movimiento": "ACTUALIZACION_USUARIO",
+      "tipo_documento": "USUARIO",
+      "codigo_documento": "US-017",
+      "fecha": "04/10/2026",
+      "hora": "11:45:22 a. m.",
+      "timestamp_iso": "2026-10-04T15:45:22.859Z",
+      "usuario": "Reset Test State",
+      "cubiculo": "A-308, A-309",
+      "archivo": "",
+      "accion": "Actualización de Usuario",
+      "estado_anterior": "ACTIVO",
+      "estado_nuevo": "Activo",
+      "observacion": "Modificación de contraseña para BERTHA SOURY (b.souri@souriindustrial.com) por Reset Test State.",
+      "ip": ""
     }
   ],
   "NOVEDADES": [
@@ -1820,5 +1891,29 @@
       "enviado_email": true,
       "fecha_iso": "2026-09-30T20:55:03.277Z"
     }
-  ]
+  ],
+  "TELEMETRIA": {
+    "total_cargas": 1,
+    "cargas_moviles": 1,
+    "cargas_escritorio": 0,
+    "cargas_pwa": 1,
+    "dispositivos_unicos": [
+      "TEST-DEV-001"
+    ],
+    "ultimas_cargas": [
+      {
+        "id": "CARGA-1791128701899",
+        "fecha": "04/10/2026",
+        "hora": "11:45:01 a. m.",
+        "deviceId": "TEST-DEV-001",
+        "dispositivo": "📱 iPhone (App PWA Instalada)",
+        "isMobile": true,
+        "isPWA": true,
+        "pantalla": "mis-solicitudes.html",
+        "usuario": "Bertha Soury (b.souri@souriindustrial.com)",
+        "cubiculo": "A-308, A-309",
+        "ip": "127.0.0.1"
+      }
+    ]
+  }
 }

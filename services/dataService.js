@@ -56,15 +56,20 @@ class DataService {
             if (initU.email) existing.email = initU.email;
             if (initU.telefono && !existing.telefono) existing.telefono = initU.telefono;
             if (initU.user_id === 'US-017') {
-              existing.password = '123456';
-              existing.password_temporal = true;
-              existing.debe_cambiar_password = true;
+              if (!existing.pin && !existing.password) {
+                existing.password = '123456';
+                existing.password_temporal = true;
+                existing.debe_cambiar_password = true;
+              }
               existing.estado = 'Activo';
             }
           } else {
             if (!this.db.USUARIOS) this.db.USUARIOS = [];
             this.db.USUARIOS.push(initU);
           }
+        }
+        for (const u of this.db.USUARIOS) {
+          if (u.pin === undefined) u.pin = null;
         }
       }
     } catch (_) {}
@@ -914,6 +919,13 @@ class DataService {
     const pagosPendientes = pagos.filter(p => ['En revisión', 'Pendiente de información'].includes(p.estado)).length;
     const pagosConfirmados = pagos.filter(p => p.estado === 'Confirmado').length;
 
+    const tel = this.db.TELEMETRIA || {
+      total_cargas: 0,
+      cargas_moviles: 0,
+      cargas_pwa: 0,
+      dispositivos_unicos: []
+    };
+
     return {
       cubiculos: {
         total: totalCubiculos,
@@ -937,7 +949,101 @@ class DataService {
         reportados: pagosReportados,
         pendientes: pagosPendientes,
         confirmados: pagosConfirmados
+      },
+      telemetria: {
+        total_cargas: tel.total_cargas || 0,
+        cargas_moviles: tel.cargas_moviles || 0,
+        cargas_pwa: tel.cargas_pwa || 0,
+        dispositivos_unicos: (tel.dispositivos_unicos || []).length
       }
+    };
+  }
+
+  // ==========================================
+  // TELEMETRÍA Y CONTADOR DE CARGAS DE LA APP
+  // ==========================================
+  async registrarCargaApp({ deviceId, isMobile, isPWA, tipoDispositivo, pantalla, usuario, cubiculo, ip }) {
+    if (!this.db.TELEMETRIA) {
+      this.db.TELEMETRIA = {
+        total_cargas: 0,
+        cargas_moviles: 0,
+        cargas_escritorio: 0,
+        cargas_pwa: 0,
+        dispositivos_unicos: [],
+        ultimas_cargas: []
+      };
+    }
+
+    const tel = this.db.TELEMETRIA;
+    tel.total_cargas = (tel.total_cargas || 0) + 1;
+
+    if (isMobile) {
+      tel.cargas_moviles = (tel.cargas_moviles || 0) + 1;
+    } else {
+      tel.cargas_escritorio = (tel.cargas_escritorio || 0) + 1;
+    }
+
+    if (isPWA) {
+      tel.cargas_pwa = (tel.cargas_pwa || 0) + 1;
+    }
+
+    if (deviceId && !tel.dispositivos_unicos.includes(deviceId)) {
+      tel.dispositivos_unicos.push(deviceId);
+    }
+
+    const now = new Date();
+    const fecha = now.toLocaleDateString('es-DO', {
+      day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Santo_Domingo'
+    });
+    const hora = now.toLocaleTimeString('es-DO', {
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: 'America/Santo_Domingo'
+    });
+
+    const registro = {
+      id: `CARGA-${Date.now()}`,
+      fecha,
+      hora,
+      deviceId: deviceId || 'ANONIMO',
+      dispositivo: tipoDispositivo || (isMobile ? 'Móvil' : 'Escritorio'),
+      isMobile: Boolean(isMobile),
+      isPWA: Boolean(isPWA),
+      pantalla: pantalla || 'index.html',
+      usuario: usuario || 'Visitante',
+      cubiculo: cubiculo || 'N/A',
+      ip: ip || ''
+    };
+
+    if (!Array.isArray(tel.ultimas_cargas)) {
+      tel.ultimas_cargas = [];
+    }
+    tel.ultimas_cargas.unshift(registro);
+    if (tel.ultimas_cargas.length > 200) {
+      tel.ultimas_cargas.pop();
+    }
+
+    this.persist();
+    return tel;
+  }
+
+  async getTelemetria() {
+    if (!this.db.TELEMETRIA) {
+      this.db.TELEMETRIA = {
+        total_cargas: 0,
+        cargas_moviles: 0,
+        cargas_escritorio: 0,
+        cargas_pwa: 0,
+        dispositivos_unicos: [],
+        ultimas_cargas: []
+      };
+    }
+    const tel = this.db.TELEMETRIA;
+    return {
+      total_cargas: tel.total_cargas || 0,
+      cargas_moviles: tel.cargas_moviles || 0,
+      cargas_escritorio: tel.cargas_escritorio || 0,
+      cargas_pwa: tel.cargas_pwa || 0,
+      total_dispositivos_unicos: (tel.dispositivos_unicos || []).length,
+      ultimas_cargas: (tel.ultimas_cargas || []).slice(0, 50)
     };
   }
 

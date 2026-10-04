@@ -121,6 +121,16 @@
               <span id="kpi-pag-confirmados" style="color:#15803D; font-weight:700;">0</span> confirmados
             </div>
           </div>
+
+          <!-- Cargas y Accesos a la App -->
+          <div class="kpi-card" style="border-left:4px solid #7C3AED;">
+            <div class="kpi-title">📱 Cargas de la Aplicación</div>
+            <div id="kpi-app-cargas" class="kpi-value" style="color:#6D28D9;">0</div>
+            <div class="kpi-subtext">
+              <span id="kpi-app-moviles" style="color:#059669; font-weight:700;">0 móviles</span> · 
+              <span id="kpi-app-unicos" style="color:#2563EB; font-weight:700;">0 únicos</span>
+            </div>
+          </div>
         </div>
 
         <!-- Acceso directo a acciones clave -->
@@ -285,20 +295,27 @@
         </div>
       </section>
 
-      <!-- 2. PESTAÑA: USUARIOS -->
+      <!-- 2. PESTAÑA: USUARIOS & CORREOS AUTORIZADOS -->
       <section id="tab-section-usuarios" style="display:none;">
-        <div style="background:#EFF6FF; border:1px solid #BFDBFE; border-radius:10px; padding:14px 18px; margin-bottom:16px; font-size:13px; color:#1E40AF; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div style="background:#EFF6FF; border:1px solid #BFDBFE; border-left:5px solid #2563EB; border-radius:10px; padding:16px 20px; margin-bottom:16px; font-size:13px; color:#1E40AF; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
           <div>
-            <div style="font-weight:800; font-size:14px; margin-bottom:2px;">🔑 Protocolo de Acceso Temporal Universal (123456)</div>
-            <div style="color:#1D4ED8;">
-              Puedes gestionar o modificar el correo de cualquier inquilino o propietario aquí. Con su correo y la contraseña temporal <strong>123456</strong>, cualquier usuario puede acceder; el sistema le enviará automáticamente un PIN de 6 dígitos a su correo registrado para crear su contraseña definitiva.
+            <div style="font-weight:900; font-size:16px; margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+              <span>👥</span> Tabla Oficial de Correos y Usuarios Autorizados
             </div>
+            <div style="color:#1D4ED8; line-height:1.5;">
+              <strong>Padrón de Acceso:</strong> Solamente los correos registrados en esta tabla tienen permiso de registrarse o acceder a la plataforma (con clave temporal <strong>123456</strong> o su <strong>PIN de 4 dígitos</strong>). Si un correo no existe aquí, el sistema no le permite registrarse ni ingresar.
+            </div>
+          </div>
+          <div>
+            <button type="button" class="btn-sm btn-sm-primary" onclick="openCreateUserModal()">
+              ➕ Autorizar Nuevo Correo / Inquilino
+            </button>
           </div>
         </div>
 
         <div class="table-filter-bar">
           <div class="search-input-wrap">
-            <input type="text" id="search-usuarios-input" class="form-input" placeholder="🔍 Buscar por nombre, correo, cubículo o código..." oninput="filterUsuarios()">
+            <input type="text" id="search-usuarios-input" class="form-input" placeholder="🔍 Buscar por nombre, correo, cubículo, código o PIN..." oninput="filterUsuarios()">
           </div>
         </div>
 
@@ -308,8 +325,9 @@
               <tr>
                 <th>Código</th>
                 <th>Nombre</th>
-                <th>Contacto</th>
+                <th>Correo Autorizado</th>
                 <th>Cubículos</th>
+                <th>PIN / Clave</th>
                 <th>Estado</th>
                 <th>Acción</th>
               </tr>

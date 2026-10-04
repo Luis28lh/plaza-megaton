@@ -126,7 +126,7 @@ class AuthService {
     const user = await this.dataService.getUsuarioByEmail(cleanEmail);
 
     if (!user) {
-      return { success: false, error: 'No se encontró ningún usuario registrado con este correo electrónico.' };
+      return { success: false, error: 'Este correo no está registrado en la tabla oficial de usuarios autorizados de Plaza Megatón 2000.' };
     }
 
     if (user.estado === 'Pendiente de Aprobación' || user.estado === 'Pendiente') {
@@ -209,16 +209,24 @@ class AuthService {
     }
 
     const cleanPwd = String(newPassword).trim();
-    await this.dataService.updateUsuario(user.user_id, {
+    const is4Digits = /^\d{4}$/.test(cleanPwd);
+    const updateData = {
       password: cleanPwd,
       debe_cambiar_password: false,
       password_temporal: false,
       password_modificado: new Date().toISOString()
-    }, `Validación Código Seguro [${user.email}]`);
+    };
+    if (is4Digits) {
+      updateData.pin = cleanPwd;
+      updateData.pin_configurado = true;
+    }
+
+    await this.dataService.updateUsuario(user.user_id, updateData, `Validación Código Seguro [${user.email}]`);
 
     // Iniciar sesión automáticamente
     const session = this.createSession({
       ...user,
+      ...updateData,
       cubiculos: await this.dataService.getCubiculosByUser(user.user_id)
     });
 
@@ -226,7 +234,13 @@ class AuthService {
       success: true,
       message: '¡Contraseña actualizada exitosamente! Has iniciado sesión.',
       sessionToken: session.sessionToken,
-      user: session.user
+      user: {
+        ...session.user,
+        mustChangePassword: false,
+        isTempPassword: false,
+        needsPinSetup: false,
+        hasPin: Boolean(is4Digits || user.pin)
+      }
     };
   }
 
@@ -238,22 +252,59 @@ class AuthService {
       return { success: false, error: 'Usuario y nueva contraseña requeridos.' };
     }
     if (String(newPassword).trim().length < 4) {
-      return { success: false, error: 'La contraseña debe tener al menos 4 caracteres.' };
+      return { success: false, error: 'La contraseña o PIN debe tener al menos 4 caracteres.' };
     }
 
     const cleanPwd = String(newPassword).trim();
-    const updated = await this.dataService.updateUsuario(userId, {
+    const is4Digits = /^\d{4}$/.test(cleanPwd);
+    const updateData = {
       password: cleanPwd,
       debe_cambiar_password: false,
       password_temporal: false,
       password_modificado: new Date().toISOString()
-    }, 'Inquilino (Cambio de Clave Temporal)');
+    };
+    if (is4Digits) {
+      updateData.pin = cleanPwd;
+      updateData.pin_configurado = true;
+    }
+
+    const updated = await this.dataService.updateUsuario(userId, updateData, 'Inquilino (Cambio de Clave Temporal)');
 
     if (!updated) return { success: false, error: 'Usuario no encontrado.' };
 
     return {
       success: true,
       message: 'Contraseña definitiva establecida correctamente.'
+    };
+  }
+
+  /**
+   * Configura los 4 dígitos de PIN personal solicitados automáticamente al ingresar con clave temporal
+   */
+  async setUserPin(userId, pin) {
+    if (!userId || !pin) {
+      return { success: false, error: 'Usuario y PIN requeridos.' };
+    }
+    const cleanPin = String(pin).trim();
+    if (!/^\d{4}$/.test(cleanPin)) {
+      return { success: false, error: 'El PIN debe ser exactamente de 4 dígitos numéricos (ej. 1234).' };
+    }
+
+    const updated = await this.dataService.updateUsuario(userId, {
+      pin: cleanPin,
+      password: cleanPin,
+      debe_cambiar_password: false,
+      password_temporal: false,
+      pin_configurado: true,
+      password_modificado: new Date().toISOString()
+    }, 'Inquilino (Configuración PIN 4 Dígitos)');
+
+    if (!updated) return { success: false, error: 'Usuario no encontrado.' };
+
+    return {
+      success: true,
+      message: '¡PIN de 4 dígitos guardado exitosamente en la base de datos!',
+      pin: cleanPin
     };
   }
 }

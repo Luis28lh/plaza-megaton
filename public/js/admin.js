@@ -225,6 +225,15 @@ async function loadKPIs() {
       document.getElementById('kpi-pag-reportados').innerText = k.pagos.reportados;
       document.getElementById('kpi-pag-pend').innerText = k.pagos.pendientes;
       document.getElementById('kpi-pag-confirmados').innerText = k.pagos.confirmados;
+
+      if (k.telemetria) {
+        const cargasEl = document.getElementById('kpi-app-cargas');
+        if (cargasEl) cargasEl.innerText = k.telemetria.total_cargas || 0;
+        const movilesEl = document.getElementById('kpi-app-moviles');
+        if (movilesEl) movilesEl.innerText = (k.telemetria.cargas_moviles || 0) + ' móviles';
+        const unicosEl = document.getElementById('kpi-app-unicos');
+        if (unicosEl) unicosEl.innerText = (k.telemetria.dispositivos_unicos || 0) + ' únicos';
+      }
       return;
     }
   } catch (_) {}
@@ -563,11 +572,21 @@ function renderUsuariosTable(users) {
       `;
     }
 
+    let pinStatusHtml = '';
+    if (u.pin) {
+      pinStatusHtml = `<span style="background:#DCFCE7; color:#166534; padding:3px 8px; border-radius:6px; font-weight:800; font-size:12px; white-space:nowrap;">🔑 PIN: ${u.pin}</span>`;
+    } else if (u.password_temporal || u.debe_cambiar_password || u.password === '123456') {
+      pinStatusHtml = `<span style="background:#FEF3C7; color:#B45309; padding:3px 8px; border-radius:6px; font-weight:800; font-size:12px; white-space:nowrap;">⚠️ Clave Temp: 123456</span>`;
+    } else {
+      pinStatusHtml = `<span style="background:#F1F5F9; color:#475569; padding:3px 8px; border-radius:6px; font-weight:600; font-size:12px; white-space:nowrap;">🔒 Clave Personal</span>`;
+    }
+
     tr.innerHTML = `
       <td><strong>${u.user_id}</strong></td>
       <td><strong>${u.nombre}</strong></td>
       <td>${u.email}<br><small style="color:#64748B;">${u.telefono || 'Sin tel.'}</small></td>
       <td><span style="background:${isPending ? '#FEF3C7' : '#FEE2E2'}; color:${isPending ? '#B45309' : '#B71C1C'}; padding:4px 8px; border-radius:6px; font-weight:600; font-size:12px; display:inline-block;">${cubsHtml}</span></td>
+      <td>${pinStatusHtml}</td>
       <td>${badgeHtml}</td>
       <td>${actionsHtml}</td>
     `;

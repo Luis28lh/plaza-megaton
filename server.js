@@ -293,13 +293,9 @@ app.post('/api/usuarios/registro', async (req, res) => {
     let user = await dataService.getUsuarioByEmail(cleanEmail);
 
     if (!user) {
-      const user_id = await sequenceService.nextCode('USUARIO');
-      user = await dataService.createUsuario({
-        user_id,
-        nombre: nombre.trim(),
-        email: cleanEmail,
-        telefono: telefono ? telefono.trim() : '',
-        estado: 'Pendiente de Aprobación'
+      return res.status(403).json({
+        success: false,
+        error: 'Acceso no permitido: El correo ingresado no figura en la tabla oficial de usuarios y correos autorizados por la administración de Plaza Megatón 2000. Solo los ocupantes y propietarios registrados en la lista oficial tienen acceso.'
       });
     } else {
       await dataService.updateUsuario(user.user_id, {
@@ -449,7 +445,10 @@ app.post('/api/auth/login', async (req, res) => {
 
     const user = await dataService.getUsuarioByEmail(cleanEmail);
     if (!user) {
-      return res.status(401).json({ success: false, error: 'Credenciales inválidas o correo no registrado.' });
+      return res.status(401).json({
+        success: false,
+        error: 'Este correo no está registrado en la tabla oficial de usuarios autorizados de Plaza Megatón 2000. Acceso no permitido.'
+      });
     }
 
     if (user.estado === 'Pendiente de Aprobación' || user.estado === 'Pendiente') {
@@ -467,29 +466,33 @@ app.post('/api/auth/login', async (req, res) => {
     }
 
     const userPwd = String(user.password || '').trim();
+    const userPin = user.pin ? String(user.pin).trim() : '';
 
     // Protocolo de Acceso Oficial:
     // 1) Clave universal temporal '123456'
     const isUsingDefault123456 = (enteredPwd === '123456');
-    // 2) Correo electrónico como contraseña de primer acceso
-    const isUsingEmailAsPassword = (enteredPwd.toLowerCase() === cleanEmail);
+    // 2) PIN personal de 4 dígitos guardado en la base de datos
+    const isMatchingPin = userPin ? (enteredPwd === userPin) : false;
     // 3) Contraseña definitiva configurada por el usuario
     const isMatchingPermanentPwd = userPwd ? (userPwd === enteredPwd) : false;
+    // 4) Correo electrónico como contraseña de primer acceso
+    const isUsingEmailAsPassword = (enteredPwd.toLowerCase() === cleanEmail);
 
-    const isValid = isUsingDefault123456 || isUsingEmailAsPassword || isMatchingPermanentPwd;
+    const isValid = isUsingDefault123456 || isMatchingPin || isMatchingPermanentPwd || isUsingEmailAsPassword;
     if (!isValid) {
       return res.status(401).json({ 
         success: false, 
-        error: 'Contraseña o PIN incorrecto. Si eres nuevo o tienes clave temporal, ingresa 123456. O pulsa "¿Olvidaste o quieres cambiarla?" para recibir un código PIN en tu correo registrado.' 
+        error: 'Contraseña o PIN incorrecto. Si ingresas por primera vez con clave temporal, utiliza 123456. O pulsa "¿Olvidaste tu contraseña o PIN?" para recibir un código de seguridad en tu correo registrado.' 
       });
     }
 
-    // Detectar si requiere cambio obligatorio de contraseña vía PIN enviado al correo
+    // Detectar si requiere configuración de los 4 pines de seguridad
     const isTemp = Boolean(
       isUsingDefault123456 || 
       isUsingEmailAsPassword || 
       user.debe_cambiar_password || 
       user.password_temporal ||
+      !user.pin ||
       userPwd === '123456'
     );
 
@@ -511,8 +514,8 @@ app.post('/api/auth/login', async (req, res) => {
         archivo: '',
         accion: 'Acceso Concedido con Clave Temporal 123456',
         estado_anterior: 'Clave Temporal',
-        estado_nuevo: 'Conectado (Requiere cambio de clave)',
-        observacion: `Ingreso autorizado con clave temporal universal (123456) para ${user.email}. Sesión activa concedida. IP: ${clientIp}`,
+        estado_nuevo: 'Conectado (Requiere configurar 4 pines)',
+        observacion: `Ingreso autorizado con clave provisional (123456) para ${user.email}. Se solicita configuración obligatoria de sus 4 pines de seguridad. IP: ${clientIp}`,
         ip: clientIp
       });
 
@@ -520,14 +523,17 @@ app.post('/api/auth/login', async (req, res) => {
         success: true,
         mustChangePassword: true,
         isTempPassword: true,
+        needsPinSetup: true,
         targetEmail: user.email,
         sessionToken: session.sessionToken,
         user: {
           ...session.user,
           mustChangePassword: true,
-          isTempPassword: true
+          isTempPassword: true,
+          needsPinSetup: true,
+          hasPin: Boolean(user.pin)
         },
-        message: '¡Acceso concedido! Has ingresado con la clave provisional (123456).'
+        message: '¡Acceso concedido! Por favor configura tus 4 pines personales de acceso.'
       });
     }
 
@@ -541,7 +547,7 @@ app.post('/api/auth/login', async (req, res) => {
       accion: 'Inicio de Sesión de Inquilino',
       estado_anterior: 'Desconectado',
       estado_nuevo: 'Conectado',
-      observacion: `Ingreso exitoso con clave definitiva. IP: ${clientIp}`,
+      observacion: `Ingreso exitoso con PIN / clave definitiva. IP: ${clientIp}`,
       ip: clientIp
     });
 
@@ -549,8 +555,16 @@ app.post('/api/auth/login', async (req, res) => {
       success: true,
       message: 'Inicio de sesión exitoso.',
       mustChangePassword: false,
+      isTempPassword: false,
+      needsPinSetup: false,
       sessionToken: session.sessionToken,
-      user: session.user
+      user: {
+        ...session.user,
+        mustChangePassword: false,
+        isTempPassword: false,
+        needsPinSetup: false,
+        hasPin: Boolean(user.pin)
+      }
     });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -617,6 +631,45 @@ app.post('/api/auth/change-temp-password', async (req, res) => {
         estado_anterior: 'Clave Temporal',
         estado_nuevo: 'Clave Permanente',
         observacion: `El inquilino configuró su contraseña definitiva tras el primer ingreso a la plataforma. IP: ${clientIp}`,
+        ip: clientIp
+      });
+    }
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 4f. Configuración de los 4 Pines de Seguridad en Base de Datos
+app.post('/api/auth/set-pin', async (req, res) => {
+  try {
+    const { userId, pin } = req.body;
+    if (!userId || !pin) {
+      return res.status(400).json({ success: false, error: 'Usuario y PIN requeridos.' });
+    }
+
+    const cleanPin = String(pin).trim();
+    if (!/^\d{4}$/.test(cleanPin)) {
+      return res.status(400).json({ success: false, error: 'El PIN debe contener exactamente 4 dígitos numéricos (ej. 1234).' });
+    }
+
+    const result = await authService.setUserPin(userId, cleanPin);
+    if (result.success) {
+      const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '';
+      const user = await dataService.getUsuarioById(userId);
+      const cubiculos = user ? await dataService.getCubiculosByUser(userId) : [];
+      await dataService.addHistorial({
+        tipo_movimiento: 'CONFIGURACION_PIN',
+        tipo_documento: 'SEGURIDAD',
+        codigo_documento: userId,
+        usuario: user ? `${user.nombre} (${user.email})` : userId,
+        cubiculo: (cubiculos || []).map(c => c.codigo || c).join(', ') || 'N/A',
+        archivo: '',
+        accion: 'Configuración de 4 Pines de Seguridad',
+        estado_anterior: 'Clave Provisional (123456)',
+        estado_nuevo: 'PIN de 4 Dígitos Configurado',
+        observacion: `El inquilino guardó exitosamente sus 4 dígitos de PIN personal en la base de datos para sus futuros accesos. IP: ${clientIp}`,
         ip: clientIp
       });
     }
@@ -911,6 +964,42 @@ app.get('/api/admin/dashboard', requireAdmin, async (req, res) => {
       role: req.adminAuth ? req.adminAuth.role : 'GESTOR',
       roleName: req.adminAuth ? req.adminAuth.nombre : 'Usuario Gestor'
     });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 12b. Telemetría y Cuantificación de Cargas en Teléfonos y Web
+app.post('/api/telemetria/carga', async (req, res) => {
+  try {
+    let body = req.body;
+    if (typeof body === 'string') {
+      try { body = JSON.parse(body); } catch (_) {}
+    }
+    const { deviceId, isMobile, isPWA, tipoDispositivo, pantalla, usuario, cubiculo } = body || {};
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '';
+
+    const stats = await dataService.registrarCargaApp({
+      deviceId,
+      isMobile,
+      isPWA,
+      tipoDispositivo,
+      pantalla,
+      usuario,
+      cubiculo,
+      ip: clientIp
+    });
+
+    res.json({ success: true, total_cargas: stats.total_cargas });
+  } catch (err) {
+    res.json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/telemetria', requireAdmin, async (req, res) => {
+  try {
+    const data = await dataService.getTelemetria();
+    res.json({ success: true, telemetria: data });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
