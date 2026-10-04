@@ -35,9 +35,39 @@ class DataService {
       try {
         this.db = JSON.parse(JSON.stringify(require('../database/initial_catalog.json')));
       } catch (_) {
-        this.db = { CUBICULOS: [], USUARIOS: [], USUARIO_CUBICULO: [], PRESUPUESTO_2026: null, RECLAMACIONES: [], PAGOS: [], CONFIGURACION: [], HISTORIAL: [], NOVEDADES: [], MENSAJES: [] };
+        if (!this.db) {
+          this.db = { CUBICULOS: [], USUARIOS: [], USUARIO_CUBICULO: [], PRESUPUESTO_2026: null, RECLAMACIONES: [], PAGOS: [], CONFIGURACION: [], HISTORIAL: [], NOVEDADES: [], MENSAJES: [] };
+        }
       }
     }
+
+    if (!this.db) {
+      this.db = { CUBICULOS: [], USUARIOS: [], USUARIO_CUBICULO: [], PRESUPUESTO_2026: null, RECLAMACIONES: [], PAGOS: [], CONFIGURACION: [], HISTORIAL: [], NOVEDADES: [], MENSAJES: [] };
+    }
+
+    // Asegurar que Bertha Soury (US-017) y usuarios de initial_catalog tengan sus datos y aliases más recientes
+    try {
+      const initialCat = require('../database/initial_catalog.json');
+      if (initialCat && Array.isArray(initialCat.USUARIOS)) {
+        for (const initU of initialCat.USUARIOS) {
+          const existing = (this.db.USUARIOS || []).find(u => u.user_id === initU.user_id);
+          if (existing) {
+            if (initU.alias_emails) existing.alias_emails = initU.alias_emails;
+            if (initU.email) existing.email = initU.email;
+            if (initU.telefono && !existing.telefono) existing.telefono = initU.telefono;
+            if (initU.user_id === 'US-017') {
+              existing.password = '123456';
+              existing.password_temporal = true;
+              existing.debe_cambiar_password = true;
+              existing.estado = 'Activo';
+            }
+          } else {
+            if (!this.db.USUARIOS) this.db.USUARIOS = [];
+            this.db.USUARIOS.push(initU);
+          }
+        }
+      }
+    } catch (_) {}
 
     if (!this.db.NOVEDADES) {
       this.db.NOVEDADES = [

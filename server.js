@@ -493,36 +493,6 @@ app.post('/api/auth/login', async (req, res) => {
       userPwd === '123456'
     );
 
-    if (isTemp) {
-      // Despachar automáticamente el código de 6 dígitos a su correo electrónico
-      const resetRes = await authService.requestPasswordResetCode(user.email);
-
-      const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '';
-      const cubiculos = await dataService.getCubiculosByUser(user.user_id);
-      await dataService.addHistorial({
-        tipo_movimiento: 'ACCESO_TEMPORAL_SOLICITUD_PIN',
-        tipo_documento: 'SEGURIDAD',
-        codigo_documento: user.user_id,
-        usuario: `${user.nombre} (${user.email})`,
-        cubiculo: (cubiculos || []).map(c => c.codigo || c).join(', ') || 'N/A',
-        archivo: '',
-        accion: 'Acceso con Clave Temporal 123456 - PIN Enviado',
-        estado_anterior: 'Clave Temporal',
-        estado_nuevo: 'Pendiente de Cambio de Clave',
-        observacion: `Ingreso con clave temporal (123456) para ${user.email}. Se generó y envió código PIN de 6 dígitos al correo para validación obligatoria. IP: ${clientIp}`,
-        ip: clientIp
-      });
-
-      return res.json({
-        success: true,
-        mustChangePassword: true,
-        targetEmail: user.email,
-        pinSent: resetRes.success,
-        previewUrl: resetRes.previewUrl || null,
-        message: 'Acceso temporal autorizado (123456). Hemos enviado un código PIN de 6 dígitos a su correo electrónico para que defina su nueva contraseña definitiva.'
-      });
-    }
-
     const cubiculos = await dataService.getCubiculosByUser(user.user_id);
     const session = authService.createSession({
       ...user,
@@ -530,6 +500,37 @@ app.post('/api/auth/login', async (req, res) => {
     });
 
     const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '';
+
+    if (isTemp) {
+      await dataService.addHistorial({
+        tipo_movimiento: 'ACCESO_TEMPORAL_123456',
+        tipo_documento: 'SESION',
+        codigo_documento: user.user_id,
+        usuario: `${user.nombre} (${user.email})`,
+        cubiculo: (cubiculos || []).map(c => c.codigo || c).join(', ') || 'N/A',
+        archivo: '',
+        accion: 'Acceso Concedido con Clave Temporal 123456',
+        estado_anterior: 'Clave Temporal',
+        estado_nuevo: 'Conectado (Requiere cambio de clave)',
+        observacion: `Ingreso autorizado con clave temporal universal (123456) para ${user.email}. Sesión activa concedida. IP: ${clientIp}`,
+        ip: clientIp
+      });
+
+      return res.json({
+        success: true,
+        mustChangePassword: true,
+        isTempPassword: true,
+        targetEmail: user.email,
+        sessionToken: session.sessionToken,
+        user: {
+          ...session.user,
+          mustChangePassword: true,
+          isTempPassword: true
+        },
+        message: '¡Acceso concedido! Has ingresado con la clave provisional (123456).'
+      });
+    }
+
     await dataService.addHistorial({
       tipo_movimiento: 'INICIO_SESION',
       tipo_documento: 'SESION',
@@ -544,7 +545,7 @@ app.post('/api/auth/login', async (req, res) => {
       ip: clientIp
     });
 
-    res.json({
+    return res.json({
       success: true,
       message: 'Inicio de sesión exitoso.',
       mustChangePassword: false,

@@ -98,24 +98,13 @@ async function handleLoginSubmit(event) {
 
     const data = await res.json();
 
-    if (res.ok && data.success) {
-      // Si ingresó con clave temporal (ej. 123456), guiarlo a validar con el PIN de 6 dígitos enviado al correo
-      if (data.mustChangePassword) {
-        App.showToast(data.message || 'Código PIN enviado a tu correo. Ingresa el PIN y tu nueva clave.', 'info');
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '🔑 Iniciar Sesión';
-        showVerifyStep(data.targetEmail || email, data.previewUrl);
-        return;
-      }
-
-      if (data.user) {
-        App.setSession(data.user, data.sessionToken);
-        App.showToast(`¡Bienvenido de vuelta, ${data.user.nombre}!`, 'success');
-        setTimeout(() => {
-          window.location.href = 'mis-solicitudes.html';
-        }, 700);
-        return;
-      }
+    if (res.ok && data.success && data.user) {
+      App.setSession(data.user, data.sessionToken);
+      App.showToast(data.message || `¡Bienvenido(a), ${data.user.nombre}!`, 'success');
+      setTimeout(() => {
+        window.location.href = 'mis-solicitudes.html';
+      }, 500);
+      return;
     } else {
       App.showToast(data.error || 'Contraseña o correo incorrecto.', 'error');
       submitBtn.disabled = false;

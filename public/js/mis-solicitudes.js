@@ -149,6 +149,129 @@ function closeSolicitudModal() {
   if (modal) modal.classList.remove('open');
 }
 
+function checkTempPasswordPrompt() {
+  const session = App.getSession();
+  if (!session || !session.user) return;
+  const isTemp = session.user.mustChangePassword || session.user.isTempPassword;
+  if (!isTemp) return;
+
+  const existingBanner = document.getElementById('temp-password-banner');
+  if (existingBanner) return;
+
+  const main = document.querySelector('main.container');
+  if (!main) return;
+
+  const banner = document.createElement('div');
+  banner.id = 'temp-password-banner';
+  banner.style.cssText = 'background:#FFFBEB; border:1.5px solid #F59E0B; border-left:5px solid #D97706; border-radius:10px; padding:14px 18px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; box-shadow:0 1px 4px rgba(0,0,0,0.05);';
+  banner.innerHTML = `
+    <div>
+      <div style="font-weight:800; color:#B45309; font-size:14px; display:flex; align-items:center; gap:6px;">
+        🔑 Clave Temporal Activa (123456)
+      </div>
+      <div style="font-size:13px; color:#78350F; margin-top:3px;">
+        Has ingresado con la clave provisional. Te recomendamos definir tu contraseña definitiva personal.
+      </div>
+    </div>
+    <div>
+      <button class="btn-sm" style="background:#D97706; color:#FFF; font-weight:800; border:none; padding:8px 14px; border-radius:6px; cursor:pointer;" onclick="openChangePasswordModal()">
+        🔒 Crear Contraseña Definitiva
+      </button>
+    </div>
+  `;
+  main.insertBefore(banner, main.firstChild);
+}
+
+function openChangePasswordModal() {
+  let modal = document.getElementById('change-password-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'change-password-modal';
+    modal.className = 'modal-backdrop';
+    modal.innerHTML = `
+      <div class="modal-box" style="max-width:440px;">
+        <div class="modal-header">
+          <h3 style="font-size:16px; font-weight:800; margin:0;">🔒 Configurar Contraseña Definitiva</h3>
+          <button onclick="closeChangePasswordModal()" style="background:none; border:none; font-size:20px; cursor:pointer;">✕</button>
+        </div>
+        <div class="modal-body" style="padding:16px 20px;">
+          <p style="font-size:13px; color:#64748B; margin:0 0 14px;">
+            Ingresa tu nueva contraseña personal para tus próximos inicios de sesión en Plaza Megatón.
+          </p>
+          <div class="form-group" style="margin-bottom:12px;">
+            <label class="form-label" style="font-size:13px; font-weight:700;">Nueva Contraseña (mínimo 4 caracteres):</label>
+            <input type="password" id="modal-new-pwd" class="form-input" placeholder="Nueva contraseña">
+          </div>
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label" style="font-size:13px; font-weight:700;">Confirmar Contraseña:</label>
+            <input type="password" id="modal-confirm-pwd" class="form-input" placeholder="Repite la nueva contraseña">
+          </div>
+          <div id="modal-pwd-err" style="color:#DC2626; font-size:12px; margin-bottom:10px; display:none;"></div>
+          <button type="button" id="btn-save-modal-pwd" class="btn-primary" style="width:100%;" onclick="submitChangePasswordFromModal()">
+            💾 Guardar Contraseña Definitiva
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+  modal.classList.add('open');
+}
+
+function closeChangePasswordModal() {
+  const modal = document.getElementById('change-password-modal');
+  if (modal) modal.classList.remove('open');
+}
+
+async function submitChangePasswordFromModal() {
+  const newPwd = (document.getElementById('modal-new-pwd')?.value || '').trim();
+  const confirmPwd = (document.getElementById('modal-confirm-pwd')?.value || '').trim();
+  const errEl = document.getElementById('modal-pwd-err');
+  const btn = document.getElementById('btn-save-modal-pwd');
+
+  if (!newPwd || newPwd.length < 4) {
+    if (errEl) { errEl.innerText = 'La contraseña debe tener al menos 4 caracteres.'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (newPwd !== confirmPwd) {
+    if (errEl) { errEl.innerText = 'Las contraseñas no coinciden.'; errEl.style.display = 'block'; }
+    return;
+  }
+
+  const session = App.getSession();
+  if (!session || !session.user) return;
+
+  btn.disabled = true;
+  btn.innerText = 'Guardando...';
+
+  try {
+    const res = await fetch('/api/auth/change-temp-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: session.user.userId, newPassword: newPwd })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      App.showToast('¡Contraseña definitiva guardada correctamente!', 'success');
+      closeChangePasswordModal();
+      const banner = document.getElementById('temp-password-banner');
+      if (banner) banner.remove();
+      session.user.mustChangePassword = false;
+      session.user.isTempPassword = false;
+      App.setSession(session.user, session.token);
+    } else {
+      if (errEl) { errEl.innerText = data.error || 'Error al guardar contraseña.'; errEl.style.display = 'block'; }
+      btn.disabled = false;
+      btn.innerText = '💾 Guardar Contraseña Definitiva';
+    }
+  } catch (e) {
+    if (errEl) { errEl.innerText = 'Error de conexión.'; errEl.style.display = 'block'; }
+    btn.disabled = false;
+    btn.innerText = '💾 Guardar Contraseña Definitiva';
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   loadMisSolicitudes();
+  checkTempPasswordPrompt();
 });
