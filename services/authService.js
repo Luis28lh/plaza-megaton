@@ -15,7 +15,15 @@ class AuthService {
    * Genera y despacha un Magic Link al correo indicado
    */
   async requestMagicLink(email, reqBaseUrl = 'http://localhost:3007') {
-    const user = await this.dataService.getUsuarioByEmail(email);
+    if (!email) return { success: false, error: 'Ingresa un correo electrónico.' };
+    const cleanEmail = String(email).trim().toLowerCase();
+    if (!cleanEmail.includes('@')) {
+      return { success: false, error: 'Solamente puedes ingresar con tu correo electrónico registrado.' };
+    }
+    if (!cleanEmail.endsWith('.com')) {
+      return { success: false, error: 'El correo electrónico debe terminar obligatoriamente en .com (ejemplo: usuario@dominio.com).' };
+    }
+    const user = await this.dataService.getUsuarioByEmail(cleanEmail);
     if (!user) {
       return { success: false, error: 'No encontramos ningún usuario registrado con este correo electrónico.' };
     }
@@ -122,7 +130,13 @@ class AuthService {
    */
   async requestPasswordResetCode(email) {
     if (!email) return { success: false, error: 'Ingresa un correo electrónico.' };
-    const cleanEmail = email.trim().toLowerCase();
+    const cleanEmail = String(email).trim().toLowerCase();
+    if (!cleanEmail.includes('@')) {
+      return { success: false, error: 'Solamente puedes utilizar tu correo electrónico registrado.' };
+    }
+    if (!cleanEmail.endsWith('.com')) {
+      return { success: false, error: 'El correo electrónico debe terminar obligatoriamente en .com (ejemplo: usuario@dominio.com).' };
+    }
     const user = await this.dataService.getUsuarioByEmail(cleanEmail);
 
     if (!user) {

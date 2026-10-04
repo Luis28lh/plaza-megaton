@@ -76,8 +76,17 @@ async function handleLoginSubmit(event) {
   const email = emailInput ? emailInput.value.trim() : '';
   const password = passwordInput ? passwordInput.value.trim() : '';
 
-  if (!email || email.length < 3) {
-    App.showToast('Ingresa tu correo electrónico registrado o identificador.', 'error');
+  const cleanEmail = email.toLowerCase();
+
+  if (!cleanEmail.includes('@')) {
+    App.showToast('Solamente puedes ingresar con tu correo electrónico. No se admiten números de cubículo ni otros identificadores.', 'error');
+    if (emailInput) emailInput.focus();
+    return;
+  }
+
+  if (!cleanEmail.endsWith('.com')) {
+    App.showToast('El correo electrónico debe terminar obligatoriamente en .com (ejemplo: usuario@dominio.com).', 'error');
+    if (emailInput) emailInput.focus();
     return;
   }
 
@@ -125,8 +134,17 @@ async function handleRequestResetCode(event) {
   const email = emailInput ? emailInput.value.trim() : '';
   const submitBtn = document.getElementById('btn-send-reset-code');
 
-  if (!email || email.length < 3) {
-    App.showToast('Ingresa tu correo electrónico registrado.', 'error');
+  const cleanEmail = email.toLowerCase();
+
+  if (!cleanEmail.includes('@')) {
+    App.showToast('Solamente puedes utilizar tu correo electrónico registrado.', 'error');
+    if (emailInput) emailInput.focus();
+    return;
+  }
+
+  if (!cleanEmail.endsWith('.com')) {
+    App.showToast('El correo electrónico debe terminar obligatoriamente en .com (ejemplo: usuario@dominio.com).', 'error');
+    if (emailInput) emailInput.focus();
     return;
   }
 
@@ -286,8 +304,17 @@ async function handleSendMagicLink() {
   const emailInput = document.getElementById('login-email');
   const email = emailInput ? emailInput.value.trim() : '';
 
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    App.showToast('Ingresa tu correo para enviarte el enlace.', 'error');
+  const cleanEmail = email.toLowerCase();
+
+  if (!cleanEmail.includes('@')) {
+    App.showToast('Solamente puedes utilizar tu correo electrónico registrado.', 'error');
+    if (emailInput) emailInput.focus();
+    return;
+  }
+
+  if (!cleanEmail.endsWith('.com')) {
+    App.showToast('El correo electrónico debe terminar obligatoriamente en .com (ejemplo: usuario@dominio.com).', 'error');
+    if (emailInput) emailInput.focus();
     return;
   }
 

@@ -344,10 +344,16 @@ app.post('/api/usuarios/registro', async (req, res) => {
 app.post('/api/auth/magic-link', async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email) return res.status(400).json({ success: false, error: 'Correo requerido.' });
+    const cleanEmail = String(email || '').trim().toLowerCase();
+    if (!cleanEmail.includes('@') || !cleanEmail.endsWith('.com')) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Debes ingresar un correo electrónico registrado válido que termine en .com.' 
+      });
+    }
 
     const baseUrl = `${req.protocol}://${req.get('host')}`;
-    const result = await authService.requestMagicLink(email.trim().toLowerCase(), baseUrl);
+    const result = await authService.requestMagicLink(cleanEmail, baseUrl);
     res.json(result);
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -394,8 +400,25 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Debes ingresar tu correo y contraseña.' });
     }
 
-    const cleanEmail = email.trim().toLowerCase();
+    const cleanEmail = String(email).trim().toLowerCase();
     const enteredPwd = String(password).trim();
+
+    // 1. REGLA ESTRICTA: Solamente correo electrónico registrado (no se admiten números de cubículo ni códigos)
+    if (!cleanEmail.includes('@')) {
+      return res.status(400).json({
+        success: false,
+        error: 'Solamente puedes ingresar con tu correo electrónico registrado. No se admiten números de cubículo ni otros identificadores.'
+      });
+    }
+
+    // 2. REGLA ESTRICTA: El correo debe terminar obligatoriamente en .com
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$/i;
+    if (!cleanEmail.endsWith('.com') || !emailRegex.test(cleanEmail)) {
+      return res.status(400).json({
+        success: false,
+        error: 'El correo electrónico debe ser válido y terminar obligatoriamente en .com (ejemplo: usuario@dominio.com).'
+      });
+    }
 
     // Acceso directo y prioritario para Usuario Master
     if (cleanEmail === MASTER_EMAIL && (enteredPwd === MASTER_PASSWORD || enteredPwd === 'megaton2026')) {
@@ -575,7 +598,14 @@ app.post('/api/auth/login', async (req, res) => {
 app.post('/api/auth/reset-code', async (req, res) => {
   try {
     const { email } = req.body;
-    const result = await authService.requestPasswordResetCode(email);
+    const cleanEmail = String(email || '').trim().toLowerCase();
+    if (!cleanEmail.includes('@') || !cleanEmail.endsWith('.com')) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Debes ingresar un correo electrónico registrado válido que termine en .com.' 
+      });
+    }
+    const result = await authService.requestPasswordResetCode(cleanEmail);
     res.json(result);
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

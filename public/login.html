@@ -35,16 +35,19 @@
 
         <form id="login-form">
           <div class="form-group">
-            <label class="form-label" for="login-email">Tu correo electrónico registrado <span class="req">*</span></label>
+            <label class="form-label" for="login-email">Tu correo electrónico registrado (.com) <span class="req">*</span></label>
             <input 
-              type="text" 
+              type="email" 
               inputmode="email"
               id="login-email" 
               class="form-input" 
-              placeholder="ejemplo@correo.com o tu usuario" 
+              placeholder="ejemplo@correo.com" 
               required
               autocomplete="email"
             >
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+              🔒 Acceso exclusivo mediante correo electrónico terminado en <strong>.com</strong>.
+            </div>
           </div>
 
           <div class="form-group">
@@ -117,16 +120,19 @@
 
         <form id="reset-request-form" onsubmit="handleRequestResetCode(event)">
           <div class="form-group">
-            <label class="form-label" for="reset-email">Correo electrónico registrado <span class="req">*</span></label>
+            <label class="form-label" for="reset-email">Correo electrónico registrado (.com) <span class="req">*</span></label>
             <input 
-              type="text" 
+              type="email" 
               inputmode="email"
               id="reset-email" 
               class="form-input" 
-              placeholder="ejemplo@correo.com o tu usuario" 
+              placeholder="ejemplo@correo.com" 
               required
               autocomplete="email"
             >
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+              🔒 El correo debe terminar obligatoriamente en <strong>.com</strong>.
+            </div>
           </div>
 
           <button type="submit" id="btn-send-reset-code" class="btn-primary" style="margin-bottom:12px;">
