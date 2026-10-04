@@ -517,6 +517,16 @@ function renderUsuariosTable(users) {
     return 0;
   });
 
+  const resetSelect = document.getElementById('select-reset-user');
+  if (resetSelect) {
+    const occupantUsers = sortedUsers.filter(u => u.user_id !== 'US-MASTER');
+    resetSelect.innerHTML = occupantUsers.map(u => {
+      const isBertha = (u.user_id === 'US-017' || (u.nombre || '').toUpperCase().includes('BERTHA'));
+      const statusLabel = u.pin ? `🔑 PIN: ${u.pin}` : (u.password === '123456' ? '⚠️ Clave Temp 123456' : '🔒 Clave Personal');
+      return `<option value="${u.user_id}" ${isBertha ? 'selected' : ''}>${u.nombre} (${u.email}) - ${statusLabel}</option>`;
+    }).join('');
+  }
+
   tbody.innerHTML = '';
   sortedUsers.forEach(u => {
     const isPending = (u.estado === 'Pendiente de Aprobación' || u.estado === 'Pendiente');
@@ -567,7 +577,7 @@ function renderUsuariosTable(users) {
       actionsHtml = `
         <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
           <button class="btn-sm btn-sm-outline" onclick="openEditUserModal('${u.user_id}')">⚙️ Gestionar</button>
-          <button class="btn-sm" style="background:#2563EB; color:#fff; font-weight:700; border:none; padding:6px 10px; border-radius:6px; cursor:pointer;" onclick="quickEnableTemporalAccess('${u.user_id}', '${safeName}')" title="Habilitar clave temporal 123456 con validación PIN obligatoria">⚡ 123456</button>
+          <button class="btn-sm" style="background:#D97706; color:#fff; font-weight:800; border:none; padding:6px 10px; border-radius:6px; cursor:pointer;" onclick="resetProvisionalAccess('${u.user_id}', '${safeName}')" title="Reiniciar a clave provisional 123456 y borrar PIN para que el usuario configure su PIN al entrar">🔄 Reiniciar (123456)</button>
         </div>
       `;
     }
@@ -718,14 +728,18 @@ function openEditUserModal(userId) {
       </select>
     </div>
 
-    <!-- ACCESO TEMPORAL 123456 INMEDIATO -->
-    <div style="background:#EFF6FF; border:1.5px solid #93C5FD; border-radius:10px; padding:12px 14px; margin-top:14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-      <div>
-        <div style="font-weight:800; color:#1E40AF; font-size:13px;">⚡ Acceso Rápido Temporal (123456)</div>
-        <div style="font-size:12px; color:#2563EB; margin-top:2px;">Asigna clave temporal <strong>123456</strong>. Al iniciar sesión, el sistema le pedirá el PIN de 6 dígitos enviado a su correo para establecer su nueva clave definitiva.</div>
+    <!-- ACCESO TEMPORAL 123456 Y REINICIO DE PROCESO -->
+    <div style="background:#FFFBEB; border:1.5px solid #F59E0B; border-radius:10px; padding:14px; margin-top:14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div style="flex:1; min-width:240px;">
+        <div style="font-weight:900; color:#B45309; font-size:13px; display:flex; align-items:center; gap:6px;">
+          <span>🔄</span> Reiniciar Proceso Provisional (123456 y Borrar PIN)
+        </div>
+        <div style="font-size:12px; color:#78350F; margin-top:3px; line-height:1.4;">
+          Borra cualquier PIN previo y restablece la clave a <strong>123456</strong>. Al entrar, el inquilino verá automáticamente la ventana modal para configurar su <strong>PIN de 4 dígitos</strong>.
+        </div>
       </div>
-      <button type="button" class="btn-sm" style="background:#2563EB; color:#FFFFFF; font-weight:800; border:none; padding:8px 14px; border-radius:6px; cursor:pointer;" onclick="quickEnableTemporalAccess('${user.user_id}', '${safeName}')">
-        ⚡ Habilitar Clave 123456
+      <button type="button" class="btn-sm" style="background:#D97706; color:#FFFFFF; font-weight:800; border:none; padding:9px 14px; border-radius:6px; cursor:pointer;" onclick="resetProvisionalAccess('${user.user_id}', '${safeName}')">
+        🔄 Reiniciar a 123456
       </button>
     </div>
 
@@ -816,6 +830,54 @@ async function quickEnableTemporalAccess(userId, userName) {
     }
   } catch (err) {
     App.showToast('Error de conexión al habilitar acceso temporal.', 'error');
+  }
+}
+
+async function triggerMasterQuickReset() {
+  const select = document.getElementById('select-reset-user');
+  const userId = select ? select.value : '';
+  if (!userId) {
+    App.showToast('Selecciona un usuario para reiniciar.', 'error');
+    return;
+  }
+  const userName = select.options[select.selectedIndex]?.text || userId;
+  await resetProvisionalAccess(userId, userName);
+}
+
+async function resetProvisionalAccess(userId, userName) {
+  const cleanName = (userName || userId).replace(/\s*\(.*?\)\s*/g, ' ').replace(/\s*\[.*?\]\s*/g, ' ').trim();
+  if (!confirm(`¿Deseas reiniciar la cuenta de "${cleanName}" a la clave provisional (123456) y borrar su PIN?\n\nAl confirmar:\n1. La contraseña volverá a ser "123456".\n2. Se borrará su PIN actual para que quede en blanco.\n3. Al entrar por primera vez con 123456, el sistema le pedirá automáticamente registrar su nuevo PIN personal de 4 dígitos.`)) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/admin/usuarios/${encodeURIComponent(userId)}/reset-provisional`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-pin': getAdminPin()
+      }
+    });
+
+    const data = await res.json();
+    if (res.ok && data.success) {
+      App.showToast(`✅ ${data.message}`, 'success');
+      const msgEl = document.getElementById('pwd-change-msg');
+      if (msgEl) {
+        msgEl.style.display = 'block';
+        msgEl.style.color = '#B45309';
+        msgEl.innerHTML = `🔄 <strong>Proceso Reiniciado:</strong> Clave asignada a <code>123456</code> y PIN borrado. El inquilino verá el formulario de 4 pines al entrar.`;
+      }
+      loadUsuarios();
+      const modal = document.getElementById('edit-user-modal');
+      if (modal && modal.classList.contains('open')) {
+        setTimeout(() => modal.classList.remove('open'), 600);
+      }
+    } else {
+      App.showToast(data.error || 'Error al reiniciar el proceso provisional.', 'error');
+    }
+  } catch (err) {
+    App.showToast('Error de conexión al reiniciar el proceso.', 'error');
   }
 }
 

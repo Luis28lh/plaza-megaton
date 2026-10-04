@@ -1061,6 +1061,12 @@ app.patch('/api/admin/usuarios/:userId', requireAdmin, async (req, res) => {
     if (telefono !== undefined) updates.telefono = telefono;
     if (password !== undefined && String(password).trim()) {
       updates.password = String(password).trim();
+      if (updates.password === '123456') {
+        updates.pin = null;
+        updates.pin_configurado = false;
+        updates.password_temporal = true;
+        updates.debe_cambiar_password = true;
+      }
     }
     if (debe_cambiar_password !== undefined) {
       updates.debe_cambiar_password = Boolean(debe_cambiar_password);
@@ -1124,6 +1130,54 @@ app.post('/api/admin/usuarios', requireAdmin, async (req, res) => {
 
     const created = await dataService.getUsuarioById(userId);
     res.json({ success: true, usuario: created, message: 'Nuevo usuario registrado con clave temporal 123456.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 14a-2. Reiniciar Proceso de Acceso Provisional (123456) y Borrar PIN (para pruebas del Master y experiencia del inquilino)
+app.post('/api/admin/usuarios/:userId/reset-provisional', requireAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await dataService.getUsuarioById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'Usuario no encontrado.' });
+    }
+
+    const adminName = req.adminAuth ? req.adminAuth.nombre : 'Usuario Master';
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '';
+
+    const updateData = {
+      password: '123456',
+      pin: null,
+      pin_configurado: false,
+      password_temporal: true,
+      debe_cambiar_password: true,
+      estado: 'Activo',
+      password_modificado: new Date().toISOString()
+    };
+
+    const updated = await dataService.updateUsuario(userId, updateData, adminName);
+
+    await dataService.addHistorial({
+      tipo_movimiento: 'REINICIO_CLAVE_TEMPORAL',
+      tipo_documento: 'USUARIO',
+      codigo_documento: user.user_id,
+      usuario: adminName,
+      cubiculo: (user.cubiculos || []).map(c => typeof c === 'object' ? c.codigo : c).join(', ') || 'N/A',
+      archivo: '',
+      accion: 'Reinicio a Clave Provisional 123456 y Borrado de PIN',
+      estado_anterior: `PIN: ${user.pin || 'No configurado'}`,
+      estado_nuevo: 'Clave Provisional 123456 (Sin PIN)',
+      observacion: `Reinicio ejecutado desde el panel Master para permitir que el inquilino configure sus 4 pines personales al acceder por primera vez. IP: ${clientIp}`,
+      ip: clientIp
+    });
+
+    res.json({
+      success: true,
+      message: `¡Proceso reiniciado exitosamente para ${user.nombre}! Clave fijada a 123456 y PIN borrado para que configure sus 4 dígitos al entrar.`,
+      usuario: updated
+    });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

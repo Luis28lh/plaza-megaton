@@ -313,6 +313,26 @@
           </div>
         </div>
 
+        <!-- Control Exclusivo Master: Reiniciar Proceso de Acceso y PIN (Modo Prueba y Bienvenida) -->
+        <div id="master-reset-banner" style="background:#FFFBEB; border:1.5px solid #F59E0B; border-left:6px solid #D97706; border-radius:10px; padding:16px 20px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+          <div style="flex: 1; min-width: 280px;">
+            <div style="font-weight:900; font-size:15px; color:#B45309; display:flex; align-items:center; gap:8px;">
+              <span>🔄</span> Reiniciar Proceso de Acceso Provisional y PIN (Modo Pruebas / Bienvenida)
+            </div>
+            <div style="font-size:13px; color:#78350F; margin-top:4px; line-height:1.5;">
+              Al pulsar este botón, la cuenta seleccionada vuelve a su estado inicial: clave provisional <strong>123456</strong> y PIN borrado. Esto te permite hacer pruebas completas y luego reiniciar el proceso para que el inquilino configure sus <strong>4 pines</strong> al ingresar por primera vez.
+            </div>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <select id="select-reset-user" class="form-select" style="min-width:240px; background:#FFFFFF; font-weight:700; font-size:13px; border:1.5px solid #D97706;">
+              <option value="">Cargando usuarios...</option>
+            </select>
+            <button type="button" class="btn-sm" style="background:#D97706; color:#FFFFFF; font-weight:900; border:none; padding:10px 16px; border-radius:6px; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(217,119,6,0.25);" onclick="triggerMasterQuickReset()">
+              🔄 Reiniciar Proceso a 123456
+            </button>
+          </div>
+        </div>
+
         <div class="table-filter-bar">
           <div class="search-input-wrap">
             <input type="text" id="search-usuarios-input" class="form-input" placeholder="🔍 Buscar por nombre, correo, cubículo, código o PIN..." oninput="filterUsuarios()">
