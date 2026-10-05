@@ -162,7 +162,7 @@ async function handlePagoSubmit(event) {
   submitBtn.disabled = true;
   submitBtn.innerHTML = '⏳ Reportando pago...';
 
-  // Entorno estático (GitHub Pages)
+  // Entorno estático (Entorno Estático)
   if (App.isStaticHost()) {
     setTimeout(() => {
       const codigo = App.getNextSequence('PG');

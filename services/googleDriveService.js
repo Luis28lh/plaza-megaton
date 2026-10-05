@@ -40,20 +40,30 @@ class GoogleDriveService {
     this.ensureDirs();
     const urls = [];
     try {
-      const folderPath = path.join(this.reclamacionesDir, codigo);
-      if (!fs.existsSync(folderPath)) {
-        fs.mkdirSync(folderPath, { recursive: true });
-      }
+      const folderPaths = [
+        path.join(this.reclamacionesDir, codigo),
+        path.join(__dirname, '..', 'public', 'assets', 'uploads', '01 - RECLAMACIONES', codigo),
+        path.join(__dirname, '..', 'assets', 'uploads', '01 - RECLAMACIONES', codigo),
+        path.join(os.tmpdir(), 'uploads', '01 - RECLAMACIONES', codigo)
+      ];
+
+      folderPaths.forEach(fp => {
+        try { if (!fs.existsSync(fp)) fs.mkdirSync(fp, { recursive: true }); } catch (_) {}
+      });
 
       for (const file of files) {
         const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
         const safeFilename = `EVIDENCIA_${Date.now()}_${Math.floor(Math.random() * 1000)}${ext}`;
-        const destPath = path.join(folderPath, safeFilename);
 
-        if (file.path && fs.existsSync(file.path)) {
-          fs.renameSync(file.path, destPath);
-        } else if (file.buffer) {
-          fs.writeFileSync(destPath, file.buffer);
+        for (const fp of folderPaths) {
+          try {
+            const destPath = path.join(fp, safeFilename);
+            if (file.buffer) {
+              fs.writeFileSync(destPath, file.buffer);
+            } else if (file.path && fs.existsSync(file.path)) {
+              fs.copyFileSync(file.path, destPath);
+            }
+          } catch (_) {}
         }
 
         const fileUrl = `/api/uploads/01 - RECLAMACIONES/${codigo}/${safeFilename}`;

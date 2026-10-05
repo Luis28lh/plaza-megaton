@@ -13,7 +13,7 @@ let adminData = {
   mensajes: []
 };
 
-// Helper para cargar catálogo en entornos estáticos (GitHub Pages / demo)
+// Helper para cargar catálogo en entornos estáticos (Entorno Estático / demo)
 async function fetchCatalogFallback() {
   if (window._catalogLoaded) return window._catalogLoaded;
   try {
@@ -1116,14 +1116,23 @@ function openAdminReclamacionModal(codigo) {
   if (item.archivos && item.archivos.length > 0) {
     photosHtml = `
       <div style="margin-top:14px;">
-        <div style="font-size:13px; font-weight:700; margin-bottom:6px;">Fotografías de Evidencia (${item.archivos.length}):</div>
+        <div style="font-size:13px; font-weight:700; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between;">
+          <span>📸 Fotografías de Evidencia (${item.archivos.length}):</span>
+          <span style="font-size:11px; color:#64748B; font-weight:normal;">(Clic para ampliar)</span>
+        </div>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          ${item.archivos.map(url => {
+          ${item.archivos.map((url, idx) => {
             const safeUrl = url.replace('/assets/uploads/', '/api/uploads/');
             return `
-              <a href="${safeUrl}" target="_blank">
-                <img src="${safeUrl}" style="width:100px; height:100px; object-fit:cover; border-radius:8px; border:1px solid #CBD5E1;">
-              </a>
+              <div style="position:relative; cursor:pointer;" onclick="openPhotoLightbox('${safeUrl}', '${item.codigo}')" title="Ver foto en tamaño completo">
+                <img src="${safeUrl}" 
+                     alt="Evidencia ${item.codigo}" 
+                     style="width:100px; height:100px; object-fit:cover; border-radius:8px; border:2px solid #CBD5E1; box-shadow:0 2px 4px rgba(0,0,0,0.06); transition:transform 0.15s ease;"
+                     onmouseover="this.style.transform='scale(1.04)'"
+                     onmouseout="this.style.transform='scale(1)'"
+                     onerror="this.onerror=null; this.src='/api/reclamaciones/${item.codigo}/fotos/${idx}';">
+                <div style="position:absolute; bottom:4px; right:4px; background:rgba(0,0,0,0.65); color:#fff; border-radius:4px; padding:1px 4px; font-size:10px;">🔍</div>
+              </div>
             `;
           }).join('')}
         </div>
@@ -1205,6 +1214,44 @@ async function saveReclamacionAction(codigo) {
 
 function closeAdminReclamacionModal() {
   document.getElementById('admin-reclamacion-modal').classList.remove('open');
+}
+
+function openPhotoLightbox(imgSrc, title = 'Evidencia') {
+  let modal = document.getElementById('pm-admin-lightbox-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'pm-admin-lightbox-modal';
+    modal.style.cssText = 'position:fixed; inset:0; z-index:99999; background:rgba(15,23,42,0.92); backdrop-filter:blur(4px); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:16px; opacity:0; transition:opacity 0.2s ease;';
+    modal.innerHTML = `
+      <div style="max-width:92vw; max-height:88vh; display:flex; flex-direction:column; align-items:center; position:relative; width:100%; max-width:650px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:12px; color:#fff;">
+          <span id="pm-admin-lightbox-title" style="font-weight:700; font-size:15px; color:#F8FAFC;">Fotografía de Evidencia</span>
+          <div style="display:flex; gap:8px;">
+            <a id="pm-admin-lightbox-ext" href="#" target="_blank" style="background:rgba(255,255,255,0.18); color:#fff; padding:6px 12px; font-size:12px; border-radius:6px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">↗ Abrir en pestaña</a>
+            <button onclick="closePhotoLightbox()" style="background:#EF4444; color:#fff; border:none; border-radius:6px; width:32px; height:32px; font-size:18px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+          </div>
+        </div>
+        <img id="pm-admin-lightbox-img" src="" alt="Evidencia" style="max-width:100%; max-height:76vh; object-fit:contain; border-radius:8px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.6); background:#0F172A; border:1px solid #334155;">
+      </div>
+    `;
+    modal.onclick = (e) => {
+      if (e.target === modal) closePhotoLightbox();
+    };
+    document.body.appendChild(modal);
+  }
+  document.getElementById('pm-admin-lightbox-title').textContent = `Fotografía de Evidencia — ${title}`;
+  document.getElementById('pm-admin-lightbox-img').src = imgSrc;
+  document.getElementById('pm-admin-lightbox-ext').href = imgSrc;
+  modal.style.display = 'flex';
+  setTimeout(() => { modal.style.opacity = '1'; }, 10);
+}
+
+function closePhotoLightbox() {
+  const modal = document.getElementById('pm-admin-lightbox-modal');
+  if (modal) {
+    modal.style.opacity = '0';
+    setTimeout(() => { modal.style.display = 'none'; }, 200);
+  }
 }
 
 // ==========================================
@@ -1738,7 +1785,7 @@ async function testGoogleConnection() {
   resultDiv.style.display = 'block';
   resultDiv.innerHTML = '<span style="color:#64748B;">⏳ Probando conexión con Google Drive y Google Sheets...</span>';
 
-  // Si corre en GitHub Pages directo
+  // Si corre en Entorno Estático directo
   if (App.isStaticHost()) {
     localStorage.setItem('pm_google_script_url', scriptUrl);
     try {

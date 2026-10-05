@@ -257,7 +257,7 @@ const App = {
       }
     });
 
-    // Inicializar almacenamiento local autónomo si corre en GitHub Pages
+    // Inicializar almacenamiento local autónomo si corre en Entorno Estático
     if (this.isStaticHost()) {
       this.initLocalStore();
     }
@@ -333,7 +333,7 @@ const App = {
     return window.location.protocol === 'file:';
   },
 
-  // Almacenamiento local persistente para funcionamiento en GitHub Pages (offline/remoto)
+  // Almacenamiento local persistente para funcionamiento en Entorno Estático (offline/remoto)
   initLocalStore() {
     const OFFICIAL_CUBS = [
       { codigo: "A-101", nivel: "Primer Nivel", area_m2: 64.75, precio_m2: 100.00, cuota: 6475.00, nombre: "Yesenia Grullón", propietario: "YESENIA GRULLON", estado: "Ocupado" },
@@ -392,16 +392,43 @@ const App = {
       }]));
     }
     if (!localStorage.getItem('pm_counters')) {
-      localStorage.setItem('pm_counters', JSON.stringify({ US: 0, CL: 0, PG: 0 }));
+      localStorage.setItem('pm_counters', JSON.stringify({ US: 18, CL: 7, PG: 0 }));
     }
   },
 
-  // Generador de secuencias en entorno estático
+  // Generador de secuencias en entorno autónomo
   getNextSequence(prefix) {
-    const counters = JSON.parse(localStorage.getItem('pm_counters') || '{"US":0,"CL":0,"PG":0}');
-    counters[prefix] = (counters[prefix] || 0) + 1;
+    const counters = JSON.parse(localStorage.getItem('pm_counters') || '{"US":18,"CL":7,"PG":0}');
+    let max = counters[prefix] || (prefix === 'CL' ? 7 : (prefix === 'US' ? 18 : 0));
+
+    if (prefix === 'CL') {
+      try {
+        const recs = JSON.parse(localStorage.getItem('pm_reclamaciones') || '[]');
+        recs.forEach(r => {
+          const m = String(r.codigo || '').match(/CL-(\d+)/i);
+          if (m) {
+            const n = parseInt(m[1], 10);
+            if (n > max) max = n;
+          }
+        });
+      } catch (_) {}
+    } else if (prefix === 'PG') {
+      try {
+        const pags = JSON.parse(localStorage.getItem('pm_pagos') || '[]');
+        pags.forEach(p => {
+          const m = String(p.codigo || '').match(/PG-(\d+)/i);
+          if (m) {
+            const n = parseInt(m[1], 10);
+            if (n > max) max = n;
+          }
+        });
+      } catch (_) {}
+    }
+
+    const next = max + 1;
+    counters[prefix] = next;
     localStorage.setItem('pm_counters', JSON.stringify(counters));
-    return `${prefix}-${String(counters[prefix]).padStart(3, '0')}`;
+    return `${prefix}-${String(next).padStart(3, '0')}`;
   }
 };
 

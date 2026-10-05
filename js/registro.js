@@ -272,7 +272,7 @@ async function handleRegistroSubmit(event) {
   submitBtn.disabled = true;
   submitBtn.innerHTML = '⏳ Procesando registro...';
 
-  // Entorno estático (GitHub Pages)
+  // Entorno estático (Entorno Estático)
   if (App.isStaticHost()) {
     setTimeout(() => {
       const userId = App.getNextSequence('US');

@@ -69,10 +69,16 @@ const handleUploadServing = (req, res) => {
       return res.sendFile(publicPath);
     }
 
+    // 2b. Si existe en assets/uploads (raíz)
+    const assetsPath = path.join(__dirname, 'assets', 'uploads', decodedRelPath);
+    if (fs.existsSync(assetsPath)) {
+      return res.sendFile(assetsPath);
+    }
+
     // 3. Fallback en memoria / base de datos para vouchers (PG-xxx)
     const matchPago = decodedRelPath.match(/PG-\d+/i);
     if (matchPago) {
-      const pago = (dataService.db?.PAGOS || []).find(p => p.codigo === matchPago[0]);
+      const pago = (dataService.db?.PAGOS || []).find(p => p.codigo.toUpperCase() === matchPago[0].toUpperCase());
       if (pago && pago.voucher_base64) {
         const mime = pago.voucher_mime || 'image/jpeg';
         res.setHeader('Content-Type', mime);
@@ -83,9 +89,15 @@ const handleUploadServing = (req, res) => {
     // 4. Fallback en memoria / base de datos para evidencias (CL-xxx)
     const matchRec = decodedRelPath.match(/CL-\d+/i);
     if (matchRec) {
-      const rec = (dataService.db?.RECLAMACIONES || []).find(r => r.codigo === matchRec[0]);
-      if (rec && rec.evidencias_base64 && rec.evidencias_base64.length > 0) {
-        const ev = rec.evidencias_base64[0];
+      const rec = (dataService.db?.RECLAMACIONES || []).find(r => r.codigo.toUpperCase() === matchRec[0].toUpperCase());
+      if (rec && Array.isArray(rec.evidencias_base64) && rec.evidencias_base64.length > 0) {
+        const filename = path.basename(decodedRelPath).toLowerCase();
+        const ev = rec.evidencias_base64.find(e => 
+          (e.name && e.name.toLowerCase() === filename) || 
+          (e.url && e.url.toLowerCase().includes(filename)) ||
+          (e.original_name && e.original_name.toLowerCase() === filename)
+        ) || rec.evidencias_base64[0];
+
         if (ev && ev.data) {
           res.setHeader('Content-Type', ev.mime || 'image/jpeg');
           return res.send(Buffer.from(ev.data, 'base64'));
@@ -95,6 +107,29 @@ const handleUploadServing = (req, res) => {
 
     // 5. Fallback visual elegante cuando el archivo no está en el contenedor efímero
     res.setHeader('Content-Type', 'image/svg+xml');
+    if (matchRec) {
+      return res.status(200).send(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="600" height="420" viewBox="0 0 600 420">
+          <defs>
+            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#F8FAFC;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#F1F5F9;stop-opacity:1" />
+            </linearGradient>
+          </defs>
+          <rect width="600" height="420" fill="url(#grad)" rx="16"/>
+          <rect x="20" y="20" width="560" height="380" fill="none" stroke="#E2E8F0" stroke-width="2" rx="12"/>
+          <circle cx="300" cy="130" r="44" fill="#DBEAFE"/>
+          <text x="300" y="145" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="40" text-anchor="middle">📸</text>
+          <text x="300" y="215" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#0F172A">Evidencia de Avería / Solicitud</text>
+          <text x="300" y="245" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="700" text-anchor="middle" fill="#2563EB">${matchRec[0]}</text>
+          <text x="300" y="275" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" text-anchor="middle" fill="#475569">La evidencia fotográfica del cliente se encuentra debidamente registrada en la plataforma.</text>
+          <text x="300" y="300" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" text-anchor="middle" fill="#475569">El departamento técnico y la administración están coordinando la solución.</text>
+          <rect x="170" y="335" width="260" height="40" fill="#2563EB" rx="8"/>
+          <text x="300" y="360" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#FFFFFF">✓ REGISTRADO EN PLAZA MEGATÓN</text>
+        </svg>
+      `);
+    }
+
     return res.status(200).send(`
       <svg xmlns="http://www.w3.org/2000/svg" width="600" height="420" viewBox="0 0 600 420">
         <defs>
@@ -108,7 +143,7 @@ const handleUploadServing = (req, res) => {
         <circle cx="300" cy="130" r="44" fill="#FEE2E2"/>
         <text x="300" y="145" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="40" text-anchor="middle">🧾</text>
         <text x="300" y="215" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#0F172A">Comprobante de Pago Registrado</text>
-        <text x="300" y="245" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="700" text-anchor="middle" fill="#D32F2F">${matchPago ? matchPago[0] : (matchRec ? matchRec[0] : 'VOUCHER')}</text>
+        <text x="300" y="245" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="700" text-anchor="middle" fill="#D32F2F">${matchPago ? matchPago[0] : 'DOCUMENTO'}</text>
         <text x="300" y="275" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" text-anchor="middle" fill="#475569">Tu comprobante fue recibido correctamente y está registrado en Plaza Megatón.</text>
         <text x="300" y="300" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" text-anchor="middle" fill="#475569">El departamento administrativo está validando la conciliación bancaria.</text>
         <rect x="170" y="335" width="260" height="40" fill="#D32F2F" rx="8"/>
@@ -122,6 +157,31 @@ const handleUploadServing = (req, res) => {
 
 app.get('/api/uploads/*', handleUploadServing);
 app.get('/assets/uploads/*', handleUploadServing);
+
+// Ruta directa para servir fotos de reclamación
+app.get('/api/reclamaciones/:codigo/fotos/:index?', async (req, res) => {
+  const { codigo } = req.params;
+  const index = parseInt(req.params.index || '0', 10);
+  const rec = (dataService.db?.RECLAMACIONES || []).find(r => r.codigo.toUpperCase() === codigo.toUpperCase());
+  if (!rec) return res.status(404).send('Reclamación no encontrada');
+
+  if (Array.isArray(rec.evidencias_base64) && rec.evidencias_base64.length > 0) {
+    const ev = rec.evidencias_base64[index] || rec.evidencias_base64[0];
+    if (ev && ev.data) {
+      res.setHeader('Content-Type', ev.mime || 'image/jpeg');
+      return res.send(Buffer.from(ev.data, 'base64'));
+    }
+  }
+
+  if (Array.isArray(rec.archivos) && rec.archivos.length > 0) {
+    const fileUrl = rec.archivos[index] || rec.archivos[0];
+    req.params[0] = fileUrl.replace(/^\/api\/uploads\//, '').replace(/^\/assets\/uploads\//, '');
+    return handleUploadServing(req, res);
+  }
+
+  res.status(404).send('Evidencia no encontrada');
+});
+
 app.get('/api/pagos/:codigo/voucher', async (req, res) => {
   const { codigo } = req.params;
   const pago = (dataService.db?.PAGOS || []).find(p => p.codigo.toUpperCase() === codigo.toUpperCase());
@@ -767,11 +827,17 @@ app.post('/api/reclamaciones', upload.array('fotos', 6), async (req, res) => {
     let evidenciasBase64 = [];
     if (req.files && req.files.length > 0) {
       fileUrls = await driveService.saveReclamacionFiles(codigo, req.files);
-      evidenciasBase64 = req.files.map(f => ({
-        name: f.originalname,
-        mime: f.mimetype || 'image/jpeg',
-        data: f.buffer ? f.buffer.toString('base64') : ''
-      })).filter(e => e.data);
+      evidenciasBase64 = req.files.map((f, idx) => {
+        const url = fileUrls[idx] || '';
+        const savedName = url ? path.basename(url) : f.originalname;
+        return {
+          name: savedName,
+          original_name: f.originalname,
+          url: url,
+          mime: f.mimetype || 'image/jpeg',
+          data: f.buffer ? f.buffer.toString('base64') : ''
+        };
+      }).filter(e => e.data);
     }
 
     // Buscar si existe usuario para ligar user_id

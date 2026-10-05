@@ -1,6 +1,10 @@
 // Servicio centralizado de secuencias y correlativos inviolables
 // Regla: Nunca reutilizar un número eliminado o cancelado. Consecutivo incremental garantizado.
 
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+
 const PREFIXES = {
   USUARIO: { prefix: 'US', param: 'ultimo_codigo_usuario', pad: 3 },
   RECLAMACION: { prefix: 'CL', param: 'ultimo_codigo_reclamacion', pad: 3 },
@@ -10,6 +14,15 @@ const PREFIXES = {
 };
 
 class SequenceService {
+  // Contadores estáticos persistentes en memoria del proceso
+  static counters = {
+    US: 18,
+    CL: 7,
+    PG: 0,
+    SL: 0,
+    CM: 0
+  };
+
   constructor(dataService) {
     this.dataService = dataService;
     this._locks = new Map();
@@ -18,7 +31,7 @@ class SequenceService {
   /**
    * Genera el siguiente código atómicamente y actualiza el contador maestro en CONFIGURACION
    * @param {'USUARIO'|'RECLAMACION'|'PAGO'|'SOLICITUD_ADMIN'|'COMUNICACION'} type 
-   * @returns {Promise<string>} e.g. "CL-001", "PG-001", "US-001"
+   * @returns {Promise<string>} e.g. "CL-008", "PG-001", "US-019"
    */
   async nextCode(type) {
     const config = PREFIXES[type];
@@ -33,18 +46,18 @@ class SequenceService {
     this._locks.set(type, true);
 
     try {
+      // 0. Base del contador estático en memoria
+      let maxNumber = SequenceService.counters[config.prefix] || 0;
+
       // 1. Obtener el último código registrado en configuración
       const currentVal = await this.dataService.getConfigValue(config.param, `${config.prefix}-000`);
-      
-      // 2. Extraer el valor numérico
-      let maxNumber = 0;
       const match = String(currentVal).match(new RegExp(`${config.prefix}-(\\d+)`));
       if (match) {
-        maxNumber = parseInt(match[1], 10);
+        const n = parseInt(match[1], 10);
+        if (n > maxNumber) maxNumber = n;
       }
 
-      // 3. Como seguridad adicional, revisar si en las tablas existentes hay un código mayor
-      // Esto previene duplicados en caso de manipulación manual de la hoja
+      // 2. Como seguridad adicional, revisar si en las tablas existentes hay un código mayor
       if (type === 'RECLAMACION') {
         const items = await this.dataService.getReclamacionesRaw();
         for (const item of items) {
@@ -53,6 +66,27 @@ class SequenceService {
             const n = parseInt(m[1], 10);
             if (n > maxNumber) maxNumber = n;
           }
+        }
+
+        // Revisar carpetas de almacenamiento local y efímero
+        const uploadFolders = [
+          path.join(__dirname, '..', 'public', 'assets', 'uploads', '01 - RECLAMACIONES'),
+          path.join(__dirname, '..', 'assets', 'uploads', '01 - RECLAMACIONES'),
+          path.join(os.tmpdir(), 'uploads', '01 - RECLAMACIONES')
+        ];
+        for (const uf of uploadFolders) {
+          try {
+            if (fs.existsSync(uf)) {
+              const entries = fs.readdirSync(uf);
+              for (const e of entries) {
+                const em = String(e).match(/CL-(\d+)/i);
+                if (em) {
+                  const en = parseInt(em[1], 10);
+                  if (en > maxNumber) maxNumber = en;
+                }
+              }
+            }
+          } catch (_) {}
         }
       } else if (type === 'PAGO') {
         const items = await this.dataService.getPagosRaw();
@@ -74,10 +108,13 @@ class SequenceService {
         }
       }
 
+      // 3. Consecutivo estrictamente incremental
       const nextNumber = maxNumber + 1;
+      SequenceService.counters[config.prefix] = nextNumber;
+
       const formattedCode = `${config.prefix}-${String(nextNumber).padStart(config.pad, '0')}`;
 
-      // 4. Persistir de inmediato el nuevo código para garantizar no reutilización
+      // 4. Persistir de inmediato el nuevo código en CONFIGURACION
       await this.dataService.setConfigValue(config.param, formattedCode);
 
       return formattedCode;

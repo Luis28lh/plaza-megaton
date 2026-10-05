@@ -185,21 +185,21 @@
 
   <script src="js/app.js"></script>
   <script>
-    const GITHUB_PAGES_REGISTRO = 'https://luis28lh.github.io/wes-plataforma/plaza-megaton/registro.html';
+    const repositorio_PAGES_REGISTRO = 'https://luis28lh.plazamegaton.web.app/wes-plataforma/plaza-megaton/registro.html';
 
     function getTargetRegistroUrl() {
-      // Si estamos corriendo en GitHub Pages o producción remota
-      if (window.location.hostname.includes('github.io')) {
+      // Si estamos corriendo en Entorno Estático o producción remota
+      if (window.location.hostname.includes('plazamegaton.web.app')) {
         const base = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
         return `${base}/registro.html`;
       }
       // Si estamos en un hosting con dominio propio o servidor local
       if (window.location.protocol.startsWith('http')) {
         const base = window.location.origin;
-        // Si la URL pública de GitHub Pages es preferida para el QR universal de reuniones:
-        return GITHUB_PAGES_REGISTRO;
+        // Si la URL pública de Entorno Estático es preferida para el QR universal de reuniones:
+        return repositorio_PAGES_REGISTRO;
       }
-      return GITHUB_PAGES_REGISTRO;
+      return repositorio_PAGES_REGISTRO;
     }
 
     function initQRPage() {

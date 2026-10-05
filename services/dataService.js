@@ -591,6 +591,8 @@ class DataService {
       asunto: data.asunto,
       detalle: data.detalle,
       archivos: data.archivos || [], // URLs de fotos
+      archivos_nombres: data.archivos_nombres || [],
+      evidencias_base64: data.evidencias_base64 || [],
       estado: data.estado || 'Recibida',
       responsable: data.responsable || 'Sin asignar',
       fecha_actualizacion: `${fecha} ${hora}`
@@ -598,6 +600,9 @@ class DataService {
 
     if (!this.db.RECLAMACIONES) this.db.RECLAMACIONES = [];
     this.db.RECLAMACIONES.push(newRec);
+
+    // Asegurar que CONFIGURACION tenga este código como el más reciente
+    await this.setConfigValue('ultimo_codigo_reclamacion', newRec.codigo);
 
     // Registrar en Historial
     const archivosEvidencia = (data.archivos_nombres && data.archivos_nombres.length > 0)
