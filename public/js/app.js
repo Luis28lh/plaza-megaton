@@ -182,14 +182,13 @@ const App = {
     }
   },
 
-  // Muestra el panel interactivo del inquilino autenticado en la página principal
+  // Muestra el indicador limpio y blanco del inquilino autenticado en la página principal
   renderOccupantHomeBanner() {
     const container = document.getElementById('occupant-home-card');
     if (!container) return;
 
     const session = this.getSession();
     if (session && session.user) {
-      const firstName = (session.user.nombre || 'Inquilino').split(' ')[0];
       const fullName = session.user.nombre || 'Inquilino';
       const cubs = Array.isArray(session.user.cubiculos) 
         ? session.user.cubiculos.map(c => typeof c === 'object' ? c.codigo : c).join(', ')
@@ -197,41 +196,22 @@ const App = {
 
       container.style.display = 'block';
       container.innerHTML = `
-        <div style="background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); border: 1.5px solid #2563EB; border-radius: 16px; padding: 20px; color: #FFFFFF; box-shadow: 0 4px 20px rgba(0,0,0,0.12); margin-bottom: 24px;">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+        <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 14px; padding: 14px 18px; margin-bottom: 20px; box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: #DCFCE7; color: #15803D; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">👤</div>
             <div>
-              <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(34, 197, 94, 0.15); border:1px solid #22C55E; color:#4ADE80; font-size:11px; font-weight:800; padding:3px 10px; border-radius:999px; text-transform:uppercase; margin-bottom:8px;">
-                <span style="display:inline-block; width:8px; height:8px; background:#22C55E; border-radius:50%;"></span>
-                Portal de Inquilino Activo
+              <div style="font-size: 15px; font-weight: 800; color: #0F172A; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span>${fullName}</span>
+                <span style="background: #DCFCE7; color: #15803D; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 9999px;">● Sesión Activa</span>
               </div>
-              <h2 style="font-size:20px; font-weight:900; margin:0 0 4px; color:#FFFFFF;">
-                ¡Hola, ${firstName}!
-              </h2>
-              <p style="font-size:13px; color:#94A3B8; margin:0; line-height:1.4;">
-                ${fullName} &bull; <strong>Cubículo(s): ${cubs}</strong>
-              </p>
-            </div>
-            <div style="display:flex; gap:8px; align-items:center;">
-              <span style="font-size:11px; color:#94A3B8; background:rgba(255,255,255,0.06); padding:6px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.1);">
-                🔒 Sesión Permanente
-              </span>
+              <div style="font-size: 13px; color: #64748B; margin-top: 2px;">
+                Cubículo(s): <strong style="color: #0F172A;">${cubs}</strong>
+              </div>
             </div>
           </div>
-
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-top:16px;">
-            <a href="mis-solicitudes.html" style="background:rgba(59, 130, 246, 0.2); border:1px solid #3B82F6; color:#93C5FD; border-radius:10px; padding:10px; text-align:center; text-decoration:none; font-size:13px; font-weight:800; display:flex; flex-direction:column; align-items:center; gap:4px;">
-              <span style="font-size:18px;">📋</span> Mis Solicitudes
-            </a>
-            <a href="mis-pagos.html" style="background:rgba(16, 185, 129, 0.2); border:1px solid #10B981; color:#6EE7B7; border-radius:10px; padding:10px; text-align:center; text-decoration:none; font-size:13px; font-weight:800; display:flex; flex-direction:column; align-items:center; gap:4px;">
-              <span style="font-size:18px;">💰</span> Mis Pagos
-            </a>
-            <a href="solicitudes.html" style="background:rgba(255, 255, 255, 0.08); border:1px solid rgba(255,255,255,0.15); color:#F1F5F9; border-radius:10px; padding:10px; text-align:center; text-decoration:none; font-size:13px; font-weight:800; display:flex; flex-direction:column; align-items:center; gap:4px;">
-              <span style="font-size:18px;">🛠️</span> Nueva Solicitud
-            </a>
-            <a href="pagos.html" style="background:rgba(255, 255, 255, 0.08); border:1px solid rgba(255,255,255,0.15); color:#F1F5F9; border-radius:10px; padding:10px; text-align:center; text-decoration:none; font-size:13px; font-weight:800; display:flex; flex-direction:column; align-items:center; gap:4px;">
-              <span style="font-size:18px;">💳</span> Reportar Pago
-            </a>
-          </div>
+          <button onclick="App.clearSession()" style="background: #F8FAFC; border: 1px solid #CBD5E1; color: #64748B; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 8px; cursor: pointer; transition: all 0.15s ease;" onmouseover="this.style.background='#FEE2E2'; this.style.color='#DC2626'; this.style.borderColor='#FCA5A5';" onmouseout="this.style.background='#F8FAFC'; this.style.color='#64748B'; this.style.borderColor='#CBD5E1';">
+            Cerrar Sesión ↗
+          </button>
         </div>
       `;
     } else {
