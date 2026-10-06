@@ -1218,6 +1218,47 @@ class DataService {
 
     return msg;
   }
+
+  async reindexAllSequences() {
+    // 1. Resecuenciar PAGOS en la base de datos local
+    if (Array.isArray(this.db.PAGOS)) {
+      this.db.PAGOS.forEach((p, idx) => {
+        p.codigo = `PG-${String(idx + 1).padStart(3, '0')}`;
+      });
+      const ultimoPago = this.db.PAGOS.length > 0 ? this.db.PAGOS[this.db.PAGOS.length - 1].codigo : 'PG-000';
+      await this.setConfigValue('ultimo_codigo_pago', ultimoPago);
+    }
+
+    // 2. Resecuenciar RECLAMACIONES en la base de datos local
+    if (Array.isArray(this.db.RECLAMACIONES)) {
+      this.db.RECLAMACIONES.forEach((r, idx) => {
+        r.codigo = `CL-${String(idx + 1).padStart(3, '0')}`;
+      });
+      const ultimaRec = this.db.RECLAMACIONES.length > 0 ? this.db.RECLAMACIONES[this.db.RECLAMACIONES.length - 1].codigo : 'CL-000';
+      await this.setConfigValue('ultimo_codigo_reclamacion', ultimaRec);
+    }
+
+    this.persist();
+
+    // 3. Sincronizar resecuenciación con Google Sheets si el puente está activo
+    let googleResult = null;
+    if (this.googleBridge) {
+      try {
+        googleResult = await this.googleBridge.sendRequest('REINDEX_SEQUENCES');
+      } catch (err) {
+        console.error('[GoogleBridge Reindex Error]', err);
+      }
+    }
+
+    return {
+      success: true,
+      pagosCount: (this.db.PAGOS || []).length,
+      ultimoPago: await this.getConfigValue('ultimo_codigo_pago', 'PG-000'),
+      reclamacionesCount: (this.db.RECLAMACIONES || []).length,
+      ultimaReclamacion: await this.getConfigValue('ultimo_codigo_reclamacion', 'CL-000'),
+      googleResult
+    };
+  }
 }
 
 module.exports = DataService;

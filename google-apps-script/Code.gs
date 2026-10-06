@@ -436,6 +436,54 @@ function doPost(e) {
       });
     }
 
+    // 6. OBTENER RESUMEN DE TODAS LAS TABLAS
+    if (action === 'GET_DATA_SUMMARY') {
+      var sheetPag = ss.getSheetByName('PAGOS');
+      var sheetRec = ss.getSheetByName('RECLAMACIONES');
+      var pagos = [];
+      var reclamaciones = [];
+
+      if (sheetPag && sheetPag.getLastRow() > 1) {
+        var pValues = sheetPag.getRange(2, 1, sheetPag.getLastRow() - 1, sheetPag.getLastColumn()).getValues();
+        pagos = pValues.map(function(r) {
+          return {
+            codigo: r[0], fecha_registro: r[1], user_id: r[2], email: r[3], cubiculo: r[4],
+            concepto: r[5], periodo: r[6], monto: r[7], fecha_pago: r[8], referencia: r[9],
+            voucher: r[10], estado: r[11], observaciones: r[12]
+          };
+        });
+      }
+
+      if (sheetRec && sheetRec.getLastRow() > 1) {
+        var rValues = sheetRec.getRange(2, 1, sheetRec.getLastRow() - 1, sheetRec.getLastColumn()).getValues();
+        reclamaciones = rValues.map(function(r) {
+          return {
+            codigo: r[0], fecha: r[1], hora: r[2], user_id: r[3], email: r[4], cubiculo: r[5],
+            asunto: r[6], detalle: r[7], archivos: r[8], estado: r[9], responsable: r[10],
+            fecha_actualizacion: r[11]
+          };
+        });
+      }
+
+      return responseJSON({
+        success: true,
+        pagosCount: pagos.length,
+        pagos: pagos,
+        reclamacionesCount: reclamaciones.length,
+        reclamaciones: reclamaciones
+      });
+    }
+
+    // 7. RESECUENCIAR HISTORIAL (001 a N) PARA PAGOS Y RECLAMACIONES
+    if (action === 'REINDEX_SEQUENCES') {
+      var res = resecuenciarTablasInterno(ss);
+      return responseJSON({
+        success: true,
+        message: 'Tablas resecuenciadas con éxito en Google Sheets',
+        result: res
+      });
+    }
+
     return responseJSON({ success: false, error: 'Acción no soportada: ' + action });
   } catch (err) {
     return responseJSON({ success: false, error: err.toString() });
@@ -538,3 +586,73 @@ function doGet(e) {
 function responseJSON(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
+
+/**
+ * Resecuencia de forma correlativa e inviolable (desde 001 a N) las tablas de PAGOS y RECLAMACIONES
+ */
+function resecuenciarTablasInterno(ss) {
+  var resumen = { pagos: 0, ultimoPago: '', reclamaciones: 0, ultimaReclamacion: '' };
+
+  // 1. Resecuenciar PAGOS
+  var sheetPag = ss.getSheetByName('PAGOS');
+  if (sheetPag && sheetPag.getLastRow() > 1) {
+    var totalFilasP = sheetPag.getLastRow() - 1;
+    var rangeCodigosP = sheetPag.getRange(2, 1, totalFilasP, 1);
+    var newCodesP = [];
+    for (var i = 1; i <= totalFilasP; i++) {
+      var codStr = 'PG-' + (i < 10 ? '00' : (i < 100 ? '0' : '')) + i;
+      newCodesP.push([codStr]);
+    }
+    rangeCodigosP.setValues(newCodesP);
+    resumen.pagos = totalFilasP;
+    resumen.ultimoPago = newCodesP[newCodesP.length - 1][0];
+
+    // Actualizar CONFIGURACION en hoja de cálculo
+    actualizarConfiguracion(ss, 'ultimo_codigo_pago', resumen.ultimoPago);
+  }
+
+  // 2. Resecuenciar RECLAMACIONES
+  var sheetRec = ss.getSheetByName('RECLAMACIONES');
+  if (sheetRec && sheetRec.getLastRow() > 1) {
+    var totalFilasR = sheetRec.getLastRow() - 1;
+    var rangeCodigosR = sheetRec.getRange(2, 1, totalFilasR, 1);
+    var newCodesR = [];
+    for (var j = 1; j <= totalFilasR; j++) {
+      var codRStr = 'CL-' + (j < 10 ? '00' : (j < 100 ? '0' : '')) + j;
+      newCodesR.push([codRStr]);
+    }
+    rangeCodigosR.setValues(newCodesR);
+    resumen.reclamaciones = totalFilasR;
+    resumen.ultimaReclamacion = newCodesR[newCodesR.length - 1][0];
+
+    // Actualizar CONFIGURACION en hoja de cálculo
+    actualizarConfiguracion(ss, 'ultimo_codigo_reclamacion', resumen.ultimaReclamacion);
+  }
+
+  return resumen;
+}
+
+function actualizarConfiguracion(ss, parametro, valor) {
+  var sheetConf = ss.getSheetByName('CONFIGURACION');
+  if (!sheetConf) return;
+  var rows = sheetConf.getDataRange().getValues();
+  for (var r = 1; r < rows.length; r++) {
+    if (String(rows[r][0]).trim() === parametro) {
+      sheetConf.getRange(r + 1, 2).setValue(valor);
+      return;
+    }
+  }
+  sheetConf.appendRow([parametro, valor]);
+}
+
+/**
+ * Función pública invocable directamente desde el Editor de Google Apps Script con 1 clic
+ */
+function resecuenciarTablas() {
+  var ss = getMegatonSpreadsheet();
+  if (!ss) throw new Error('No se pudo acceder a la hoja de cálculo de Plaza Megatón');
+  var resultado = resecuenciarTablasInterno(ss);
+  Logger.log('Resecuenciación completada con éxito: ' + JSON.stringify(resultado));
+  return resultado;
+}
+

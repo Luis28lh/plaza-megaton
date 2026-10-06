@@ -371,16 +371,17 @@ const App = {
       }]));
     }
     if (!localStorage.getItem('pm_counters')) {
-      localStorage.setItem('pm_counters', JSON.stringify({ US: 18, CL: 7, PG: 7 }));
+      localStorage.setItem('pm_counters', JSON.stringify({ US: 18, CL: 22, PG: 11 }));
     }
   },
 
   // Generador de secuencias en entorno autónomo
   getNextSequence(prefix) {
-    const counters = JSON.parse(localStorage.getItem('pm_counters') || '{"US":18,"CL":7,"PG":7}');
-    let max = counters[prefix] || (prefix === 'CL' ? 7 : (prefix === 'US' ? 18 : (prefix === 'PG' ? 7 : 0)));
+    const counters = JSON.parse(localStorage.getItem('pm_counters') || '{"US":18,"CL":22,"PG":11}');
+    let max = counters[prefix] || (prefix === 'CL' ? 22 : (prefix === 'US' ? 18 : (prefix === 'PG' ? 11 : 0)));
 
     if (prefix === 'CL') {
+      if (max < 22) max = 22;
       try {
         const recs = JSON.parse(localStorage.getItem('pm_reclamaciones') || '[]');
         recs.forEach(r => {
@@ -392,7 +393,7 @@ const App = {
         });
       } catch (_) {}
     } else if (prefix === 'PG') {
-      if (max < 7) max = 7;
+      if (max < 11) max = 11;
       try {
         const pags = JSON.parse(localStorage.getItem('pm_pagos') || '[]');
         pags.forEach(p => {

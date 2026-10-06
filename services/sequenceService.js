@@ -17,8 +17,8 @@ class SequenceService {
   // Contadores estáticos persistentes en memoria del proceso
   static counters = {
     US: 18,
-    CL: 7,
-    PG: 7,
+    CL: 22,
+    PG: 11,
     SL: 0,
     CM: 0
   };
@@ -88,6 +88,7 @@ class SequenceService {
             }
           } catch (_) {}
         }
+        if (maxNumber < 22) maxNumber = 22;
       } else if (type === 'PAGO') {
         const items = await this.dataService.getPagosRaw();
         for (const item of items) {
@@ -119,8 +120,8 @@ class SequenceService {
           } catch (_) {}
         }
 
-        // Garantizar que la secuencia continúe desde PG-007 en adelante
-        if (maxNumber < 7) maxNumber = 7;
+        // Garantizar que la secuencia continúe desde PG-011 en adelante
+        if (maxNumber < 11) maxNumber = 11;
       } else if (type === 'USUARIO') {
         const items = await this.dataService.getUsuariosRaw();
         for (const item of items) {

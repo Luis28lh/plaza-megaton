@@ -1890,6 +1890,40 @@ async function syncAllToGoogle() {
   }
 }
 
+async function reindexAllSequencesAdmin() {
+  if (!confirm('¿Deseas resecuenciar de forma correlativa (desde 001 a N) todos los pagos y solicitudes existentes tanto en la base de datos como en Google Sheets?\n\nEsta acción renumerará cronológicamente los registros para eliminar códigos duplicados.')) {
+    return;
+  }
+
+  const resultDiv = document.getElementById('google-test-result');
+  resultDiv.style.display = 'block';
+  resultDiv.innerHTML = '<span style="color:#64748B;">⏳ Resecuenciando correlativamente pagos (PG) y solicitudes (CL)...</span>';
+
+  try {
+    const res = await fetch('/api/admin/reindex-sequences', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-pin': getAdminPin()
+      },
+      body: JSON.stringify({ pin: getAdminPin() })
+    });
+    const data = await res.json();
+    if (data.success) {
+      resultDiv.innerHTML = `<span style="color:#166534; font-weight:700;">✅ ${data.message}</span>`;
+      App.showToast(data.message, 'success');
+      if (typeof loadPagosAdmin === 'function') loadPagosAdmin();
+      if (typeof loadReclamacionesAdmin === 'function') loadReclamacionesAdmin();
+    } else {
+      resultDiv.innerHTML = `<span style="color:#DC2626;">${data.error}</span>`;
+      App.showToast(data.error || 'Error al resecuenciar', 'error');
+    }
+  } catch (err) {
+    resultDiv.innerHTML = `<span style="color:#DC2626;">Error: ${err.message}</span>`;
+    App.showToast(`Error de red: ${err.message}`, 'error');
+  }
+}
+
 // ==========================================
 // 4b. NOVEDADES COMUNITARIAS Y MENSAJERÍA DIRECTA
 // ==========================================

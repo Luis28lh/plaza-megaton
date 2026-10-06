@@ -30,8 +30,15 @@ async function loadMisPagos() {
     if (res.ok) {
       const data = await res.json();
       if (data.success && Array.isArray(data.pagos)) {
-        // Fusión inteligente sin duplicados
-        userPagos = mergePagos(data.pagos, localList);
+        userPagos = data.pagos;
+        // Si hay pagos locales con códigos nuevos no presentes en el servidor, fusionarlos
+        if (localList && localList.length > 0) {
+          const serverCodes = new Set(data.pagos.map(p => (p.codigo || '').toUpperCase()));
+          const onlyNewLocals = localList.filter(p => p.codigo && !serverCodes.has(p.codigo.toUpperCase()) && !p.codigo.toUpperCase().includes('PG-007'));
+          if (onlyNewLocals.length > 0) {
+            userPagos = mergePagos(data.pagos, onlyNewLocals);
+          }
+        }
         renderPagosList(userPagos);
         return;
       }

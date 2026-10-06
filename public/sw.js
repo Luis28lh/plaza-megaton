@@ -1,5 +1,5 @@
 // Service Worker Oficial de Plaza Megatón PWA
-const CACHE_NAME = 'megaton-pwa-v4';
+const CACHE_NAME = 'megaton-pwa-v5';
 const CORE_ASSETS = [
   '/',
   '/index.html',

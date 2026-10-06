@@ -910,7 +910,7 @@
 
             <div class="form-group" style="margin-bottom: 12px;">
               <label class="form-label" style="font-size: 12px;">URL de la Aplicación Web (Google Apps Script Webhook):</label>
-              <input type="url" id="input-google-script-url" class="form-input" value="https://script.google.com/macros/s/AKfycbzhIZ4dMGMyX4ZQgZrBnwegGHjPJC9U_9sw7jRcUVHVB2MGp9sLluZBi3wYN5bZICX0/exec" placeholder="https://script.google.com/macros/s/.../exec">
+              <input type="url" id="input-google-script-url" class="form-input" value="https://script.google.com/macros/s/AKfycbz3Ke4jrxn_cmQ8EC--_K-FbCfYIRdCAIVtplW6pKWclTukaG1tYLIWmdBgaBPf5tzSWA/exec" placeholder="https://script.google.com/macros/s/.../exec">
             </div>
 
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
@@ -919,6 +919,9 @@
               </button>
               <button type="button" class="btn-sm btn-sm-outline" onclick="syncAllToGoogle()">
                 🔄 Sincronizar Todo a Google Sheets Ahora
+              </button>
+              <button type="button" class="btn-sm btn-sm-outline" style="border-color:#D32F2F; color:#D32F2F; font-weight:700;" onclick="reindexAllSequencesAdmin()">
+                🔢 Resecuenciar Historial (001 a N)
               </button>
             </div>
             

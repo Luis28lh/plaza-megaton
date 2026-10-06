@@ -1463,6 +1463,30 @@ app.post('/api/admin/google/sync-all', async (req, res) => {
   }
 });
 
+// 19b. Resecuenciar todas las solicitudes y pagos (001 a N)
+app.post('/api/admin/reindex-sequences', async (req, res) => {
+  const pin = req.headers['x-admin-pin'] || req.body?.pin;
+  const isMaster = (pin === '2026' || pin === '1026' || pin === process.env.ADMIN_PIN || pin === 'megaton2026');
+  if (!isMaster) {
+    return res.status(401).json({ success: false, error: 'No autorizado. Se requiere PIN administrativo.' });
+  }
+
+  try {
+    const result = await dataService.reindexAllSequences();
+    // Actualizar contadores estáticos en SequenceService
+    SequenceService.counters.PG = result.pagosCount;
+    SequenceService.counters.CL = result.reclamacionesCount;
+
+    res.json({
+      success: true,
+      message: `Resecuenciación completada: ${result.pagosCount} pagos (hasta ${result.ultimoPago}) y ${result.reclamacionesCount} solicitudes (hasta ${result.ultimaReclamacion}).`,
+      ...result
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // 20. NOVEDADES COMUNITARIAS
 app.get('/api/novedades', async (req, res) => {
   try {
