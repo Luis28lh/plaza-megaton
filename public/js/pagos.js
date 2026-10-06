@@ -209,8 +209,40 @@ async function handlePagoSubmit(event) {
     const data = await res.json();
 
     if (data.success) {
+      const codigo = data.codigo || (data.pago && data.pago.codigo);
+      const localPago = {
+        codigo,
+        fecha_registro: new Date().toLocaleDateString('es-DO') + ' ' + new Date().toLocaleTimeString('es-DO', { hour: '2-digit', minute: '2-digit', hour12: true }),
+        nombre,
+        email,
+        cubiculo,
+        concepto,
+        periodo,
+        monto,
+        fecha_pago,
+        referencia,
+        voucher: (data.pago && data.pago.voucher) || '',
+        estado: 'Reportado',
+        observaciones: ''
+      };
+
+      if (selectedVoucherFile && selectedVoucherFile.type.startsWith('image/')) {
+        try {
+          const reader = new FileReader();
+          reader.onload = (re) => {
+            localPago.voucher_data = re.target.result;
+            savePagoLocal(localPago);
+          };
+          reader.readAsDataURL(selectedVoucherFile);
+        } catch (_) {
+          savePagoLocal(localPago);
+        }
+      } else {
+        savePagoLocal(localPago);
+      }
+
       showSuccessPagoScreen({
-        codigo: data.codigo,
+        codigo,
         monto,
         cubiculo,
         concepto,
@@ -223,10 +255,72 @@ async function handlePagoSubmit(event) {
       submitBtn.innerHTML = '💳 Reportar Pago';
     }
   } catch (err) {
-    console.warn('Error backend, guardando local:', err);
+    console.warn('Error backend, guardando localmente:', err);
     const codigo = App.getNextSequence('PG');
+    const localPago = {
+      codigo,
+      fecha_registro: new Date().toLocaleDateString('es-DO') + ' ' + new Date().toLocaleTimeString('es-DO', { hour: '2-digit', minute: '2-digit', hour12: true }),
+      nombre,
+      email,
+      cubiculo,
+      concepto,
+      periodo,
+      monto,
+      fecha_pago,
+      referencia,
+      voucher: '',
+      estado: 'Reportado',
+      observaciones: ''
+    };
+    if (selectedVoucherFile && selectedVoucherFile.type.startsWith('image/')) {
+      try {
+        const reader = new FileReader();
+        reader.onload = (re) => {
+          localPago.voucher_data = re.target.result;
+          savePagoLocal(localPago);
+        };
+        reader.readAsDataURL(selectedVoucherFile);
+      } catch (_) {
+        savePagoLocal(localPago);
+      }
+    } else {
+      savePagoLocal(localPago);
+    }
     showSuccessPagoScreen({ codigo, monto, cubiculo, concepto, email, previewUrl: null });
   }
+}
+
+function savePagoLocal(pagoItem) {
+  try {
+    const list = JSON.parse(localStorage.getItem('pm_pagos') || '[]');
+    const idx = list.findIndex(p => p.codigo === pagoItem.codigo);
+    if (idx >= 0) {
+      list[idx] = { ...list[idx], ...pagoItem };
+    } else {
+      list.push(pagoItem);
+    }
+    localStorage.setItem('pm_pagos', JSON.stringify(list));
+
+    const eKey = `pm_user_pagos_${(pagoItem.email || '').trim().toLowerCase()}`;
+    const userList = JSON.parse(localStorage.getItem(eKey) || '[]');
+    const uIdx = userList.findIndex(p => p.codigo === pagoItem.codigo);
+    if (uIdx >= 0) {
+      userList[uIdx] = { ...userList[uIdx], ...pagoItem };
+    } else {
+      userList.push(pagoItem);
+    }
+    localStorage.setItem(eKey, JSON.stringify(userList));
+
+    const m = String(pagoItem.codigo || '').match(/PG-(\d+)/i);
+    if (m) {
+      const n = parseInt(m[1], 10);
+      const counters = JSON.parse(localStorage.getItem('pm_counters') || '{"US":18,"CL":7,"PG":7}');
+      if (n > (counters.PG || 7)) {
+        counters.PG = n;
+        localStorage.setItem('pm_counters', JSON.stringify(counters));
+      }
+    }
+  } catch (_) {}
 }
 
 function showSuccessPagoScreen({ codigo, monto, cubiculo, concepto, email, previewUrl }) {

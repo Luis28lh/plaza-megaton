@@ -1535,6 +1535,23 @@
       "voucher": "",
       "estado": "Reportado",
       "observaciones": ""
+    },
+    {
+      "codigo": "PG-007",
+      "fecha_registro": "05/10/2026 07:00 p. m.",
+      "user_id": "US-018",
+      "nombre": "Ing. Luis Miguel Lizardo Hernández",
+      "email": "ing.lmlh@gmail.com",
+      "cubiculo": "Cubículos 10, 11, 12, 13",
+      "concepto": "Cuota de Mantenimiento",
+      "periodo": "Octubre 2026",
+      "monto": "RD,000.00",
+      "fecha_pago": "2026-10-05",
+      "referencia": "TR-102607",
+      "voucher": "/api/uploads/02 - PAGOS/PG-007/VOUCHER_PG-007.jpg",
+      "archivo_nombre": "VOUCHER_PG-007.jpg",
+      "estado": "Reportado",
+      "observaciones": "Pago reportado por inquilino en la plataforma."
     }
   ],
   "CONFIGURACION": [
@@ -1600,7 +1617,7 @@
     },
     {
       "parametro": "ultimo_codigo_pago",
-      "valor": "PG-000"
+      "valor": "PG-008"
     },
     {
       "parametro": "ultimo_codigo_solicitud_admin",

@@ -371,14 +371,14 @@ const App = {
       }]));
     }
     if (!localStorage.getItem('pm_counters')) {
-      localStorage.setItem('pm_counters', JSON.stringify({ US: 18, CL: 7, PG: 0 }));
+      localStorage.setItem('pm_counters', JSON.stringify({ US: 18, CL: 7, PG: 7 }));
     }
   },
 
   // Generador de secuencias en entorno autónomo
   getNextSequence(prefix) {
-    const counters = JSON.parse(localStorage.getItem('pm_counters') || '{"US":18,"CL":7,"PG":0}');
-    let max = counters[prefix] || (prefix === 'CL' ? 7 : (prefix === 'US' ? 18 : 0));
+    const counters = JSON.parse(localStorage.getItem('pm_counters') || '{"US":18,"CL":7,"PG":7}');
+    let max = counters[prefix] || (prefix === 'CL' ? 7 : (prefix === 'US' ? 18 : (prefix === 'PG' ? 7 : 0)));
 
     if (prefix === 'CL') {
       try {
@@ -392,6 +392,7 @@ const App = {
         });
       } catch (_) {}
     } else if (prefix === 'PG') {
+      if (max < 7) max = 7;
       try {
         const pags = JSON.parse(localStorage.getItem('pm_pagos') || '[]');
         pags.forEach(p => {

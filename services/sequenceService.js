@@ -18,7 +18,7 @@ class SequenceService {
   static counters = {
     US: 18,
     CL: 7,
-    PG: 0,
+    PG: 7,
     SL: 0,
     CM: 0
   };
@@ -97,6 +97,30 @@ class SequenceService {
             if (n > maxNumber) maxNumber = n;
           }
         }
+
+        // Revisar carpetas de almacenamiento local y efímero de comprobantes (02 - PAGOS)
+        const uploadFolders = [
+          path.join(__dirname, '..', 'public', 'assets', 'uploads', '02 - PAGOS'),
+          path.join(__dirname, '..', 'assets', 'uploads', '02 - PAGOS'),
+          path.join(os.tmpdir(), 'uploads', '02 - PAGOS')
+        ];
+        for (const uf of uploadFolders) {
+          try {
+            if (fs.existsSync(uf)) {
+              const entries = fs.readdirSync(uf);
+              for (const e of entries) {
+                const em = String(e).match(/PG-(\d+)/i);
+                if (em) {
+                  const en = parseInt(em[1], 10);
+                  if (en > maxNumber) maxNumber = en;
+                }
+              }
+            }
+          } catch (_) {}
+        }
+
+        // Garantizar que la secuencia continúe desde PG-007 en adelante
+        if (maxNumber < 7) maxNumber = 7;
       } else if (type === 'USUARIO') {
         const items = await this.dataService.getUsuariosRaw();
         for (const item of items) {

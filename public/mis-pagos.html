@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Mis Pagos — Plaza Megatón</title>
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/styles.css?v=3.3">
+  <link rel="stylesheet" href="css/admin.css?v=3.3">
 </head>
 <body>
 
@@ -51,6 +51,20 @@
 
   </main>
 
+  <!-- Modal de Visor de Voucher -->
+  <div id="voucher-modal" class="modal-backdrop" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; padding:16px;">
+    <div style="background:#fff; border-radius:16px; max-width:550px; width:100%; max-height:90vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);">
+      <div style="padding:14px 18px; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; align-items:center;">
+        <h3 id="voucher-modal-title" style="font-size:15px; font-weight:800; color:#0F172A; margin:0;">📄 Comprobante de Pago</h3>
+        <button onclick="closeVoucherModal()" style="background:none; border:none; font-size:22px; cursor:pointer; color:#64748B;">✕</button>
+      </div>
+      <div id="voucher-modal-body" style="padding:16px; overflow-y:auto; text-align:center; background:#F8FAFC;"></div>
+      <div style="padding:12px 18px; border-top:1px solid #E2E8F0; text-align:right; background:#FFFFFF;">
+        <button onclick="closeVoucherModal()" class="btn-primary" style="min-height:38px; padding:0 20px; font-size:13px;">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Barra de Navegación Inferior Móvil Simplificada -->
   <nav class="bottom-nav">
     <a href="index.html" class="nav-item">
@@ -67,7 +81,7 @@
     </a>
   </nav>
 
-  <script src="js/app.js"></script>
-  <script src="js/mis-pagos.js"></script>
+  <script src="js/app.js?v=3.3"></script>
+  <script src="js/mis-pagos.js?v=3.3"></script>
 </body>
 </html>

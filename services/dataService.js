@@ -698,7 +698,18 @@ class DataService {
 
     if (filter.email) {
       const e = filter.email.trim().toLowerCase();
-      items = items.filter(p => (p.email || '').trim().toLowerCase() === e);
+      const user = (this.db.USUARIOS || []).find(u => 
+        (u.email || '').trim().toLowerCase() === e || 
+        (Array.isArray(u.alias_emails) && u.alias_emails.some(a => (a || '').trim().toLowerCase() === e))
+      );
+      const validEmails = [e];
+      if (user) {
+        if (user.email) validEmails.push(user.email.trim().toLowerCase());
+        if (Array.isArray(user.alias_emails)) {
+          user.alias_emails.forEach(a => { if (a) validEmails.push(a.trim().toLowerCase()); });
+        }
+      }
+      items = items.filter(p => validEmails.includes((p.email || '').trim().toLowerCase()));
     }
     if (filter.user_id) {
       items = items.filter(p => p.user_id === filter.user_id);
@@ -739,12 +750,18 @@ class DataService {
       fecha_pago: data.fecha_pago || fecha,
       referencia: data.referencia || '',
       voucher: data.voucher || '', // URL
+      archivo_nombre: data.archivo_nombre || '',
+      voucher_base64: data.voucher_base64 || '',
+      voucher_mime: data.voucher_mime || '',
       estado: data.estado || 'Reportado',
       observaciones: data.observaciones || ''
     };
 
     if (!this.db.PAGOS) this.db.PAGOS = [];
     this.db.PAGOS.push(newPago);
+
+    // Asegurar que CONFIGURACION tenga este código como el más reciente de pagos
+    await this.setConfigValue('ultimo_codigo_pago', newPago.codigo);
 
     // Historial
     const archivoVoucher = data.archivo_nombre || (newPago.voucher ? newPago.voucher.split('/').pop() : '');
