@@ -162,7 +162,13 @@ const App = {
 
     const session = this.getSession();
     if (session && session.user) {
-      const nombre = session.user.nombre || 'Luis Miguel Lizardo';
+      let displayName = session.user.nombre || 'Luis Miguel';
+      if (displayName.toLowerCase().includes('luis miguel')) {
+        displayName = 'Luis Miguel';
+      } else {
+        const parts = displayName.replace(/^(Ing\.|Lic\.|Dr\.|Sr\.|Sra\.)\s*/i, '').trim().split(' ');
+        displayName = parts.slice(0, 2).join(' ') || displayName;
+      }
       pill.style.background = '#FFFFFF';
       pill.style.border = '1.5px solid #22C55E';
       pill.style.color = '#0F172A';
@@ -172,11 +178,11 @@ const App = {
       pill.style.display = 'inline-flex';
       pill.style.alignItems = 'center';
       pill.style.cursor = 'pointer';
-      pill.innerHTML = `👤 <strong style="color:#0F172A; margin: 0 4px;">${nombre}</strong> <span style="background:#DCFCE7; color:#15803D; font-size:11px; font-weight:800; padding:2px 8px; border-radius:999px; margin-right:4px;">● Activo</span> <span style="font-size:11px; color:#64748B; text-decoration:underline;">(Cerrar)</span>`;
-      pill.title = `Sesión activa de ${nombre}. Clic para cerrar sesión.`;
+      pill.innerHTML = `👤 <strong style="color:#0F172A; margin: 0 4px;">${displayName}</strong> <span style="background:#DCFCE7; color:#15803D; font-size:11px; font-weight:800; padding:2px 8px; border-radius:999px; margin-right:4px;">● Activo</span> <span style="font-size:11px; color:#64748B; text-decoration:underline;">(Cerrar)</span>`;
+      pill.title = `Sesión activa de ${session.user.nombre || displayName}. Clic para cerrar sesión.`;
       pill.onclick = (e) => {
         e.preventDefault();
-        if (confirm(`¿Deseas cerrar la sesión activa de ${nombre}?`)) {
+        if (confirm(`¿Deseas cerrar la sesión activa de ${session.user.nombre || displayName}?`)) {
           this.clearSession();
         }
       };
