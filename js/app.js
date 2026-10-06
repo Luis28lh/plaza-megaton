@@ -155,26 +155,41 @@ const App = {
     }).format(num).replace('DOP', 'RD$');
   },
 
-  // Actualiza el indicador del usuario en la barra superior
+  // Actualiza el indicador del usuario en la barra superior blanca
   updateUserHeader() {
     const pill = document.getElementById('user-header-pill');
     if (!pill) return;
 
     const session = this.getSession();
     if (session && session.user) {
-      const firstName = (session.user.nombre || 'Usuario').split(' ')[0];
-      const cubs = Array.isArray(session.user.cubiculos) 
-        ? session.user.cubiculos.map(c => typeof c === 'object' ? c.codigo : c).join(', ')
-        : '';
-      pill.innerHTML = `👤 ${firstName} ${cubs ? `(${cubs})` : ''} <span style="font-size: 10px; opacity: 0.8; margin-left: 4px;">▼</span>`;
-      pill.title = 'Sesión activa. Haz clic para cambiar de cuenta.';
+      const nombre = session.user.nombre || 'Luis Miguel Lizardo';
+      pill.style.background = '#FFFFFF';
+      pill.style.border = '1.5px solid #22C55E';
+      pill.style.color = '#0F172A';
+      pill.style.padding = '5px 12px';
+      pill.style.borderRadius = '9999px';
+      pill.style.boxShadow = '0 1px 3px rgba(0,0,0,0.06)';
+      pill.style.display = 'inline-flex';
+      pill.style.alignItems = 'center';
+      pill.style.cursor = 'pointer';
+      pill.innerHTML = `👤 <strong style="color:#0F172A; margin: 0 4px;">${nombre}</strong> <span style="background:#DCFCE7; color:#15803D; font-size:11px; font-weight:800; padding:2px 8px; border-radius:999px; margin-right:4px;">● Activo</span> <span style="font-size:11px; color:#64748B; text-decoration:underline;">(Cerrar)</span>`;
+      pill.title = `Sesión activa de ${nombre}. Clic para cerrar sesión.`;
       pill.onclick = (e) => {
         e.preventDefault();
-        if (confirm(`¿Cerrar sesión de ${session.user.nombre}?`)) {
+        if (confirm(`¿Deseas cerrar la sesión activa de ${nombre}?`)) {
           this.clearSession();
         }
       };
     } else {
+      pill.style.background = '';
+      pill.style.border = '';
+      pill.style.color = '';
+      pill.style.padding = '';
+      pill.style.borderRadius = '';
+      pill.style.boxShadow = '';
+      pill.style.display = '';
+      pill.style.alignItems = '';
+      pill.style.cursor = 'pointer';
       pill.innerHTML = `🔑 Acceder`;
       pill.onclick = () => {
         window.location.href = 'login.html';
@@ -182,41 +197,14 @@ const App = {
     }
   },
 
-  // Muestra el indicador limpio y blanco del inquilino autenticado en la página principal
+  // Eliminada la consola o tarjeta redundante para dejar exclusivamente
+  // la interfaz limpia con las 7 tarjetas y la sesión activa en el encabezado
   renderOccupantHomeBanner() {
     const container = document.getElementById('occupant-home-card');
-    if (!container) return;
-
-    const session = this.getSession();
-    if (session && session.user) {
-      const fullName = session.user.nombre || 'Inquilino';
-      const cubs = Array.isArray(session.user.cubiculos) 
-        ? session.user.cubiculos.map(c => typeof c === 'object' ? c.codigo : c).join(', ')
-        : (session.user.cubiculos || 'Plaza Megatón');
-
-      container.style.display = 'block';
-      container.innerHTML = `
-        <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 14px; padding: 14px 18px; margin-bottom: 20px; box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="width: 40px; height: 40px; border-radius: 10px; background: #DCFCE7; color: #15803D; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">👤</div>
-            <div>
-              <div style="font-size: 15px; font-weight: 800; color: #0F172A; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                <span>${fullName}</span>
-                <span style="background: #DCFCE7; color: #15803D; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 9999px;">● Sesión Activa</span>
-              </div>
-              <div style="font-size: 13px; color: #64748B; margin-top: 2px;">
-                Cubículo(s): <strong style="color: #0F172A;">${cubs}</strong>
-              </div>
-            </div>
-          </div>
-          <button onclick="App.clearSession()" style="background: #F8FAFC; border: 1px solid #CBD5E1; color: #64748B; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 8px; cursor: pointer; transition: all 0.15s ease;" onmouseover="this.style.background='#FEE2E2'; this.style.color='#DC2626'; this.style.borderColor='#FCA5A5';" onmouseout="this.style.background='#F8FAFC'; this.style.color='#64748B'; this.style.borderColor='#CBD5E1';">
-            Cerrar Sesión ↗
-          </button>
-        </div>
-      `;
-    } else {
+    if (container) {
       container.style.display = 'none';
       container.innerHTML = '';
+      container.remove();
     }
   },
 
@@ -423,6 +411,7 @@ window.deferredPWAInstallPrompt = null;
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').then(reg => {
+      try { reg.update(); } catch (_) {}
       reg.addEventListener('updatefound', () => {
         const installingWorker = reg.installing;
         if (installingWorker) {
