@@ -142,6 +142,14 @@
 
   <script src="js/app.js?v=3.2"></script>
   <script>
+    // Limpieza proactiva de cachés antiguas en teléfonos móviles
+    if ('caches' in window) {
+      caches.keys().then(keys => {
+        keys.forEach(k => {
+          if (k !== 'megaton-pwa-v3') caches.delete(k);
+        });
+      });
+    }
     function openContactModal() {
       document.getElementById('contact-modal').style.display = 'flex';
     }

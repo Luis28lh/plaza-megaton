@@ -216,6 +216,11 @@ const App = {
 
   // Inicialización de componentes comunes
   init() {
+    try {
+      const darkBanners = document.querySelectorAll('#occupant-home-card, .occupant-card, [id*="occupant"]');
+      darkBanners.forEach(el => el.remove());
+    } catch (_) {}
+
     this.updateUserHeader();
     this.renderOccupantHomeBanner();
 
