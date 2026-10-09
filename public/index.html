@@ -2,9 +2,9 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Plaza Megatón — Sistema de Gestión</title>
-  <link rel="stylesheet" href="css/styles.css?v=3.2">
+  <link rel="stylesheet" href="css/styles.css?v=4.0">
 
   <!-- Metas y Enlaces PWA -->
   <link rel="manifest" href="manifest.json">
@@ -18,135 +18,169 @@
 </head>
 <body>
 
-  <!-- Encabezado Corporativo -->
-  <header class="app-header">
-    <div class="header-container">
-      <a href="index.html" class="brand-logo-wrap">
-        <img src="assets/logo-megaton.svg" alt="Plaza Megatón Logo" class="brand-logo-img">
-      </a>
-      <div id="user-header-pill" class="user-status-pill">
-        🔑 Acceder
-      </div>
-    </div>
-  </header>
+  <!-- Marco Enmarcado Estilo App Shell -->
+  <div class="app-shell">
 
-  <!-- Contenido Principal -->
-  <main class="main-wrapper">
-    
-    <!-- Banner de Bienvenida -->
-    <section class="hero-banner">
-      <span class="hero-badge">Plataforma Oficial</span>
-      <h1 class="hero-title">PLAZA MEGATÓN</h1>
-      <p class="hero-desc">Sistema centralizado para la administración de cubículos, solicitudes de mantenimiento y reporte de pagos.</p>
-    </section>
-
-
-    <!-- Grid de Accesos Rápidos -->
-    <section>
-      <div class="quick-actions-grid">
-        
-        <!-- Tarjeta 1: Reportar Pago (Destacada) -->
-        <a href="pagos.html" class="action-card featured">
-          <div class="card-icon">💳</div>
-          <div class="card-name">Registrar Pago</div>
-          <div class="card-hint">Sube tu comprobante o voucher bancario</div>
+    <!-- Encabezado Corporativo Compacto -->
+    <header class="app-header">
+      <div class="header-container">
+        <a href="index.html" class="brand-logo-wrap">
+          <img src="assets/logo-megaton.svg" alt="Plaza Megatón Logo" class="brand-logo-img">
         </a>
-
-        <!-- Tarjeta 2: Solicitudes / Reclamaciones -->
-        <a href="solicitudes.html" class="action-card">
-          <div class="card-icon">🛠️</div>
-          <div class="card-name">Nueva Solicitud</div>
-          <div class="card-hint">Mantenimiento, electricidad, limpieza</div>
-        </a>
-
-        <!-- Tarjeta 3: Mis Solicitudes -->
-        <a href="mis-solicitudes.html" class="action-card">
-          <div class="card-icon">📋</div>
-          <div class="card-name">Mis Solicitudes</div>
-          <div class="card-hint">Consulta el estado de tus reclamos CL-xxx</div>
-        </a>
-
-        <!-- Tarjeta 4: Mis Pagos -->
-        <a href="mis-pagos.html" class="action-card">
-          <div class="card-icon">💰</div>
-          <div class="card-name">Mis Pagos</div>
-          <div class="card-hint">Historial de pagos y confirmaciones PG-xxx</div>
-        </a>
-
-        <!-- Tarjeta 5: Novedades & Buzón de Mensajes -->
-        <a href="novedades.html" class="action-card" style="border: 1.5px solid #CBD5E1; background: #FFFDFD;">
-          <div class="card-icon">📢</div>
-          <div class="card-name">Novedades & Mensajes</div>
-          <div class="card-hint">Reuniones, avisos y tu buzón privado</div>
-        </a>
-
-        <!-- Tarjeta 6: Aplicación Móvil (PWA) -->
-        <a href="instalar.html" class="action-card">
-          <div class="card-icon">📱</div>
-          <div class="card-name">Descargar App</div>
-          <div class="card-hint">Instala el icono en tu celular y recibe avisos</div>
-        </a>
-
-        <!-- Tarjeta 7: Contacto y Soporte -->
-        <div class="action-card" onclick="openContactModal()">
-          <div class="card-icon">📞</div>
-          <div class="card-name">Contacto Directo</div>
-          <div class="card-hint">Oficina de Administración y horarios</div>
+        <div id="user-header-pill" class="user-status-pill">
+          🔑 Acceder
         </div>
-
       </div>
-    </section>
+    </header>
 
-    <!-- Información de Servicio -->
-    <section class="card-box">
-      <div class="card-box-header">
-        <h2 class="card-title">ℹ️ Información y Servicios de Plaza Megatón</h2>
-        <p class="card-subtitle">Garantizamos el funcionamiento óptimo y la seguridad de todos los cubículos.</p>
+    <!-- Contenido Principal Enmarcado -->
+    <main class="main-wrapper">
+      
+      <!-- Banner de Bienvenida Compacto -->
+      <section class="hero-banner-compact">
+        <div>
+          <span class="hero-badge-compact">Plataforma Oficial</span>
+          <h1 class="hero-title-compact">PLAZA MEGATÓN</h1>
+          <p class="hero-desc-compact">Portal Centralizado de Gestión Inmobiliaria</p>
+        </div>
+        <div style="font-size: 26px; opacity: 0.9;">🏢</div>
+      </section>
+
+      <!-- Accesos Rápidos: Los 7 Cuadros Encuadrados -->
+      <section>
+        
+        <!-- Tarjeta 1: Reportar Pago (Destacada Superior) -->
+        <a href="pagos.html" class="featured-action-card">
+          <div class="featured-action-left">
+            <div class="featured-action-icon">💳</div>
+            <div>
+              <div class="featured-action-title">Registrar Pago</div>
+              <div class="featured-action-sub">Sube tu comprobante o voucher bancario</div>
+            </div>
+          </div>
+          <div class="featured-action-arrow">➔</div>
+        </a>
+
+        <!-- Cuadrícula 2x3 para las 6 Tarjetas Restantes -->
+        <div class="compact-actions-grid">
+          
+          <!-- Tarjeta 2: Solicitudes / Reclamaciones -->
+          <a href="solicitudes.html" class="compact-card">
+            <div class="compact-card-icon">🛠️</div>
+            <div class="compact-card-info">
+              <div class="compact-card-title">Nueva Solicitud</div>
+              <div class="compact-card-hint">Mantenimiento y servicios</div>
+            </div>
+          </a>
+
+          <!-- Tarjeta 3: Mis Solicitudes -->
+          <a href="mis-solicitudes.html" class="compact-card">
+            <div class="compact-card-icon">📋</div>
+            <div class="compact-card-info">
+              <div class="compact-card-title">Mis Solicitudes</div>
+              <div class="compact-card-hint">Estado en vivo CL-xxx</div>
+            </div>
+          </a>
+
+          <!-- Tarjeta 4: Mis Pagos -->
+          <a href="mis-pagos.html" class="compact-card">
+            <div class="compact-card-icon">💰</div>
+            <div class="compact-card-info">
+              <div class="compact-card-title">Mis Pagos</div>
+              <div class="compact-card-hint">Historial de pagos PG-xxx</div>
+            </div>
+          </a>
+
+          <!-- Tarjeta 5: Novedades & Buzón de Mensajes -->
+          <a href="novedades.html" class="compact-card">
+            <div class="compact-card-icon">📢</div>
+            <div class="compact-card-info">
+              <div class="compact-card-title">Novedades</div>
+              <div class="compact-card-hint">Avisos y buzón privado</div>
+            </div>
+          </a>
+
+          <!-- Tarjeta 6: Aplicación Móvil (PWA) -->
+          <a href="instalar.html" class="compact-card">
+            <div class="compact-card-icon">📱</div>
+            <div class="compact-card-info">
+              <div class="compact-card-title">Descargar App</div>
+              <div class="compact-card-hint">Instalar icono en celular</div>
+            </div>
+          </a>
+
+          <!-- Tarjeta 7: Contacto y Soporte -->
+          <div class="compact-card" onclick="openContactModal()">
+            <div class="compact-card-icon">📞</div>
+            <div class="compact-card-info">
+              <div class="compact-card-title">Contacto</div>
+              <div class="compact-card-hint">Oficina de Administración</div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Píldora de Información y Normas al Pie -->
+      <div class="info-strip" onclick="openInfoModal()">
+        <span>ℹ️ Información y Servicios de la Plaza</span>
+        <span style="font-weight: 700; color: var(--primary-red);">➔</span>
       </div>
-      <div style="font-size: 14px; color: var(--text-body); line-height: 1.6;">
-        <p><strong>• Atención a incidencias:</strong> Todas las solicitudes reciben un código consecutivo <code>CL-xxx</code> para seguimiento inmediato.</p>
-        <p style="margin-top: 6px;"><strong>• Transparencia en pagos:</strong> Sube tu voucher en foto o PDF y recibe confirmación oficial con código <code>PG-xxx</code>.</p>
-        <p style="margin-top: 6px;"><strong>• Acceso sin contraseña:</strong> Ingresa en cualquier momento mediante Magic Link enviado directamente a tu correo electrónico.</p>
+
+    </main>
+
+    <!-- Modal Informativo de Servicios -->
+    <div id="info-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:100; align-items:center; justify-content:center; padding:16px;">
+      <div style="background:#fff; border-radius:16px; max-width:440px; width:100%; padding:20px; box-shadow:var(--shadow-lg);">
+        <h3 style="font-size:17px; font-weight:800; color:var(--text-main); margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+          <span>ℹ️</span> Servicios y Normas de Plaza Megatón
+        </h3>
+        <div style="font-size:13px; color:var(--text-body); line-height:1.6;">
+          <p style="margin-bottom:8px;"><strong>• Atención a incidencias:</strong> Todas las solicitudes reciben un código consecutivo <code>CL-xxx</code> para seguimiento inmediato.</p>
+          <p style="margin-bottom:8px;"><strong>• Transparencia en pagos:</strong> Sube tu voucher en foto o PDF y recibe confirmación oficial con código <code>PG-xxx</code>.</p>
+          <p style="margin-bottom:14px;"><strong>• Acceso sin contraseña:</strong> Ingresa en cualquier momento mediante enlace temporal seguro o PIN enviado a tu correo.</p>
+        </div>
+        <button class="btn-primary" onclick="closeInfoModal()" style="min-height:42px; font-size:14px;">Entendido</button>
       </div>
-    </section>
-
-  </main>
-
-  <!-- Modal de Contacto -->
-  <div id="contact-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:100; align-items:center; justify-content:center; padding:16px;">
-    <div style="background:#fff; border-radius:16px; max-width:440px; width:100%; padding:24px; box-shadow:var(--shadow-lg);">
-      <h3 style="font-size:18px; font-weight:800; color:var(--text-main); margin-bottom:12px;">📞 Administración Plaza Megatón</h3>
-      <p style="font-size:14px; margin-bottom:8px;"><strong>Dirección:</strong> Av. Principal esq. Central, Santo Domingo, R.D.</p>
-      <p style="font-size:14px; margin-bottom:8px;"><strong>Teléfono:</strong> 809-555-0199</p>
-      <p style="font-size:14px; margin-bottom:8px;"><strong>Correo:</strong> administracion@plazamegaton.com</p>
-      <p style="font-size:14px; margin-bottom:16px;"><strong>Horario:</strong> Lunes a Sábado de 8:00 AM a 6:00 PM</p>
-      <button class="btn-primary" onclick="closeContactModal()" style="min-height:44px;">Cerrar</button>
     </div>
-  </div>
 
-  <!-- Barra de Navegación Inferior Móvil Simplificada -->
-  <nav class="bottom-nav">
-    <a href="index.html" class="nav-item active">
-      <span class="nav-item-icon">🏠</span>
-      <span>Inicio</span>
-    </a>
-    <a href="novedades.html?tab=novedades" class="nav-item">
-      <span class="nav-item-icon">📢</span>
-      <span>Novedades</span>
-    </a>
-    <a href="novedades.html?tab=mensajes" class="nav-item">
-      <span class="nav-item-icon">📬</span>
-      <span>Mis Mensajes</span>
-    </a>
-  </nav>
+    <!-- Modal de Contacto -->
+    <div id="contact-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:100; align-items:center; justify-content:center; padding:16px;">
+      <div style="background:#fff; border-radius:16px; max-width:440px; width:100%; padding:20px; box-shadow:var(--shadow-lg);">
+        <h3 style="font-size:17px; font-weight:800; color:var(--text-main); margin-bottom:12px;">📞 Administración Plaza Megatón</h3>
+        <p style="font-size:13px; margin-bottom:6px;"><strong>Dirección:</strong> Av. Principal esq. Central, Santo Domingo, R.D.</p>
+        <p style="font-size:13px; margin-bottom:6px;"><strong>Teléfono:</strong> 809-555-0199</p>
+        <p style="font-size:13px; margin-bottom:6px;"><strong>Correo:</strong> administracion@plazamegaton.com</p>
+        <p style="font-size:13px; margin-bottom:14px;"><strong>Horario:</strong> Lunes a Sábado de 8:00 AM a 6:00 PM</p>
+        <button class="btn-primary" onclick="closeContactModal()" style="min-height:42px; font-size:14px;">Cerrar</button>
+      </div>
+    </div>
 
-  <script src="js/app.js?v=3.2"></script>
+    <!-- Barra de Navegación Inferior Móvil Enmarcada -->
+    <nav class="bottom-nav">
+      <a href="index.html" class="nav-item active">
+        <span class="nav-item-icon">🏠</span>
+        <span>Inicio</span>
+      </a>
+      <a href="novedades.html?tab=novedades" class="nav-item">
+        <span class="nav-item-icon">📢</span>
+        <span>Novedades</span>
+      </a>
+      <a href="novedades.html?tab=mensajes" class="nav-item">
+        <span class="nav-item-icon">📬</span>
+        <span>Mis Mensajes</span>
+      </a>
+    </nav>
+
+  </div> <!-- Fin .app-shell -->
+
+  <script src="js/app.js?v=4.0"></script>
   <script>
     // Limpieza proactiva de cachés antiguas en teléfonos móviles
     if ('caches' in window) {
       caches.keys().then(keys => {
         keys.forEach(k => {
-          if (k !== 'megaton-pwa-v3') caches.delete(k);
+          if (k !== 'megaton-pwa-v6') caches.delete(k);
         });
       });
     }
@@ -155,6 +189,12 @@
     }
     function closeContactModal() {
       document.getElementById('contact-modal').style.display = 'none';
+    }
+    function openInfoModal() {
+      document.getElementById('info-modal').style.display = 'flex';
+    }
+    function closeInfoModal() {
+      document.getElementById('info-modal').style.display = 'none';
     }
   </script>
 </body>

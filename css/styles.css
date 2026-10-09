@@ -41,10 +41,38 @@
 
 body {
   font-family: var(--font-family);
-  background-color: var(--bg-page);
+  background-color: #F1F5F9;
   color: var(--text-body);
   line-height: 1.5;
-  padding-bottom: 70px; /* Espacio para barra de navegación móvil */
+  margin: 0;
+  padding: 0;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+}
+
+/* Marco Contenedor Estilo App Móvil Enmarcada */
+.app-shell {
+  width: 100%;
+  max-width: 460px;
+  min-height: 100dvh;
+  background-color: var(--bg-page);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.07);
+  padding-bottom: 60px; /* Espacio para barra de navegación móvil */
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  body {
+    background-color: var(--bg-page);
+  }
+  .app-shell {
+    box-shadow: none;
+    max-width: 100%;
+  }
 }
 
 /* ==============================================================
@@ -53,15 +81,17 @@ body {
 .app-header {
   background-color: #FFFFFF;
   border-bottom: 1px solid var(--border-light);
-  padding: 12px 16px;
+  padding: 8px 12px;
   position: sticky;
   top: 0;
   z-index: 40;
   box-shadow: var(--shadow-sm);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .header-container {
-  max-width: 900px;
+  max-width: 460px;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -71,12 +101,12 @@ body {
 .brand-logo-wrap {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   text-decoration: none;
 }
 
 .brand-logo-img {
-  height: 42px;
+  height: 36px;
   width: auto;
   display: block;
 }
@@ -84,11 +114,11 @@ body {
 .user-status-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
+  gap: 5px;
+  font-size: 12px;
   background-color: var(--primary-light);
   color: var(--primary-dark);
-  padding: 6px 12px;
+  padding: 5px 10px;
   border-radius: var(--radius-pill);
   font-weight: 600;
   text-decoration: none;
@@ -100,9 +130,14 @@ body {
    CONTENEDOR PRINCIPAL
    ============================================================== */
 .main-wrapper {
-  max-width: 900px;
+  width: 100%;
+  max-width: 460px;
   margin: 0 auto;
-  padding: 16px;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Tarjeta contenedora de formulario / contenido */
@@ -137,63 +172,213 @@ body {
 }
 
 /* ==============================================================
-   GRID DE ACCESOS RÁPIDOS (LANDING / INICIO)
+   BANNER HERO Y ACCESOS RÁPIDOS ENMARCADOS
    ============================================================== */
-.hero-banner {
+.hero-banner-compact {
   background: linear-gradient(135deg, #D32F2F 0%, #991B1B 100%);
   color: #FFFFFF;
-  border-radius: var(--radius-lg);
-  padding: 26px 20px;
-  margin-bottom: 20px;
-  box-shadow: var(--shadow-md);
-  text-align: center;
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   position: relative;
   overflow: hidden;
 }
 
-.hero-banner::after {
+.hero-banner-compact::after {
   content: '';
   position: absolute;
-  top: -20px;
-  right: -20px;
-  width: 140px;
-  height: 140px;
+  top: -15px;
+  right: -15px;
+  width: 70px;
+  height: 70px;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 50%;
   pointer-events: none;
 }
 
-.hero-badge {
+.hero-badge-compact {
   display: inline-block;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.22);
+  padding: 2px 8px;
   border-radius: var(--radius-pill);
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 10px;
+  font-weight: 800;
   letter-spacing: 0.5px;
-  margin-bottom: 8px;
   text-transform: uppercase;
+  margin-bottom: 2px;
 }
 
-.hero-title {
-  font-size: 24px;
+.hero-title-compact {
+  font-size: 17px;
   font-weight: 900;
   letter-spacing: 0.5px;
-  margin-bottom: 6px;
+  line-height: 1.1;
+  margin: 0;
 }
 
-.hero-desc {
-  font-size: 14px;
-  opacity: 0.95;
-  max-width: 500px;
-  margin: 0 auto;
+.hero-desc-compact {
+  font-size: 11px;
+  opacity: 0.92;
+  margin-top: 2px;
+  line-height: 1.2;
 }
 
-.quick-actions-grid {
+/* Tarjeta Destacada 1 (Registrar Pago) */
+.featured-action-card {
+  background: linear-gradient(135deg, #FFF5F5 0%, #FFFFFF 100%);
+  border: 1.5px solid #FECACA;
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s ease;
+  min-height: 50px;
+  box-sizing: border-box;
+}
+
+.featured-action-card:active, .featured-action-card:hover {
+  border-color: var(--primary-red);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.featured-action-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.featured-action-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--primary-red);
+  color: #FFFFFF;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.featured-action-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+.featured-action-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.featured-action-arrow {
+  color: var(--primary-red);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+/* Cuadrícula de 6 Tarjetas Compactas (2x3) */
+.compact-actions-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.compact-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 8px 10px;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 54px;
+  box-sizing: border-box;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.compact-card:active, .compact-card:hover {
+  border-color: var(--primary-red);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.compact-card-icon {
+  width: 34px;
+  height: 34px;
+  background-color: var(--primary-light);
+  color: var(--primary-red);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.compact-card-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.compact-card-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.compact-card-hint {
+  font-size: 10px;
+  color: var(--text-muted);
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+/* Píldora Informativa Compacta al Pie */
+.info-strip {
+  background-color: #FFFFFF;
+  border: 1px dashed #CBD5E1;
+  border-radius: var(--radius-sm);
+  padding: 7px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-decoration: none;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: all 0.15s ease;
+}
+
+.info-strip:hover, .info-strip:active {
+  border-color: var(--primary-red);
+  color: var(--primary-red);
+  background-color: #FFFDFD;
 }
 
 @media (min-width: 640px) {
@@ -655,14 +840,16 @@ body {
 }
 
 /* ==============================================================
-   BARRA DE NAVEGACIÓN MÓVIL INFERIOR
+   BARRA DE NAVEGACIÓN MÓVIL INFERIOR ENMARCADA
    ============================================================== */
 .bottom-nav {
   position: fixed;
   bottom: 0;
-  left: 0;
-  right: 0;
-  height: 64px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 460px;
+  height: 56px;
   background-color: #FFFFFF;
   border-top: 1px solid var(--border-light);
   display: flex;
@@ -670,6 +857,7 @@ body {
   align-items: center;
   z-index: 50;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
 }
 
 .nav-item {
